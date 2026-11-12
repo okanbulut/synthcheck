@@ -4,18 +4,27 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
   force(real); force(synthetic)
   function(input, output, session) {
     rv <- shiny::reactiveValues(models = list(), proc = NULL, run_dir = NULL, run_data = NULL,
-                                run_status = NULL, timing = NULL, benchmark = NULL, log = NULL)
+                                run_status = NULL, timing = NULL, benchmark = NULL, log = NULL,
+                                pretest = NULL)
 
     # ---- About ----------------------------------------------------------------
     shiny::observeEvent(input$about_start, bslib::nav_select("sc_nav", "instrument", session = session))
     shiny::observeEvent(input$tour_start, {
       if (sc_has_tour()) {
-        sc_app_tour()$init()$start()
+        sc_app_tour(input$sc_path)$init()$start()
       } else {
         shiny::showModal(shiny::modalDialog(
           title = "Guided tour",
           "The guided tour needs the cicerone package: install.packages(\"cicerone\").",
           easyClose = TRUE))
+      }
+    })
+
+    # the first step: With real data, the fourth tab is Compare; without, Pretest
+    shiny::observeEvent(input$sc_path, {
+      for (p in names(sc_path_tabs)) for (tab in sc_path_tabs[[p]]) {
+        if (p == input$sc_path) bslib::nav_show("sc_nav", tab, session = session) else
+          bslib::nav_hide("sc_nav", tab, session = session)
       }
     })
 
@@ -133,21 +142,30 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
                               OPENAI_API_KEY = input$key_openai %||% ""))
 
     shiny::observeEvent(input$mod_add, {
-      m <- tryCatch(sc_model(input$mod_provider, input$mod_model,
-                             temperature = if (isTRUE(input$mod_send_temp)) input$mod_temp else NULL,
-                             name = trimws(input$mod_name),
-                             base_url = if (input$mod_provider == "ollama") input$ollama_url else NULL),
-                    error = function(e) e)
-      if (inherits(m, "error")) return(shiny::showNotification(conditionMessage(m), type = "error"))
-      names_now <- vapply(rv$models, `[[`, character(1), "name")
-      if (m$name %in% names_now) {
-        m$name <- sprintf("%s (temperature %s)", m$name,
-                          if (is.null(m$temperature)) "default" else format(m$temperature))
-        if (m$name %in% names_now)
-          return(shiny::showNotification("This model is already in the run.", type = "warning"))
+      temps <- sc_parse_temps(input$mod_temps)
+      if (inherits(temps, "error")) return(shiny::showNotification(conditionMessage(temps), type = "error"))
+      several <- length(temps) > 0
+      if (!several) temps <- list(if (isTRUE(input$mod_send_temp)) input$mod_temp else NULL)
+      for (tp in temps) {
+        lab <- trimws(input$mod_name %||% "")
+        if (several) lab <- sprintf("%s (temperature %s)", if (nzchar(lab)) lab else input$mod_model, format(tp))
+        m <- tryCatch(sc_model(input$mod_provider, input$mod_model, temperature = tp, name = lab,
+                               base_url = if (input$mod_provider == "ollama") input$ollama_url else NULL),
+                      error = function(e) e)
+        if (inherits(m, "error")) return(shiny::showNotification(conditionMessage(m), type = "error"))
+        names_now <- vapply(rv$models, `[[`, character(1), "name")
+        if (m$name %in% names_now) {
+          m$name <- sprintf("%s (temperature %s)", m$name,
+                            if (is.null(m$temperature)) "default" else format(m$temperature))
+          if (m$name %in% names_now) {
+            shiny::showNotification(sprintf("%s is already in the run.", m$name), type = "warning")
+            next
+          }
+        }
+        rv$models <- c(rv$models, list(m))
       }
-      rv$models <- c(rv$models, list(m))
       shiny::updateTextInput(session, "mod_name", value = "")
+      shiny::updateTextInput(session, "mod_temps", value = "")
     })
     shiny::observeEvent(input$mod_remove_last, if (length(rv$models)) rv$models <- rv$models[-length(rv$models)])
     shiny::observeEvent(input$mod_clear, rv$models <- list())
@@ -334,8 +352,8 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
                sc_read_table(input$real_file$datapath, input$real_file$name)
              })
     })
-    syn_data <- shiny::reactive({
-      switch(input$syn_source,
+    syn_from <- function(source, country, attempts, files) {
+      switch(source,
              run = {
                shiny::validate(shiny::need(!is.null(rv$run_data) && nrow(rv$run_data) > 0,
                                            "Generate data in the Models tab first, or choose another source."))
@@ -344,11 +362,11 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
              arg = as.data.frame(synthetic),
              hexaco = {
                h <- synthcheck::hexaco_llm
-               h[h$country == input$syn_country & h$attempt <= input$syn_attempts, ]
+               h[h$country == country & h$attempt <= attempts, ]
              },
              upload = {
-               shiny::validate(shiny::need(input$syn_files, "Upload the files saved by a run."))
-               f <- input$syn_files
+               shiny::validate(shiny::need(files, "Upload the files saved by a run."))
+               f <- files
                parts <- lapply(seq_len(nrow(f)), function(i) {
                  ext <- tolower(tools::file_ext(f$name[i]))
                  as.data.frame(read_synthetic(f$datapath[i], format = ext))
@@ -356,7 +374,9 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
                cols <- unique(unlist(lapply(parts, names)))
                do.call(rbind, lapply(parts, function(d) { d[setdiff(cols, names(d))] <- NA; d[cols] }))
              })
-    })
+    }
+    syn_data <- shiny::reactive(syn_from(input$syn_source, input$syn_country, input$syn_attempts,
+                                         input$syn_files))
     bm_items <- shiny::reactive(as.data.frame(instrument()$items))
 
     output$real_status <- shiny::renderUI({
@@ -415,6 +435,67 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
       t
     }, digits = 0)
 
+    # ---- 4. Pretest (without real data) ----------------------------------------
+    pt_data <- shiny::reactive(syn_from(input$pt_source, input$pt_country, input$pt_attempts,
+                                        input$pt_files))
+    output$pt_status <- shiny::renderUI({
+      s <- tryCatch(pt_data(), error = function(e) e)
+      if (inherits(s, "error")) return(shiny::div(class = "text-muted", conditionMessage(s)))
+      it <- tryCatch(bm_items()$item, error = function(e) character(0))
+      sc_ok(sprintf("%s synthetic respondents%s; %d of %d instrument items found.",
+                    format(nrow(s), big.mark = ","),
+                    if ("model" %in% names(s)) sprintf(" from %d model%s", length(unique(s$model)),
+                                                       if (length(unique(s$model)) > 1) "s" else "") else "",
+                    length(intersect(it, names(s))), length(it)))
+    })
+    shiny::observeEvent(input$pt_run, {
+      res <- tryCatch({
+        it <- bm_items(); s <- pt_data()
+        by <- if (identical(input$pt_by, "none")) character(0) else input$pt_by
+        if (length(by) && !by %in% names(s))
+          stop(sprintf("The synthetic data have no `%s` column. Choose another comparison.", by))
+        ins <- instrument()
+        shiny::withProgress(message = "Running the pretest", detail = "This can take a minute.", {
+          synthetic_pretest(s, it, by = by, scale_range = c(ins$min, ins$max),
+                            irt = isTRUE(input$pt_irt), n_pa = input$pt_pa %||% 20)
+        })
+      }, error = function(e) e)
+      if (inherits(res, "error"))
+        return(shiny::showNotification(conditionMessage(res), type = "error", duration = NULL))
+      rv$pretest <- res
+    })
+    output$pt_summary <- shiny::renderUI({
+      pt <- rv$pretest
+      if (is.null(pt)) return(shiny::p(class = "text-muted", "Run the pretest to see the summary."))
+      s <- summarise_pretest(pt)
+      shiny::tagList(lapply(seq_len(nrow(s)), function(i) shiny::p(s$text[i])))
+    })
+    output$pt_plot <- shiny::renderPlot({
+      shiny::req(rv$pretest); gg_pretest(rv$pretest, max_items = 25)
+    }, res = 96)
+    output$pt_scales <- shiny::renderPlot({
+      shiny::req(rv$pretest); gg_pretest(rv$pretest, "scales")
+    }, res = 96)
+    output$pt_table <- shiny::renderTable({
+      shiny::req(rv$pretest)
+      a <- as.data.frame(rv$pretest$agreement)
+      a <- a[a$flagged_in > 0, , drop = FALSE]
+      if (!nrow(a)) return(data.frame(Note = "No item is flagged."))
+      a <- utils::head(a, 15)
+      data.frame(Item = a$item, Scale = a$scale, `Flagged in` = sprintf("%d of %d", a$flagged_in, a$conditions),
+                 Flags = a$flags, check.names = FALSE)
+    })
+    output$pt_structure <- shiny::renderTable({
+      shiny::req(rv$pretest)
+      s <- as.data.frame(rv$pretest$summary)
+      data.frame(Condition = s$condition, Respondents = s$n, `Flagged items` = s$flagged,
+                 `Mean alpha` = sprintf("%.2f", s$alpha),
+                 `Dimensions (designed)` = sprintf("%s (%d)", ifelse(is.na(s$n_factors), "-", s$n_factors), s$scales),
+                 `Own scale` = ifelse(is.na(s$own_scale), "-", sprintf("%.0f%%", 100 * s$own_scale)),
+                 `Reverse keys` = ifelse(is.na(s$reverse_ok), "-", sprintf("%.0f%%", 100 * s$reverse_ok)),
+                 check.names = FALSE)
+    })
+
     # ---- 5. Export -----------------------------------------------------------
     current_syn <- shiny::reactive(tryCatch(syn_data(), error = function(e) NULL))
     output$dl_synthetic <- shiny::downloadHandler(
@@ -443,17 +524,44 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
         ggplot2::ggsave(file, gg_benchmark(rv$benchmark), width = 8, height = 1.5 + 0.5 * nrow(rv$benchmark$table),
                         dpi = 200, bg = "white")
       })
-    script <- shiny::reactive(sc_app_script(
+    output$dl_pt_items <- shiny::downloadHandler(
+      filename = function() "pretest-items.csv",
+      content = function(file) {
+        shiny::validate(shiny::need(rv$pretest, "Run the pretest first."))
+        utils::write.csv(as.data.frame(rv$pretest$items), file, row.names = FALSE)
+      })
+    output$dl_pt_summary <- shiny::downloadHandler(
+      filename = function() "pretest-summary.txt",
+      content = function(file) {
+        shiny::validate(shiny::need(rv$pretest, "Run the pretest first."))
+        writeLines(summarise_pretest(rv$pretest)$text, file)
+      })
+    output$dl_pt_plot <- shiny::downloadHandler(
+      filename = function() "pretest.png",
+      content = function(file) {
+        shiny::validate(shiny::need(rv$pretest, "Run the pretest first."))
+        n <- min(25, sum(rv$pretest$agreement$flagged_in > 0))
+        ggplot2::ggsave(file, gg_pretest(rv$pretest, max_items = 25), width = 8, height = 2 + 0.3 * max(n, 3),
+                        dpi = 200, bg = "white")
+      })
+    bm_script <- shiny::reactive(sc_app_script(
       run_dir = rv$run_dir, syn_source = input$syn_source, real_source = input$real_source,
       country = input$real_country, score = input$bm_score, clean = isTRUE(input$bm_clean),
       fit = isTRUE(input$bm_fit), splits = input$bm_splits,
       traits = if (input$ins_source == "hexaco") input$ins_traits else NULL))
+    pt_script <- shiny::reactive(sc_pretest_script(
+      run_dir = rv$run_dir, source = input$pt_source, country = input$pt_country,
+      attempts = input$pt_attempts, by = input$pt_by, irt = isTRUE(input$pt_irt), n_pa = input$pt_pa,
+      traits = if (input$ins_source == "hexaco") input$ins_traits else NULL))
+    script <- shiny::reactive(if (identical(input$sc_path, "pretest")) pt_script() else bm_script())
     output$exp_script <- shiny::renderText(script())
     output$dl_script <- shiny::downloadHandler(filename = function() "synthcheck-benchmark.R",
                                                content = function(file) writeLines(script(), file))
 
     result <- function() list(synthetic = shiny::isolate(rv$run_data %||% current_syn()),
                               benchmark = shiny::isolate(rv$benchmark),
+                              pretest = shiny::isolate(rv$pretest),
+                              path = shiny::isolate(input$sc_path),
                               instrument = shiny::isolate(tryCatch(instrument(), error = function(e) NULL)),
                               personas = shiny::isolate(tryCatch(persona_table(), error = function(e) NULL)))
     shiny::observeEvent(input$app_close, shiny::stopApp(result()))
@@ -526,6 +634,43 @@ sc_list_models <- function(provider, url = NULL) {
   ids <- as.character(d$id)
   if (provider == "openai") ids <- ids[grepl("^(gpt|o[0-9])", ids)]
   sort(unique(ids))
+}
+
+# temperatures typed as "0.3, 0.7, 1": A list of numbers, an empty list, or an error
+sc_parse_temps <- function(x) {
+  x <- trimws(x %||% "")
+  if (!nzchar(x)) return(list())
+  v <- suppressWarnings(as.numeric(trimws(strsplit(x, "[,; ]+")[[1]])))
+  if (anyNA(v) || any(v < 0 | v > 2))
+    return(simpleError("Type temperatures between 0 and 2, separated by commas."))
+  as.list(unique(v))
+}
+
+sc_pretest_script <- function(run_dir, source, country, attempts, by, irt, n_pa, traits) {
+  syn <- switch(source %||% "run",
+                run = sprintf('synthetic <- read_synthetic("%s")', run_dir %||% "path/to/run"),
+                hexaco = sprintf('synthetic <- hexaco_llm[hexaco_llm$country == "%s" & hexaco_llm$attempt <= %d, ]',
+                                 country %||% "Canada", as.integer(attempts %||% 3)),
+                'synthetic <- read_synthetic("path/to/your/synthetic/files")')
+  items <- if (!is.null(traits)) {
+    sprintf("items <- hexaco_items[hexaco_items$trait %%in%% c(%s), ]",
+            paste(sprintf('"%s"', traits), collapse = ", "))
+  } else if (identical(source, "run") && !is.null(run_dir)) {
+    sprintf('items <- jsonlite::read_json("%s", simplifyVector = TRUE)$instrument$items',
+            file.path(run_dir, "run.json"))
+  } else 'items <- read.csv("path/to/item_table.csv")'
+  by <- if (identical(by, "none")) "character(0)" else sprintf('"%s"', by %||% "model")
+  paste(c(
+    "library(synthcheck)", "",
+    "# Pilot screening without real data: It flags items, it does not validate the scale.",
+    syn, items, "",
+    sprintf("pt <- synthetic_pretest(synthetic, items, by = %s, irt = %s, n_pa = %d)", by,
+            if (isTRUE(irt)) "TRUE" else "FALSE", as.integer(n_pa %||% 20)),
+    "pt", "summarise_pretest(pt)", "gg_pretest(pt)", 'gg_pretest(pt, "scales")', "",
+    "# Once real data are in, benchmark the same synthetic data:",
+    "# real <- read.csv(\"path/to/real_data.csv\")",
+    "# authenticity_benchmark(as_synthetic_list(synthetic), real, items)"),
+    collapse = "\n")
 }
 
 sc_app_script <- function(run_dir, syn_source, real_source, country, score, clean, fit, splits, traits) {

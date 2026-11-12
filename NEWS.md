@@ -1,5 +1,23 @@
 # synthcheck (development version)
 
+* New `synthetic_pretest()` for scales without real data: Pilot screening of
+  the items on synthetic respondents alone (item-rest correlations, alpha if
+  an item is dropped, items that barely vary or duplicate another item,
+  reverse keys, GRM slopes with mirt, alpha and parallel analysis per
+  scale). It checks whether the flags hold across models, temperatures,
+  prompt wordings or persona sets (`by`), in every attempt, and whether the
+  designed structure (the `scale` and `reverse` columns) comes back.
+  `gg_pretest()` draws the flagged items and the scales, and
+  `summarise_pretest()` describes the result in plain language. It is
+  screening, not validation.
+
+* The app now asks first whether you have real data. With real data, the
+  fourth tab is Compare (the benchmark); without it, the fourth tab is the
+  new Pretest tab. The Models tab can add one model at several temperatures
+  for the stability check, and Export saves the pretest and its R script.
+
+* New article: "Pretesting a scale without real data".
+
 * The app has a new look in the logo colours, with the logo in the navbar
   and a coverage strip under it. A new About tab opens the app: It explains
   the purpose, lists what the app can do and produce, shows an animated

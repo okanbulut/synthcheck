@@ -28,17 +28,26 @@ own computer only.}
 \value{
 Invisibly, when the app is closed with its Close button: A list
 with \code{synthetic} (the generated data), \code{benchmark} (the
-\code{\link[=authenticity_benchmark]{authenticity_benchmark()}} result, if one was run), \code{instrument} and
-\code{personas}.
+\code{\link[=authenticity_benchmark]{authenticity_benchmark()}} result, if one was run), \code{pretest} (the
+\code{\link[=synthetic_pretest]{synthetic_pretest()}} result, if one was run), \code{path} (\code{"real"},
+\code{"pretest"} or \code{NULL}), \code{instrument} and \code{personas}.
 }
 \description{
 \strong{Experimental.} \code{run_synthcheck_app()} opens an app that walks through
 the whole workflow in five tabs. It opens on an \strong{About} tab that
 explains the purpose of the app, lists what it can do and produce, shows
 an animated picture of a language model answering survey items and starts
-a guided tour of the five tabs (the tour needs the cicerone package):
+a guided tour of the five tabs (the tour needs the cicerone package).
 }
 \details{
+The About tab starts with one question: \strong{Do you already have real
+responses to this instrument?} With real data, the fourth tab is
+\strong{Compare} (the benchmark below). Without real data, it is \strong{Pretest}:
+Pilot screening of the items on synthetic respondents alone, with the
+agreement across models or temperatures and a check of the structure you
+designed (\code{\link[=synthetic_pretest]{synthetic_pretest()}}). The answer can be changed at any time,
+so you can come back with real data later and compare the same synthetic
+data.
 \enumerate{
 \item \strong{Instrument:} Upload an item table or use the IPIP-HEXACO items,
 and set the response scale and instructions (\code{\link[=sc_instrument]{sc_instrument()}}).
@@ -56,8 +65,12 @@ the time left.
 \item \strong{Compare:} Load real data and run \code{\link[=authenticity_benchmark]{authenticity_benchmark()}}, with
 \code{\link[=gg_benchmark]{gg_benchmark()}}, \code{\link[=gg_behaviour]{gg_behaviour()}} and a plain-language summary per
 model (\code{\link[=summarise_benchmark]{summarise_benchmark()}}).
+\item \strong{Pretest} (without real data): Run \code{\link[=synthetic_pretest]{synthetic_pretest()}} on the
+generated data, with \code{\link[=gg_pretest]{gg_pretest()}} and a plain-language summary
+(\code{\link[=summarise_pretest]{summarise_pretest()}}). Add the same model at several temperatures in
+the Models tab to check whether the flags hold.
 \item \strong{Export:} Download the data (CSV, JSON, RDS or Excel), the
-benchmark and an R script that repeats the comparison.
+benchmark or the pretest, and an R script that repeats the analysis.
 }
 
 \strong{API keys} typed into the app stay in memory for that session only:

@@ -4,7 +4,7 @@
 
 sc_app_www <- function() system.file("app", "www", package = "synthcheck")
 
-sc_app_about <- function() {
+sc_app_about <- function(has_real = FALSE) {
   li <- function(...) shiny::tags$li(...)
   card <- function(title, ..., id = NULL) {
     bslib::card(id = id, bslib::card_header(title), bslib::card_body(fillable = FALSE, ...))
@@ -27,6 +27,21 @@ sc_app_about <- function() {
                  "language models and test how authentic they are with the synthetic",
                  "authenticity benchmark."),
         tour_btn, start_btn)),
+    card("First step: Do you already have real responses to this instrument?", id = "about_path",
+         shiny::radioButtons(
+           "sc_path", NULL, inline = TRUE, width = "100%",
+           choiceNames = list(
+             shiny::span(shiny::strong("Yes, I have real data. "),
+                         "Generate synthetic respondents and benchmark them against the real ones."),
+             shiny::span(shiny::strong("No, not yet. "),
+                         "Pretest the scale on synthetic respondents alone: Item screening, agreement",
+                         "across models and the structure you designed.")),
+           choiceValues = list("real", "pretest"),
+           selected = if (has_real) "real" else character(0)),
+         shiny::p(class = "small text-muted mb-0",
+                  "The answer sets the fourth tab: Compare with real data, or Pretest without it.",
+                  "You can change it at any time, for example to benchmark the same synthetic data",
+                  "once real responses come in.")),
     bslib::layout_columns(
       col_widths = c(7, 5), fill = FALSE,
       card("How a language model answers a survey", id = "about_anim",
@@ -61,6 +76,7 @@ sc_app_about <- function() {
              li("Generate respondents with Anthropic, OpenAI or local Ollama models, side by side"),
              li("Show a progress bar with the time left, and stop a run at any time"),
              li("Benchmark several models against real data in one table"),
+             li("Without real data, pretest a scale on synthetic respondents and see which flagged items hold across models"),
              li("Explain each model's result in plain language"))),
       card("What it produces",
            shiny::tags$ul(
@@ -69,6 +85,7 @@ sc_app_about <- function() {
              li("The synthetic authenticity benchmark table and plot"),
              li("A behaviour strip of eight answer features per model"),
              li("A plain-language summary for each model"),
+             li("Without real data: Flagged items, their agreement across models and a check of the designed structure"),
              li("An R script that repeats the comparison"))),
       card("Designer",
            shiny::div(
@@ -93,6 +110,8 @@ sc_app_about <- function() {
               " to try the app without an API key, then press ", shiny::em("Generate data"), "."),
            li(shiny::strong("Compare: "), "Choose the real data and press ", shiny::em("Run the benchmark"),
               ". Or pick ", shiny::em("hexaco_llm"), " to compare six models without generating anything."),
+           li(shiny::strong("Pretest "), "(no real data): Press ", shiny::em("Run the pretest"),
+              " to see which items are flagged and whether the models agree."),
            li(shiny::strong("Export: "), "Download the data, the plot and an R script, or close the app",
               " to get everything back in R.")),
          shiny::p(class = "mb-0 small text-muted",
@@ -104,10 +123,28 @@ sc_app_about <- function() {
 sc_has_tour <- function() requireNamespace("cicerone", quietly = TRUE)
 
 # the guided tour, one step per main control (cicerone switches the tabs)
-sc_app_tour <- function() {
-  steps <- list(
+sc_app_tour <- function(path = NULL) {
+  path <- if (identical(path, "pretest")) "pretest" else "real"
+  fourth <- if (path == "pretest") list(
+    list("pt_data_card", "4. Pretest: The data",
+         "Without real data, the pretest screens the items on the synthetic respondents alone.",
+         "pretest", "right"),
+    list("pt_plot_card", "Flagged items",
+         "Items that barely vary, link weakly to their scale or duplicate another item, and how many models agree.",
+         "pretest", "left")
+  ) else list(
+    list("cmp_data_card", "4. Compare: The data",
+         "Choose the real data and the synthetic data. The built-in hexaco_llm has six models.", "compare",
+         "right"),
+    list("cmp_plot_card", "The benchmark",
+         "Overlap, Structure and Behaviour for every model, from 0 (shuffled) to 100 (real people).",
+         "compare", "left"))
+  steps <- c(list(
     list("about_hero", "Welcome to synthcheck",
          "This tour shows the five steps of the app. Use the arrow keys or the buttons to move on.",
+         "about"),
+    list("about_path", "First: Real data or not?",
+         "With real data, the fourth tab benchmarks the models. Without it, the fourth tab pretests the scale.",
          "about"),
     list("ins_items_card", "1. Instrument",
          "Choose the items: The built-in IPIP-HEXACO items or your own item table, with the response scale.",
@@ -119,18 +156,13 @@ sc_app_tour <- function() {
     list("mod_add_card", "3. Add a model",
          "Pick a provider and a model. Mock gives random answers and needs no API key.", "models", "right"),
     list("mod_run_card", "Generate data",
-         "Set the attempts and respondents, estimate the run time and start the run.", "models", "left"),
-    list("cmp_data_card", "4. Compare: The data",
-         "Choose the real data and the synthetic data. The built-in hexaco_llm has six models.", "compare",
-         "right"),
-    list("cmp_plot_card", "The benchmark",
-         "Overlap, Structure and Behaviour for every model, from 0 (shuffled) to 100 (real people).",
-         "compare", "left"),
+         "Set the attempts and respondents, estimate the run time and start the run.", "models", "left")),
+    fourth, list(
     list("exp_dl_card", "5. Export",
          "Download the data, the table, the summary and the plot.", "export"),
     list("exp_script_card", "Repeat it in R",
-         "An R script repeats the comparison. Close the app to get everything back in R.", "export")
-  )
+         "An R script repeats the analysis. Close the app to get everything back in R.", "export")
+  ))
   tour <- cicerone::Cicerone$new(id = "sc_tour", opacity = 0.6, allow_close = TRUE,
                                  stage_background = "#ffffff")
   # cicerone's own tab and tab_id arguments fail in cicerone 1.0.4 (the

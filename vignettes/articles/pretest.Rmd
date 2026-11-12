@@ -1,0 +1,170 @@
+---
+title: "Pretesting a scale without real data"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 8, fig.height = 4.5,
+                      dpi = 96, out.width = "100%")
+```
+
+**Experimental.** Most people who write a new scale have no real data yet.
+`synthetic_pretest()` is for that stage. It runs a standard item analysis on
+synthetic respondents and flags items worth a second look. It also asks two
+questions that stand in for real data: Do the flags hold across models,
+temperatures, prompt wordings and persona sets? And do the synthetic answers
+recover the structure you designed?
+
+This is **pilot screening, not validation**. Language models answer more
+tidily than people do (see the [benchmark article](benchmark.html)), so a
+clean pretest does not show that a scale works in people. Items that fail
+even with tidy respondents are the ones to rewrite first.
+
+## The data
+
+The tutorial treats two HEXACO traits, Honesty-Humility (H) and
+Conscientiousness (C), as if they were a new 80-item scale. The six models in
+`hexaco_llm` are the conditions, with three attempts each:
+
+```{r}
+library(synthcheck)
+
+items <- hexaco_items[hexaco_items$trait %in% c("H", "C"), ]
+synthetic <- hexaco_llm[hexaco_llm$country == "Canada" & hexaco_llm$attempt <= 3, ]
+table(synthetic$model)
+```
+
+For your own scale, generate the data with `generate_synthetic()` or the app
+(see [Generating synthetic respondents in R](generate.html)). The item table
+needs `item` and `scale`, and `reverse` for reverse-keyed items. Those
+columns are the structure the pretest checks.
+
+## Run the pretest
+
+```{r}
+pt <- synthetic_pretest(synthetic, items, by = "model", irt = FALSE)
+pt
+```
+
+Each row of the summary is one condition: How many items it flags, the mean
+alpha over scales, the number of dimensions parallel analysis finds over all
+items (next to the two scales designed), the share of items that relate most
+to their own scale, and the share of reverse-keyed items whose key comes
+through.
+
+`irt = TRUE` (the default) also fits a graded response model per scale with
+mirt and flags items with a slope below 0.5. It is the slowest step, so it is
+off here.
+
+## Which items are flagged, and by how many models?
+
+An item is flagged when it barely varies (SD below 0.5, or 90% of the answers
+in one category), when its keyed answers run against the rest of its scale,
+when its item-rest correlation is below 0.3, when it relates more to another
+scale than to its own, or when it correlates 0.85 or more with another item.
+`thresholds` changes any of these.
+
+```{r, fig.height = 7}
+gg_pretest(pt, max_items = 25)
+```
+
+Red tiles are items with too little signal, blue tiles are near-duplicates,
+and the label gives the number of models that flag the item. `agreement`
+holds the same information as a table, most often flagged first:
+
+```{r}
+head(pt$agreement[, c("item", "scale", "flagged_in", "flags", "attempt_share")], 10)
+```
+
+`attempt_share` is the share of single attempts that flag the item. A flag
+that comes and goes between attempts of the same model may be sampling noise.
+
+Here most items are flagged by at least one model, and "Barely varies" and
+"Near-duplicate" are the most common reasons. That is the tidy answering of
+language models, not a property of 80 bad items. When this happens, start
+with the items that most models agree on, and read "Weak link" and "Reverse
+key not working" before the other flags.
+
+## Do the conditions agree?
+
+`stability` compares every pair of conditions: The rank correlation of their
+item-rest correlations (`rho`) and the share of flagged items they have in
+common (`jaccard`).
+
+```{r}
+pt$stability
+```
+
+On HEXACO the models agree only in part: Some pairs rank the items alike, and
+others not at all. Low agreement is a finding too: It means a different model would have told
+you to fix different items. The same comparison works for temperatures,
+prompt wordings or persona sets. Give each run its own label and pass that
+column as `by`, or several columns, as in `by = c("model", "wording")`. In
+the app, "Or several temperatures" in the Models tab adds one model per
+temperature.
+
+## Does the designed structure come back?
+
+```{r}
+pt$summary[, c("condition", "scales", "n_factors", "own_scale", "reverse_ok")]
+gg_pretest(pt, "scales")
+```
+
+Almost every item relates most to the scale it was written for, and the
+reverse keys come through. Parallel analysis finds more dimensions than the
+two scales, because each HEXACO trait has four facets; the real data below
+give more than two as well. The scale plot shows
+the tidy answers again: Alpha is 0.95 or more for many models, higher than
+real people give.
+
+## Plain language
+
+```{r}
+summarise_pretest(pt)
+```
+
+## How well do the flags match real people?
+
+The HEXACO data come with real responses, so this tutorial can check what the
+pretest would have found in people. `synthetic_pretest()` works on any data:
+
+```{r}
+real <- hexaco_real[hexaco_real$country == "Canada", ]
+pr <- synthetic_pretest(real, items, by = NULL, irt = FALSE)
+real_flags <- pr$items[pr$items$weak | pr$items$key, c("item", "item_rest", "flags")]
+real_flags
+```
+
+How many of the six models flag these items as weak or running against their
+scale?
+
+```{r}
+it <- as.data.frame(pt$items)
+it$weak_or_key <- it$weak | it$key
+n_models <- tapply(it$weak_or_key, it$item, sum)
+data.frame(item = real_flags$item, models = n_models[real_flags$item])
+```
+
+And how closely do the item-rest correlations of each model follow the real
+ones (rank correlation)?
+
+```{r}
+real_ir <- setNames(pr$items$item_rest, pr$items$item)
+sapply(split(it, it$condition), function(d)
+  round(cor(d$item_rest, real_ir[d$item], method = "spearman", use = "complete.obs"), 2))
+```
+
+The models catch some of the items that are weak in people, and they agree
+with real people on the ranking of the items only in part. That is why the
+pretest is screening: It points at items to read again, and a field test
+still decides.
+
+## Later: Real data
+
+The pretest keeps the item table in `pt$settings$items`. Once real responses
+come in, the same synthetic data go straight into the benchmark, and the app
+lets you switch the first question to "Yes, I have real data":
+
+```{r, eval = FALSE}
+real <- read.csv("my_real_data.csv")
+authenticity_benchmark(as_synthetic_list(synthetic), real, pt$settings$items)
+```
