@@ -1,0 +1,205 @@
+---
+title: "Cognitive interviews with language models"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 8, fig.height = 5,
+                      dpi = 96, out.width = "100%")
+```
+
+**Experimental.** This tutorial runs simulated cognitive interviews: A
+language model plays each persona you define, thinks aloud while it answers
+a survey item, and then answers the verbal probes a cognitive interviewer
+would ask. A second call codes each transcript for problems. The result is
+a list of items and wording worth a closer look, most useful when you have
+no real respondents yet, for example right after a synthetic pretest.
+
+It is a **screening aid**. A model does not remember its own life or feel
+uncomfortable, so it cannot stand in for cognitive interviews with real
+people or for a field test. Use it to decide what to bring to those.
+
+Everything below runs with the **mock** provider, which gives canned
+transcripts without calling an API. Swap in `sc_model("anthropic")`,
+`sc_model("openai")` or `sc_model("ollama", ...)` for a real run.
+
+```{r}
+library(synthcheck)
+```
+
+## 1. The protocol
+
+Each interview is one conversation with one persona about one item. It
+follows the usual mix of think-aloud and scripted probes in cognitive
+interviewing (Willis, 2005; Beatty & Willis, 2007):
+
+1. **Think-aloud and answer.** The persona reads the statement, says what
+   goes through its mind and answers on the scale.
+2. **Probes.** The persona answers the probes from `sc_probes()` in the same
+   conversation.
+3. **Coding.** A separate call with no persona reads the transcript and
+   codes problems at the four stages of answering a survey question
+   (Tourangeau, 1984): Comprehension, retrieval, judgement and response
+   mapping, plus sensitivity. For each it gives a yes or no and a note with
+   a quote, then an overall severity and a suggested rewording.
+
+The default probes:
+
+```{r}
+sc_probes()
+```
+
+Write your own with `stage` and `probe`, for example a shorter protocol:
+
+```{r}
+sc_probes(stage = c("comprehension", "comprehension", "response"),
+          probe = c("In your own words, what is this statement asking?",
+                    "What does 'rules' mean to you here?",
+                    "Was it easy to pick a number?"))
+```
+
+`sc_interview_prompts()` shows exactly what is sent for one item:
+
+```{r}
+h <- hexaco_items[hexaco_items$trait == "H", ]
+h <- h[seq(1, nrow(h), by = 4), ]   # ten items across the four facets
+h$trait <- "Honesty-Humility"
+ins <- sc_instrument(h, scale = c(1, 7), name = "HEXACO Honesty-Humility")
+ins
+p <- sc_interview_prompts(ins, h$item[1], "You are a 34-year-old nurse in Calgary.")
+cat(p$system)
+cat(p$think_aloud)
+cat(p$probes)
+```
+
+## 2. Personas
+
+Choose personas that differ as much as your future respondents will: Age,
+education, first language, reading level, and anything the items touch on.
+Varied personas are what make the interviews useful.
+
+```{r}
+per <- sc_persona_grid(
+  age = c(19, 45, 72),
+  education = c("did not finish high school", "has a university degree"),
+  template = "You are a {age}-year-old adult in Canada who {education}.")
+per
+```
+
+## 3. Run the interviews
+
+```{r}
+iv <- cognitive_interview(ins, list(sc_model("mock", name = "Model A"),
+                                    sc_model("mock", name = "Model B")),
+                          per, coder = sc_model("mock", name = "Coder"), interviews = 2,
+                          progress = FALSE)
+iv
+```
+
+The message gives the number of interviews and requests (three per
+interview) before anything is sent. This run, with two models, six personas,
+ten items and two interviews each, is 240 interviews, which costs little on
+the default models. All 240 HEXACO items would be 24 times more, so start
+with the items you are least sure of.
+
+Use a different model as `coder` in real runs, so that no model grades its
+own interviews. Two or more respondent models also help: Personas from one
+model tend to sound alike.
+
+```{r, eval = FALSE}
+iv <- cognitive_interview(ins, list(sc_model("anthropic"), sc_model("openai")), per,
+                          coder = sc_model("anthropic", "claude-sonnet-5-5"),
+                          parallel = 4, output = "interviews_honesty")
+```
+
+With `output`, the table is saved with `run.json` and one Markdown file of
+transcripts per item in `transcripts/`, which is the easiest way to read
+them.
+
+## 4. Summarise per item
+
+```{r}
+s <- summarise_interviews(iv)
+s
+```
+
+Each row is one item: The share of interviews with a problem at each stage
+and at any stage, how many personas and models raised one, the stage that
+drives it, and the coder's most common notes and rewordings. An item is
+flagged when at least 30% of its interviews found a problem (change it with
+`flag`) and, with two or more models, at least two models found one.
+
+```{r}
+s[s$flagged, c("item", "statement", "top_stage", "notes", "revisions")]
+```
+
+## 5. One picture
+
+```{r}
+gg_interview(s)
+```
+
+Rows are items, with the most problems at the top. Pale is no problem,
+red is a problem in most interviews, and an asterisk marks a flagged item.
+
+## 6. Read the transcripts
+
+The codes point to where to look; the transcripts show why:
+
+```{r}
+one <- iv[iv$item == s$item[1], ][1, ]
+cat(one$think_aloud, "\n\n")
+cat(one$probe_paraphrase, "\n")
+cat(one$comprehension_note, "\n")
+```
+
+## 7. After a pretest
+
+The pretest is optional: Without one, the interviews cover all items, or
+the ones you name in `items`. When you have run a synthetic pretest, pass its result as `pretest`. The
+interviews then cover the flagged items (most often flagged first), and each
+gets one more probe aimed at the reason for its flag: A weak link to its
+scale becomes "Does this statement seem to be about the same thing as
+statements about Honesty-Humility?", a near-duplicate becomes "Does this
+statement seem to ask the same thing as another statement?", and so on.
+A data frame with `item` and `flag` columns works too:
+
+```{r}
+flags <- data.frame(item = h$item[c(5, 2)],
+                    flag = c("Weak link to its scale", "Reverse key not working"))
+iv2 <- cognitive_interview(ins, list(sc_model("mock", name = "Model A"),
+                                     sc_model("mock", name = "Model B")),
+                           per, pretest = flags, interviews = 2, progress = FALSE)
+summarise_interviews(iv2)
+```
+
+`agreement` says whether an item was flagged by both the pretest and the
+interviews, by one of them, or by neither. Items flagged by both are the
+first to revise.
+
+## What the interviews can and cannot tell you
+
+- **Most useful:** Comprehension and response mapping. Vague words,
+  double negatives, two questions in one, or a scale that fits poorly show up
+  in the paraphrases and the probes.
+- **Least useful:** Retrieval and judgement. A model guesses what such a
+  person might say; it has no memories to search.
+- **Too easy:** Models understand items better than many real respondents,
+  so an item without problems here is not shown to work.
+- **Too alike:** Personas played by one model sound alike. More models and
+  more varied personas help, but do not fix it.
+
+The interviews choose what to take to cognitive interviews with real people
+and a field test. They do not replace either.
+
+## References
+
+- Beatty, P. C., & Willis, G. B. (2007). Research synthesis: The practice of
+  cognitive interviewing. *Public Opinion Quarterly, 71*(2), 287-311.
+- Tourangeau, R. (1984). Cognitive science and survey methods. In T. Jabine,
+  M. Straf, J. Tanur & R. Tourangeau (Eds.), *Cognitive aspects of survey
+  methodology: Building a bridge between disciplines* (pp. 73-100). National
+  Academy Press.
+- Willis, G. B. (2005). *Cognitive interviewing: A tool for improving
+  questionnaire design.* Sage.
+- Willis, G. B., & Lessler, J. T. (1999). *Question Appraisal System QAS-99.*
+  Research Triangle Institute.

@@ -1,5 +1,18 @@
 # synthcheck (development version)
 
+* New cognitive interviews for items without real data (experimental):
+  `cognitive_interview()` has language models play each persona, think
+  aloud while answering an item and answer scripted verbal probes
+  (`sc_probes()`, after Willis, 2005), then a separate call codes each
+  transcript for comprehension, retrieval, judgement, response-mapping and
+  sensitivity problems. A synthetic pretest result can choose the items and
+  adds a probe aimed at each flag. `summarise_interviews()` rolls the codes
+  up per item, flags items by fixed rules and says how they agree with the
+  pretest, and `gg_interview()` draws one heatmap. `sc_interview_prompts()`
+  shows what is sent. The new article "Cognitive interviews with language
+  models" walks through it. It is a screening aid, not a substitute for
+  cognitive interviews with real people.
+
 * The app has a new look in the logo colours, with the logo in the navbar
   and a coverage strip under it. A new About tab opens the app: It explains
   the purpose, lists what the app can do and produce, shows an animated

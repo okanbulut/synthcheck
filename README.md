@@ -29,6 +29,14 @@ whether every real person has a synthetic look-alike, and
 `authenticity_benchmark(copula = TRUE)` adds a Gaussian copula row, a
 generator without a language model, as a reference.
 
+Without real data, `cognitive_interview()` runs simulated cognitive
+interviews: A language model plays each persona you define, thinks aloud
+while it answers each item and answers standard verbal probes, and a
+separate call codes the transcripts for comprehension, retrieval,
+judgement, response-mapping and sensitivity problems. It is a screening aid
+that points to wording to look at. It is not a substitute for cognitive
+interviews with real people.
+
 The package compares models and supports decisions about them. It does not
 show that synthetic respondents can replace a field test.
 
