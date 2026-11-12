@@ -1,5 +1,10 @@
 # Changelog
 
+## synthcheck (development version)
+
+- The README, `citation("synthcheck")` and `CITATION.cff` give the
+  Zenodo DOI (10.5281/zenodo.24173114).
+
 ## synthcheck 0.1.0
 
 First release, archived on Zenodo. synthcheck is experimental: The
