@@ -66,6 +66,37 @@ gg_benchmark(bm)
 gg_behaviour(bm$behaviour)
 ```
 
+## Generating synthetic data in an app
+
+`run_synthcheck_app()` opens an app that does the whole workflow: Define an
+instrument and personas, generate synthetic respondents with Anthropic,
+OpenAI or local Ollama models (with their temperature and the number of
+attempts), watch a progress bar with the time left, save the data as CSV,
+JSON, RDS or Excel, and benchmark the models against real data with a
+plain-language summary for each one.
+
+```r
+install.packages(c("shiny", "bslib", "ellmer", "callr", "jsonlite"))
+res <- run_synthcheck_app(real = my_real_data)
+res$benchmark
+```
+
+API keys typed into the app stay in memory for that session only. Keys set
+as `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` in `.Renviron` are used without
+being shown. The same steps work in code:
+
+```r
+ins <- sc_instrument(hexaco_items[hexaco_items$trait == "H", ], scale = c(1, 7))
+per <- sc_persona_grid(age = c(25, 45, 65), country = c("Canada", "the United States"),
+                       template = "You are a {age}-year-old adult living in {country}.")
+syn <- generate_synthetic(ins, list(sc_model("anthropic"), sc_model("openai")), per,
+                          attempts = 5, respondents = 10, parallel = 8, output = "my_run")
+
+real <- hexaco_real[hexaco_real$country == "Canada", ]
+bm <- authenticity_benchmark(as_synthetic_list(syn), real, ins$items)
+summarise_benchmark(bm)
+```
+
 ## Data
 
 `hexaco_real` holds 17,874 real respondents to the 240 IPIP-HEXACO items from

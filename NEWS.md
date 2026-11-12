@@ -1,5 +1,20 @@
 # synthcheck 0.0.0.9000
 
+* New: `run_synthcheck_app()` opens a Shiny app that generates synthetic
+  respondents with several language models and benchmarks them in five tabs:
+  Instrument, Personas, Models (API keys, temperature, attempts, a progress
+  bar with the time left), Compare (the benchmark with a plain-language
+  summary per model) and Export. API keys stay in memory for the session.
+  The Instrument and Personas tabs offer CSV templates to fill in.
+* New: `sc_instrument()`, `sc_personas()`, `sc_persona_grid()`, `sc_model()`
+  and `sc_prompt()` define what synthetic respondents take and who they are,
+  and `generate_synthetic()` asks Anthropic, OpenAI or local Ollama models
+  (through ellmer) to answer, one respondent per call.
+* New: `write_synthetic()` and `read_synthetic()` save and load generated data
+  as CSV, JSON, RDS or Excel, and `as_synthetic_list()` turns a long table
+  into the input of `authenticity_benchmark()`.
+* New: `summarise_benchmark()` describes each model's benchmark result in a
+  few plain sentences.
 * New: `behaviour_features()` gives eight behaviour features per respondent
   (variability, extreme and midpoint answers, acquiescence, key
   inconsistency, even-odd consistency, Mahalanobis distance and person fit

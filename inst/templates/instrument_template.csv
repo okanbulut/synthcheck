@@ -1,0 +1,9 @@
+item,statement,scale,facet,reverse
+E1,I am the life of the party.,Extraversion,Sociability,FALSE
+E2,I don't talk a lot.,Extraversion,Sociability,TRUE
+E3,I feel comfortable around people.,Extraversion,Comfort,FALSE
+E4,I keep in the background.,Extraversion,Comfort,TRUE
+C1,I am always prepared.,Conscientiousness,Order,FALSE
+C2,I leave my belongings around.,Conscientiousness,Order,TRUE
+C3,I pay attention to details.,Conscientiousness,Diligence,FALSE
+C4,I make a mess of things.,Conscientiousness,Diligence,TRUE
