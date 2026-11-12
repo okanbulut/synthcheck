@@ -4,11 +4,11 @@ bibentry(
   author = person("Okan", "Bulut", comment = c(ORCID = "0000-0001-5853-1267")),
   year = "2026",
   note = paste("R package version", meta$Version),
-  doi = "10.5281/zenodo.24173114",
+  doi = "10.5281/zenodo.24173113",
   url = "https://github.com/okanbulut/synthcheck",
   textVersion = paste0(
     "Bulut, O. (2026). synthcheck: Tests how authentic synthetic survey ",
     "respondents look. R package version ", meta$Version, ". ",
-    "https://doi.org/10.5281/zenodo.24173114"
+    "https://doi.org/10.5281/zenodo.24173113"
   )
 )
