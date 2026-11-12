@@ -69,7 +69,48 @@ test_that("the app opens on the About tab with the contact details and the tour"
   skip_if_not_installed("cicerone")
   tour <- sc_app_tour()
   expect_s3_class(tour, "Cicerone")
-  ids <- c("about_hero", "ins_items_card", "ins_prompt_card", "per_card", "mod_add_card",
+  expect_s3_class(sc_app_tour("pretest"), "Cicerone")
+  expect_match(html, 'id="about_path"', fixed = TRUE)
+  expect_match(html, 'data-value="pretest"', fixed = TRUE)
+  ids <- c("about_hero", "about_path", "pt_data_card", "pt_plot_card", "ins_items_card", "ins_prompt_card", "per_card", "mod_add_card",
            "mod_run_card", "cmp_data_card", "cmp_plot_card", "exp_dl_card", "exp_script_card")
   for (id in ids) expect_match(html, paste0('id="', id, '"'), fixed = TRUE)
+})
+
+test_that("without real data, the app pretests mock data across temperatures", {
+  skip_if_not_installed("shiny")
+  skip_if_not_installed("bslib")
+  skip_on_cran()
+  withr::local_options(synthcheck.foreground = TRUE)
+  out <- withr::local_tempdir()
+  shiny::testServer(sc_app_server(), {
+    session$setInputs(sc_path = "pretest",
+                      ins_source = "hexaco", ins_traits = "H", ins_min = 1, ins_max = 7,
+                      ins_labels = paste(sc_default_labels(7), collapse = "\n"),
+                      ins_instructions = "Answer.", ins_name = "HEXACO H", per_source = "none")
+    session$setInputs(mod_provider = "mock", mod_model = "mock", mod_send_temp = TRUE, mod_temp = 1,
+                      mod_name = "", mod_temps = "0.5, 1.5", ollama_url = "", mod_add = 1)
+    expect_length(rv$models, 2)
+    expect_match(vapply(rv$models, `[[`, character(1), "name")[1], "temperature 0.5", fixed = TRUE)
+    session$setInputs(run_attempts = 2, run_respondents = 40, run_block = 0, run_retries = 0,
+                      run_shuffle = FALSE, run_parallel = 1, run_batch = 1, run_output = file.path(out, "run"),
+                      run_format = "csv", run_start = 1)
+    expect_equal(nrow(rv$run_data), 2 * 2 * 40)
+    session$setInputs(pt_source = "run", pt_by = "temperature", pt_irt = FALSE, pt_pa = 3, pt_run = 1)
+    expect_s3_class(rv$pretest, "sc_pretest")
+    expect_setequal(rv$pretest$settings$conditions, c("0.5", "1.5"))
+    expect_match(output$exp_script, "synthetic_pretest", fixed = TRUE)
+    res <- result()
+    expect_equal(res$path, "pretest")
+    expect_s3_class(res$pretest, "sc_pretest")
+  })
+})
+
+test_that("temperatures are parsed for the stability check", {
+  expect_equal(sc_parse_temps("0.3, 0.7 1"), list(0.3, 0.7, 1))
+  expect_equal(sc_parse_temps(""), list())
+  expect_s3_class(sc_parse_temps("hot"), "error")
+  expect_s3_class(sc_parse_temps("3"), "error")
+  s <- sc_pretest_script("my_run", "run", "Canada", 3, "model", FALSE, 20, "H")
+  expect_match(s, 'synthetic_pretest(synthetic, items, by = "model", irt = FALSE, n_pa = 20)', fixed = TRUE)
 })

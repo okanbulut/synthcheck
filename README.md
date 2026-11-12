@@ -29,6 +29,15 @@ whether every real person has a synthetic look-alike, and
 `authenticity_benchmark(copula = TRUE)` adds a Gaussian copula row, a
 generator without a language model, as a reference.
 
+**No real data yet?** `synthetic_pretest()` screens a new scale on
+synthetic respondents alone: Item-rest correlations, items that barely vary
+or duplicate each other, reverse keys, reliability, parallel analysis, IRT
+slopes, and whether the scales you designed come back. It flags items in
+each model, temperature, prompt wording or persona set and shows how many
+agree. This is pilot screening, not validation: Language models answer more
+tidily than people, so the pretest points to items to read again, and a
+field test still decides.
+
 The package compares models and supports decisions about them. It does not
 show that synthetic respondents can replace a field test.
 
@@ -85,7 +94,9 @@ gg_respondent_coverage(respondent_coverage(synthetic, real, hexaco_items))
 ## Generating synthetic data in an app
 
 `run_synthcheck_app()` opens an app that starts on an About tab with a
-guided tour and then does the whole workflow: Define an instrument and
+guided tour and one question: Do you already have real responses? With real
+data, the app benchmarks the models; without it, the app pretests the scale
+on synthetic respondents. Then it does the whole workflow: Define an instrument and
 personas, generate synthetic respondents with Anthropic, OpenAI or local
 Ollama models (with their temperature and the number of attempts), watch a
 progress bar with the time left, save the data as CSV, JSON, RDS or Excel,

@@ -30,6 +30,8 @@ navbar:
         href: articles/benchmark.html
       - text: Diagnostics beside the benchmark
         href: articles/diagnostics.html
+      - text: Pretesting a scale without real data
+        href: articles/pretest.html
       - text: Generating synthetic respondents in R
         href: articles/generate.html
     app:
@@ -52,6 +54,7 @@ articles:
   - articles/behaviour
   - articles/benchmark
   - articles/diagnostics
+  - articles/pretest
   - articles/generate
 - title: The synthcheck app
   desc: The whole workflow on screen, from an instrument to a benchmark.
@@ -86,6 +89,12 @@ reference:
   - respondent_coverage
   - gg_respondent_coverage
   - synthetic_copula
+- title: Pretest without real data
+  desc: Pilot screening of a scale on synthetic respondents alone, with agreement across conditions.
+  contents:
+  - synthetic_pretest
+  - gg_pretest
+  - summarise_pretest
 - title: Generating synthetic respondents
   desc: Define an instrument and personas, call language models, save the data.
   contents:
