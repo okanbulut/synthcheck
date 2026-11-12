@@ -17,6 +17,7 @@ authenticity_benchmark(
   ceiling_n = c("attempt", "half"),
   fit_scales = NULL,
   cor = c("pearson", "polychoric"),
+  copula = FALSE,
   seed = 1
 )
 }
@@ -54,11 +55,14 @@ respondents.}
 \item{cor}{correlations for Structure: \code{"pearson"} (the default, fast on
 many items) or \code{"polychoric"} (needs the polycor package; slow).}
 
+\item{copula}{add the Gaussian copula reference row (see Details).}
+
 \item{seed}{random seed for breaking ties.}
 }
 \value{
 An object of class \code{sc_benchmark}: A list with \code{table} (a tibble
-with one row per model, sorted by score: \code{model}, \code{attempts}, \code{score},
+with one row per model, sorted by score: \code{model}, \code{reference} (\code{TRUE}
+for the copula row), \code{attempts}, \code{score},
 \code{weakest}, the anchored \code{overlap}, \code{structure} and \code{behaviour}, their
 raw values (\verb{*_raw}), and the lowest and highest anchored values over
 the attempts), \code{attempts} (raw and anchored values per attempt),
@@ -110,6 +114,17 @@ anchored columns and names it in \code{weakest}. \code{"mean"} takes the (weight
 mean, \code{"geometric"} the (weighted) geometric mean of the values clamped
 to 0 to 100, and a function of three arguments (\code{overlap}, \code{structure},
 \code{behaviour}) gives any other score.
+
+\strong{Copula reference.} With \code{copula = TRUE}, a row named "Gaussian copula
+(reference)" is added. Its respondents come from \code{\link[=synthetic_copula]{synthetic_copula()}},
+which keeps every item's distribution and the correlations between items
+of the real data and nothing else. It has the median number and size of
+the synthetic attempts. A model below this row does no better than a
+generator without a language model. The copula is fitted to the real
+target, so it is an in-sample reference (\code{reference = TRUE} in the
+table), not a competitor. For the same reason, its Overlap and Structure
+can be above 100: It reproduces the full real sample more closely than
+a second, smaller sample of real people does.
 
 Synthetic respondents are experimental: The benchmark compares models and
 supports decisions about them. It does not show that synthetic data can

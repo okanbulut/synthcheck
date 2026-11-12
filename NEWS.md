@@ -1,5 +1,17 @@
 # synthcheck 0.0.0.9000
 
+* New: `synthetic_construct()` and `gg_construct()` check the construct
+  structure of each model: The gap between the synthetic and the real
+  correlations between scales, alpha per scale (above the real value means
+  too coherent) and Tucker's congruence of the loadings, read against a
+  permutation null (after Lukauskas & Šarkauskaitė, 2026).
+* New: `respondent_coverage()` and `gg_respondent_coverage()` give the
+  respondent coverage gap (RCG) and the off-support ratio (OSR) of Kumagae
+  and Kaneko (2026): Whether every real person has a synthetic look-alike,
+  and whether synthetic respondents sit outside the real data.
+* New: `synthetic_copula()` draws respondents from a Gaussian copula of the
+  real data, and `authenticity_benchmark(copula = TRUE)` adds it as a
+  reference row.
 * Website: Get started, four tutorials (Overlap and Structure, Behaviour, the
   benchmark, generating synthetic respondents in R), a tour of the app with
   screenshots of each tab, and three app demos (the built-in models, a

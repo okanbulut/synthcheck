@@ -43,6 +43,17 @@
 #' to 0 to 100, and a function of three arguments (`overlap`, `structure`,
 #' `behaviour`) gives any other score.
 #'
+#' **Copula reference.** With `copula = TRUE`, a row named "Gaussian copula
+#' (reference)" is added. Its respondents come from [synthetic_copula()],
+#' which keeps every item's distribution and the correlations between items
+#' of the real data and nothing else. It has the median number and size of
+#' the synthetic attempts. A model below this row does no better than a
+#' generator without a language model. The copula is fitted to the real
+#' target, so it is an in-sample reference (`reference = TRUE` in the
+#' table), not a competitor. For the same reason, its Overlap and Structure
+#' can be above 100: It reproduces the full real sample more closely than
+#' a second, smaller sample of real people does.
+#'
 #' Synthetic respondents are experimental: The benchmark compares models and
 #' supports decisions about them. It does not show that synthetic data can
 #' replace a field test.
@@ -57,8 +68,10 @@
 #' @param ceiling_n size of the ceiling samples: `"attempt"` or `"half"`.
 #' @param cor correlations for Structure: `"pearson"` (the default, fast on
 #'   many items) or `"polychoric"` (needs the polycor package; slow).
+#' @param copula add the Gaussian copula reference row (see Details).
 #' @return An object of class `sc_benchmark`: A list with `table` (a tibble
-#'   with one row per model, sorted by score: `model`, `attempts`, `score`,
+#'   with one row per model, sorted by score: `model`, `reference` (`TRUE`
+#'   for the copula row), `attempts`, `score`,
 #'   `weakest`, the anchored `overlap`, `structure` and `behaviour`, their
 #'   raw values (`*_raw`), and the lowest and highest anchored values over
 #'   the attempts), `attempts` (raw and anchored values per attempt),
@@ -88,7 +101,8 @@
 authenticity_benchmark <- function(synthetic, real, items, score = "weakest", weights = NULL,
                                    clean_real = FALSE, careless_rule = NULL, n_splits = 20,
                                    n_floor = 20, ceiling_n = c("attempt", "half"),
-                                   fit_scales = NULL, cor = c("pearson", "polychoric"), seed = 1) {
+                                   fit_scales = NULL, cor = c("pearson", "polychoric"),
+                                   copula = FALSE, seed = 1) {
   ceiling_n <- match.arg(ceiling_n)
   cor <- match.arg(cor)
   if (cor == "polychoric" && !requireNamespace("polycor", quietly = TRUE))
@@ -109,6 +123,13 @@ authenticity_benchmark <- function(synthetic, real, items, score = "weakest", we
   m <- if (ceiling_n == "half") floor(n_real / 2) else min(floor(n_real / 2), stats::median(sizes))
   m <- max(10L, as.integer(m))
   if (2L * m > n_real) stop("The real data are too small for the ceiling.", call. = FALSE)
+  if (isTRUE(copula)) {
+    if (copula_name %in% names(syn))
+      stop("A model cannot be called \"", copula_name, "\" when `copula = TRUE`.", call. = FALSE)
+    n_att <- max(1L, as.integer(stats::median(lengths(syn))))
+    syn[[copula_name]] <- synthetic_copula(real, n = as.integer(stats::median(sizes)), items = it$item,
+                                           attempts = n_att, seed = seed + 1L)
+  }
 
   raw <- bh_matrix(real, it)
   def_full <- bm_overlap_def(Kr, it)
@@ -164,7 +185,8 @@ authenticity_benchmark <- function(synthetic, real, items, score = "weakest", we
     a <- att[att$model == mo, ]
     v <- vapply(idx, function(k) mean(a[[k]], na.rm = TRUE), numeric(1))
     sc <- bm_score(v, score, w)
-    out <- data.frame(model = mo, attempts = nrow(a), score = sc$score, weakest = sc$weakest,
+    out <- data.frame(model = mo, reference = mo == copula_name && isTRUE(copula),
+                      attempts = nrow(a), score = sc$score, weakest = sc$weakest,
                       overlap = v[1], structure = v[2], behaviour = v[3],
                       overlap_raw = mean(a$overlap_raw), structure_raw = mean(a$structure_raw),
                       behaviour_raw = mean(a$behaviour_raw), stringsAsFactors = FALSE)
@@ -190,7 +212,7 @@ authenticity_benchmark <- function(synthetic, real, items, score = "weakest", we
     careless = prep$careless,
     settings = list(score = if (is.function(score)) "custom" else score, weights = w,
                     clean_real = clean_real, n_splits = n_splits, n_floor = n_floor,
-                    ceiling_n = ceiling_n, anchor_n = m, cor = cor, n_real = n_real,
+                    ceiling_n = ceiling_n, anchor_n = m, cor = cor, n_real = n_real, copula = isTRUE(copula),
                     items = it$item, fit_scales = ref$fit_scales, seed = seed)),
     class = "sc_benchmark")
 }
@@ -278,6 +300,8 @@ tidy.sc_benchmark <- function(x, ...) x$table
 autoplot.sc_benchmark <- function(object, ...) gg_benchmark(object, ...)
 
 # ---- internal -------------------------------------------------------------
+
+copula_name <- "Gaussian copula (reference)"
 
 bm_weights <- function(weights) {
   w <- c(overlap = 1, structure = 1, behaviour = 1)

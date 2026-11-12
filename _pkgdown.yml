@@ -21,6 +21,8 @@ navbar:
         href: articles/behaviour.html
       - text: The synthetic authenticity benchmark
         href: articles/benchmark.html
+      - text: Diagnostics beside the benchmark
+        href: articles/diagnostics.html
       - text: Generating synthetic respondents in R
         href: articles/generate.html
     app:
@@ -35,19 +37,20 @@ articles:
 - title: Get started
   navbar: ~
   contents:
-  - synthcheck
+  - articles/synthcheck
 - title: Tutorials
   desc: One step of the workflow at a time, with the functions behind it.
   contents:
-  - overlap-structure
-  - behaviour
-  - benchmark
-  - generate
+  - articles/overlap-structure
+  - articles/behaviour
+  - articles/benchmark
+  - articles/diagnostics
+  - articles/generate
 - title: The synthcheck app
   desc: The whole workflow on screen, from an instrument to a benchmark.
   contents:
-  - app-tour
-  - app-demo
+  - articles/app-tour
+  - articles/app-demo
 
 reference:
 - title: Overlap and Structure
@@ -68,6 +71,14 @@ reference:
   - authenticity_benchmark
   - gg_benchmark
   - summarise_benchmark
+- title: Diagnostics
+  desc: Checks beside the benchmark that do not change its score.
+  contents:
+  - synthetic_construct
+  - gg_construct
+  - respondent_coverage
+  - gg_respondent_coverage
+  - synthetic_copula
 - title: Generating synthetic respondents
   desc: Define an instrument and personas, call language models, save the data.
   contents:

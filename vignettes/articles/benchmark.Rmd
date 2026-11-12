@@ -124,5 +124,7 @@ gg_benchmark(bm_all)
 
 ## Next
 
+[Diagnostics beside the benchmark](diagnostics.html) checks construct
+structure and respondent coverage, and adds a copula reference row.
 [Generating synthetic respondents](generate.html) shows how to make your own
 synthetic data to benchmark.
