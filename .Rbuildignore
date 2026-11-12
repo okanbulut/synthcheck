@@ -10,3 +10,5 @@
 ^PROJECT_BRIEF\.md$
 ^README\.Rmd$
 ^vignettes/articles$
+^CITATION\.cff$
+^\.zenodo\.json$

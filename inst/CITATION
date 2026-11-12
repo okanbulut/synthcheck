@@ -1,0 +1,13 @@
+bibentry(
+  bibtype = "Manual",
+  title = "{synthcheck}: Tests How Authentic Synthetic Survey Respondents Look",
+  author = person("Okan", "Bulut", comment = c(ORCID = "0000-0001-5853-1267")),
+  year = "2026",
+  note = paste("R package version", meta$Version),
+  url = "https://github.com/okanbulut/synthcheck",
+  textVersion = paste0(
+    "Bulut, O. (2026). synthcheck: Tests how authentic synthetic survey ",
+    "respondents look. R package version ", meta$Version, ". ",
+    "https://github.com/okanbulut/synthcheck"
+  )
+)
