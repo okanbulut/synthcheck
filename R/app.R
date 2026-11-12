@@ -4,7 +4,10 @@
 #' Generate and benchmark synthetic data in a Shiny app
 #'
 #' **Experimental.** `run_synthcheck_app()` opens an app that walks through
-#' the whole workflow in five tabs:
+#' the whole workflow in five tabs. It opens on an **About** tab that
+#' explains the purpose of the app, lists what it can do and produce, shows
+#' an animated picture of a language model answering survey items and starts
+#' a guided tour of the five tabs (the tour needs the cicerone package):
 #'
 #' 1. **Instrument:** Upload an item table or use the IPIP-HEXACO items,
 #'    and set the response scale and instructions ([sc_instrument()]).
@@ -84,8 +87,8 @@ sc_trait_choices <- c("Honesty-Humility" = "H", "Emotionality" = "E", "Extravers
                       "Agreeableness" = "A", "Conscientiousness" = "C", "Openness" = "O")
 
 sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
-  card <- function(title, ...) bslib::card(bslib::card_header(title),
-                                           bslib::card_body(fillable = FALSE, ...))
+  card <- function(title, ..., id = NULL) bslib::card(id = id, bslib::card_header(title),
+                                                      bslib::card_body(fillable = FALSE, ...))
   row <- function(...) {
     args <- list(...)
     w <- 12 %/% length(args)
@@ -98,11 +101,11 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
     "It does not show that synthetic data can replace a field test.")
 
   instrument <- bslib::nav_panel(
-    "1. Instrument",
+    "1. Instrument", value = "instrument", icon = shiny::icon("list-check"),
     notice,
     bslib::layout_columns(
       col_widths = c(5, 7), fill = FALSE,
-      card("Items",
+      card("Items", id = "ins_items_card",
            shiny::radioButtons("ins_source", NULL,
                                c("IPIP-HEXACO (built in)" = "hexaco", "Upload an item table" = "upload"),
                                inline = TRUE),
@@ -127,14 +130,15 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
       bslib::layout_columns(
         col_widths = 12, row_heights = "auto", fill = FALSE,
         card("Check", shiny::uiOutput("ins_status"), shiny::tableOutput("ins_preview")),
-        card("Prompt sent for each respondent", shiny::verbatimTextOutput("ins_prompt"))))
+        card("Prompt sent for each respondent", id = "ins_prompt_card",
+             shiny::verbatimTextOutput("ins_prompt"))))
   )
 
   personas <- bslib::nav_panel(
-    "2. Personas",
+    "2. Personas", value = "personas", icon = shiny::icon("users"),
     bslib::layout_columns(
       col_widths = c(5, 7), fill = FALSE,
-      card("Personas",
+      card("Personas", id = "per_card",
            shiny::radioButtons("per_source", NULL,
                                c("No persona" = "none", "Type them" = "type",
                                  "Build a grid" = "grid", "Upload a table" = "upload")),
@@ -162,7 +166,7 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
   )
 
   models <- bslib::nav_panel(
-    "3. Models",
+    "3. Models", value = "models", icon = shiny::icon("microchip"),
     bslib::layout_columns(
       col_widths = c(4, 8), fill = FALSE,
       bslib::layout_columns(
@@ -174,7 +178,7 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
              shiny::uiOutput("key_openai_env"),
              shiny::textInput("ollama_url", "Ollama server", "http://localhost:11434"),
              shiny::helpText("Keys stay in memory for this session only. They are never saved.")),
-        card("Add a model",
+        card("Add a model", id = "mod_add_card",
              shiny::selectInput("mod_provider", "Provider",
                                 c("Anthropic" = "anthropic", "OpenAI" = "openai",
                                   "Ollama (local)" = "ollama", "Mock (random answers, no API)" = "mock")),
@@ -191,7 +195,7 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
              shiny::tableOutput("mod_table"),
              shiny::div(shiny::actionButton("mod_remove_last", "Remove last", class = "btn-sm"),
                         shiny::actionButton("mod_clear", "Clear", class = "btn-sm"))),
-        card("Run",
+        card("Run", id = "mod_run_card",
              row(
                shiny::numericInput("run_attempts", "Attempts", 2, min = 1, step = 1),
                shiny::numericInput("run_respondents", "Respondents per persona per attempt", 5, min = 1, step = 1),
@@ -222,11 +226,11 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
   )
 
   compare <- bslib::nav_panel(
-    "4. Compare",
+    "4. Compare", value = "compare", icon = shiny::icon("chart-simple"),
     bslib::layout_columns(
       col_widths = c(4, 8), fill = FALSE,
       bslib::layout_columns(
-        col_widths = 12, row_heights = "auto", fill = FALSE,
+        col_widths = 12, row_heights = "auto", fill = FALSE, id = "cmp_data_card",
         card("Real data",
              shiny::radioButtons("real_source", NULL,
                                  c(if (has_real) c("Data given to run_synthcheck_app()" = "arg"),
@@ -266,23 +270,23 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
       bslib::layout_columns(
         col_widths = 12, row_heights = "auto", fill = FALSE,
         card("Plain-language summary", shiny::uiOutput("bm_summary")),
-        card("Synthetic authenticity benchmark", shiny::plotOutput("bm_plot", height = "320px"),
+        card("Synthetic authenticity benchmark", id = "cmp_plot_card", shiny::plotOutput("bm_plot", height = "320px"),
              shiny::tableOutput("bm_table")),
         card("Behaviour strip", shiny::plotOutput("bm_behaviour", height = "360px"))))
   )
 
   export <- bslib::nav_panel(
-    "5. Export",
+    "5. Export", value = "export", icon = shiny::icon("download"),
     bslib::layout_columns(
       col_widths = c(6, 6), fill = FALSE,
-      card("Download",
+      card("Download", id = "exp_dl_card",
            shiny::selectInput("exp_format", "Format for the synthetic data",
                               c("CSV" = "csv", "JSON" = "json", "RDS" = "rds", "Excel" = "xlsx")),
            shiny::downloadButton("dl_synthetic", "Synthetic data"),
            shiny::downloadButton("dl_benchmark", "Benchmark table (CSV)"),
            shiny::downloadButton("dl_summary", "Summary (text)"),
            shiny::downloadButton("dl_plot", "Benchmark plot (PNG)")),
-      card("Repeat it in R",
+      card("Repeat it in R", id = "exp_script_card",
            shiny::verbatimTextOutput("exp_script"),
            shiny::downloadButton("dl_script", "R script"),
            shiny::hr(),
@@ -291,10 +295,36 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
            shiny::actionButton("app_close", "Close the app and return to R", class = "btn-outline-primary")))
   )
 
+  shiny::addResourcePath("synthcheck-www", sc_app_www())
   bslib::page_navbar(
-    title = "synthcheck",
+    id = "sc_nav",
+    title = shiny::tags$span(
+      shiny::img(src = "synthcheck-www/logo.png", class = "sc-brand-logo", alt = ""),
+      "synthcheck", shiny::span(class = "sc-brand-sub d-none d-lg-inline", "synthetic authenticity benchmark")),
+    window_title = "synthcheck",
     fillable = FALSE,
-    theme = bslib::bs_theme(version = 5, primary = "#1c5cab"),
-    instrument, personas, models, compare, export
+    theme = sc_app_theme(),
+    header = shiny::tags$head(
+      shiny::tags$link(rel = "stylesheet", href = "synthcheck-www/synthcheck.css"),
+      shiny::tags$link(rel = "icon", type = "image/png", href = "synthcheck-www/logo.png"),
+      if (sc_has_tour()) cicerone::use_cicerone()),
+    sc_app_about(), instrument, personas, models, compare, export
   )
 }
+
+# a Bootstrap 5 theme in the logo colours (navy, the coverage strip blues and reds)
+sc_app_theme <- function() {
+  bslib::bs_theme(
+    version = 5,
+    primary = "#1c5cab", secondary = "#5b6475", info = "#86b6ef",
+    danger = "#c0302b", warning = "#f0a09a", success = "#1c5cab",
+    dark = "#10213d", light = "#f0efec",
+    bg = "#f7f6f3", fg = "#1d2433",
+    base_font = bslib::font_collection("system-ui", "-apple-system", "Segoe UI", "Roboto",
+                                       "Helvetica Neue", "Arial", "sans-serif"),
+    "navbar-bg" = "#10213d",
+    "card-bg" = "#ffffff",
+    "border-radius" = ".45rem"
+  )
+}
+

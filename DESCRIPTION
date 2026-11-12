@@ -34,6 +34,7 @@ Imports:
 Suggests: 
     bslib,
     callr,
+    cicerone,
     ellmer (>= 0.3.0),
     jsonlite,
     later,

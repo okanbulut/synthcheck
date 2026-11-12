@@ -53,3 +53,23 @@ test_that("the R script repeats the comparison", {
   expect_match(s, 'hexaco_items$trait %in% c("H", "C")', fixed = TRUE)
   expect_match(s, "fit_scales = NULL", fixed = TRUE)
 })
+
+test_that("the app opens on the About tab with the contact details and the tour", {
+  skip_if_not_installed("shiny")
+  skip_if_not_installed("bslib")
+  html <- as.character(sc_app_ui())
+  expect_match(html, 'data-value="about"', fixed = TRUE)
+  expect_match(html, "Okan Bulut", fixed = TRUE)
+  expect_match(html, "mailto:bulut@ualberta.ca", fixed = TRUE)
+  expect_match(html, "https://www.okanbulut.com", fixed = TRUE)
+  expect_match(html, "<svg", fixed = TRUE)
+  expect_true(file.exists(file.path(sc_app_www(), "logo.png")))
+  expect_true(file.exists(file.path(sc_app_www(), "synthcheck.css")))
+  # every element the tour points to is in the app
+  skip_if_not_installed("cicerone")
+  tour <- sc_app_tour()
+  expect_s3_class(tour, "Cicerone")
+  ids <- c("about_hero", "ins_items_card", "ins_prompt_card", "per_card", "mod_add_card",
+           "mod_run_card", "cmp_data_card", "cmp_plot_card", "exp_dl_card", "exp_script_card")
+  for (id in ids) expect_match(html, paste0('id="', id, '"'), fixed = TRUE)
+})

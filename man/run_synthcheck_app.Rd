@@ -33,7 +33,10 @@ with \code{synthetic} (the generated data), \code{benchmark} (the
 }
 \description{
 \strong{Experimental.} \code{run_synthcheck_app()} opens an app that walks through
-the whole workflow in five tabs:
+the whole workflow in five tabs. It opens on an \strong{About} tab that
+explains the purpose of the app, lists what it can do and produce, shows
+an animated picture of a language model answering survey items and starts
+a guided tour of the five tabs (the tour needs the cicerone package):
 }
 \details{
 \enumerate{
