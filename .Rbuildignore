@@ -9,3 +9,4 @@
 ^CLAUDE\.md$
 ^PROJECT_BRIEF\.md$
 ^README\.Rmd$
+^vignettes/articles$
