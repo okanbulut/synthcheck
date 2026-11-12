@@ -3,6 +3,40 @@
 ## synthcheck 0.0.0.9000
 
 - New:
+  [`run_synthcheck_app()`](https://www.okanbulut.com/synthcheck/reference/run_synthcheck_app.md)
+  opens a Shiny app that generates synthetic respondents with several
+  language models and benchmarks them in five tabs: Instrument,
+  Personas, Models (API keys, temperature, attempts, a progress bar with
+  the time left), Compare (the benchmark with a plain-language summary
+  per model) and Export. API keys stay in memory for the session. The
+  Instrument and Personas tabs offer CSV templates to fill in.
+
+- New:
+  [`sc_instrument()`](https://www.okanbulut.com/synthcheck/reference/sc_instrument.md),
+  [`sc_personas()`](https://www.okanbulut.com/synthcheck/reference/sc_personas.md),
+  [`sc_persona_grid()`](https://www.okanbulut.com/synthcheck/reference/sc_personas.md),
+  [`sc_model()`](https://www.okanbulut.com/synthcheck/reference/sc_model.md)
+  and
+  [`sc_prompt()`](https://www.okanbulut.com/synthcheck/reference/sc_prompt.md)
+  define what synthetic respondents take and who they are, and
+  [`generate_synthetic()`](https://www.okanbulut.com/synthcheck/reference/generate_synthetic.md)
+  asks Anthropic, OpenAI or local Ollama models (through ellmer) to
+  answer, one respondent per call.
+
+- New:
+  [`write_synthetic()`](https://www.okanbulut.com/synthcheck/reference/write_synthetic.md)
+  and
+  [`read_synthetic()`](https://www.okanbulut.com/synthcheck/reference/write_synthetic.md)
+  save and load generated data as CSV, JSON, RDS or Excel, and
+  [`as_synthetic_list()`](https://www.okanbulut.com/synthcheck/reference/as_synthetic_list.md)
+  turns a long table into the input of
+  [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md).
+
+- New:
+  [`summarise_benchmark()`](https://www.okanbulut.com/synthcheck/reference/summarise_benchmark.md)
+  describes each model’s benchmark result in a few plain sentences.
+
+- New:
   [`behaviour_features()`](https://www.okanbulut.com/synthcheck/reference/behaviour_features.md)
   gives eight behaviour features per respondent (variability, extreme
   and midpoint answers, acquiescence, key inconsistency, even-odd

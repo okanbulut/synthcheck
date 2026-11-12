@@ -30,6 +30,33 @@ How synthetic respondents answer.
   : The synthetic authenticity benchmark
 - [`gg_benchmark()`](https://www.okanbulut.com/synthcheck/reference/gg_benchmark.md)
   : Draw the synthetic authenticity benchmark
+- [`summarise_benchmark()`](https://www.okanbulut.com/synthcheck/reference/summarise_benchmark.md)
+  : Describe the benchmark in plain language
+
+## Generating synthetic respondents
+
+Define an instrument and personas, call language models, save the data.
+
+- [`run_synthcheck_app()`](https://www.okanbulut.com/synthcheck/reference/run_synthcheck_app.md)
+  : Generate and benchmark synthetic data in a Shiny app
+- [`sc_instrument()`](https://www.okanbulut.com/synthcheck/reference/sc_instrument.md)
+  : Define an instrument for synthetic respondents
+- [`sc_personas()`](https://www.okanbulut.com/synthcheck/reference/sc_personas.md)
+  [`sc_persona_grid()`](https://www.okanbulut.com/synthcheck/reference/sc_personas.md)
+  : Define personas for synthetic respondents
+- [`sc_model()`](https://www.okanbulut.com/synthcheck/reference/sc_model.md)
+  : Choose a language model for synthetic respondents
+- [`sc_default_models`](https://www.okanbulut.com/synthcheck/reference/sc_default_models.md)
+  : Default model ids
+- [`sc_prompt()`](https://www.okanbulut.com/synthcheck/reference/sc_prompt.md)
+  : Build the prompts for one synthetic respondent
+- [`generate_synthetic()`](https://www.okanbulut.com/synthcheck/reference/generate_synthetic.md)
+  : Generate synthetic respondents with language models
+- [`write_synthetic()`](https://www.okanbulut.com/synthcheck/reference/write_synthetic.md)
+  [`read_synthetic()`](https://www.okanbulut.com/synthcheck/reference/write_synthetic.md)
+  : Save and read synthetic respondents
+- [`as_synthetic_list()`](https://www.okanbulut.com/synthcheck/reference/as_synthetic_list.md)
+  : Turn a table of synthetic respondents into benchmark input
 
 ## Data
 
