@@ -1,0 +1,143 @@
+---
+title: "Diagnostics beside the benchmark"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 8, fig.height = 4.5,
+                      dpi = 96, out.width = "100%")
+```
+
+**Experimental.** The benchmark scores each model on Overlap, Structure and
+Behaviour. Three diagnostics look at failures those columns can miss. They
+come from recent studies of synthetic survey respondents, and they do not
+change the benchmark score:
+
+- `synthetic_construct()`: Do the scales hold together and relate to each
+  other as they do in real people?
+- `respondent_coverage()`: Does every real person have a synthetic
+  look-alike, and do synthetic respondents stay inside the real data?
+- `synthetic_copula()` and `authenticity_benchmark(copula = TRUE)`: How
+  does a generator with no language model do?
+
+The diagnostics compare models and support decisions about them. They do not
+show that synthetic data can replace a field test.
+
+## The data
+
+All 240 HEXACO items for Canada, with three attempts per model:
+
+```{r}
+library(synthcheck)
+
+real <- hexaco_real[hexaco_real$country == "Canada", ]
+ca <- hexaco_llm[hexaco_llm$country == "Canada" & hexaco_llm$attempt <= 3, ]
+synthetic <- as_synthetic_list(ca, items = hexaco_items$item)
+```
+
+## Construct structure
+
+Structure averages over every pair of items, which is 28,680 pairs for 240
+items. A model can do well there and still blur the six traits together, or
+make every scale too coherent. `synthetic_construct()` makes three checks for
+each scale and model:
+
+- **Trait correlations:** `trait_cor_gap` is the mean absolute difference
+  between the synthetic and the real correlations among the scale scores.
+- **Reliability:** `alpha_gap` is the synthetic minus the real Cronbach's
+  alpha. Above 0 means the items hang together more tightly than in real
+  people. That is the "too coherent" pattern, not a better result.
+- **Loadings:** `phi` is Tucker's congruence between the synthetic and the
+  real one-factor loadings of each scale. Loadings of similar size give a
+  high `phi` by chance, so each value is compared with a permutation null
+  (`phi_null`). `rejects` is the share of scales whose `phi` is above
+  chance.
+
+```{r}
+cs <- synthetic_construct(synthetic, real, hexaco_items, n_perm = 100, n_splits = 10)
+cs
+```
+
+The "Real (second sample)" row shows how big the gaps are from sampling
+noise alone. The correlations between traits show the largest differences:
+
+```{r, fig.width = 10}
+gg_construct(cs, "cor")
+```
+
+Red means two traits relate less strongly than in real people, blue more
+strongly. `gg_construct(cs)` shows alpha per scale on the same colour scale.
+
+## Respondent coverage
+
+Overlap looks at scale scores one scale at a time. `respondent_coverage()`
+treats each respondent as one point, the keyed answers to all items, and
+measures distances to the nearest neighbour (Kumagae & Kaneko, 2026):
+
+- **RCG:** How far real people are from the nearest synthetic respondent.
+  Above 1 means some real people have no synthetic look-alike.
+- **OSR:** How far synthetic respondents are from the nearest real person.
+  Above 1 means some synthetic respondents sit outside the real data.
+
+Both ratios are scaled by the distance between real people, so a second
+sample of real people gives about 1 on both.
+
+```{r}
+rc <- respondent_coverage(synthetic, real, hexaco_items, n_draws = 3)
+rc
+```
+
+```{r, fig.height = 5}
+gg_respondent_coverage(rc)
+```
+
+Every model has RCG above 1 and OSR below 1, which is the "contraction"
+pattern. Synthetic respondents stay close to some real people, but they
+leave others uncovered. `pattern` names it once RCG is more than `tol`
+(0.1 by default) above 1, so the models closest to 1 are still labelled
+"Human-like". Synthetic respondents that were simply noisy would show up as
+"off-support", with both ratios above 1.
+
+## A copula reference row
+
+`synthetic_copula()` draws respondents from a Gaussian copula of the real
+data. It keeps each item's answer distribution and the correlations between
+items, and nothing else. With `copula = TRUE`, the benchmark adds it as a
+row:
+
+```{r}
+items <- hexaco_items[hexaco_items$trait %in% c("H", "C"), ]
+bm <- authenticity_benchmark(synthetic, real, items, fit_scales = character(0),
+                             n_splits = 10, n_floor = 10, copula = TRUE)
+bm$table[, c("model", "reference", "score", "overlap", "structure", "behaviour")]
+```
+
+```{r, fig.height = 3.8}
+gg_benchmark(bm)
+```
+
+A model below the copula row does no better than this generator. Keep in
+mind that the copula is fitted to the real data it is compared with. That
+makes it an in-sample reference rather than a competitor, and it is why its
+Overlap and Structure can go above 100. You can also use its respondents on
+their own:
+
+```{r}
+cop <- synthetic_copula(real, n = 500, items = hexaco_items, attempts = 2)
+dim(cop[[1]])
+```
+
+## References
+
+- Chidichimo, E., Jung, M. J., Wallis, F. P. S., & He, J. K. (2026).
+  Artificial Societies Benchmark: A validation framework for synthetic
+  research. [arXiv:2609.30030](https://arxiv.org/abs/2609.30030).
+- Kumagae, Y., & Kaneko, M. (2026). Silicon samples match the answers but
+  not the respondents. [arXiv:2610.30900](https://arxiv.org/abs/2610.30900).
+- Lukauskas, M., & Šarkauskaitė, V. (2026). Plausible but not valid: A
+  psychometric audit of LLMs as synthetic survey respondents.
+  [arXiv:2608.14606](https://arxiv.org/abs/2608.14606).
+
+## Next
+
+[The synthetic authenticity benchmark](benchmark.html) explains the three
+anchored columns these diagnostics sit beside.
