@@ -1,7 +1,11 @@
 # Generate and benchmark synthetic data in a Shiny app
 
 **Experimental.** `run_synthcheck_app()` opens an app that walks through
-the whole workflow in five tabs:
+the whole workflow in five tabs. It opens on an **About** tab that
+explains the purpose of the app, lists what it can do and produce, shows
+an animated picture of a language model answering survey items and
+starts a guided tour of the five tabs (the tour needs the cicerone
+package):
 
 ## Usage
 

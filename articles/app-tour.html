@@ -89,7 +89,7 @@ does not show that synthetic data can replace a field test.</p>
 <p>The app needs a few suggested packages:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"shiny"</span>, <span class="st">"bslib"</span>, <span class="st">"ellmer"</span>, <span class="st">"callr"</span>, <span class="st">"jsonlite"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co"># optional: readxl and writexl for Excel files</span></span></code></pre></div>
+<span><span class="co"># optional: readxl and writexl for Excel files, cicerone for the guided tour</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/okanbulut/synthcheck" class="external-link">synthcheck</a></span><span class="op">)</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_synthcheck_app.html">run_synthcheck_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -101,6 +101,26 @@ tab:</p>
 <p>When you close the app with the button in the Export tab,
 <code>res</code> holds the generated data, the benchmark, the instrument
 and the personas.</p>
+</div>
+<div class="section level2">
+<h2 id="about">About<a class="anchor" aria-label="anchor" href="#about"></a>
+</h2>
+<div class="float">
+<img src="figures/app-about.png" alt="The About tab that opens the app."><div class="figcaption">The About tab that opens the app.</div>
+</div>
+<p>The app opens on the <strong>About</strong> tab. It explains what the
+app is for, lists what it can do and what it produces, and shows an
+animated picture of a language model answering survey items: A persona
+and the items go in, the model answers each item on the response scale,
+and synthcheck compares the answers with real people. A short guided
+demo lists the five steps.</p>
+<p><strong>Take the guided tour</strong> walks through the app one
+control at a time and switches the tabs for you. The tour needs the
+cicerone package (<code>install.packages("cicerone")</code>).</p>
+<div class="float">
+<img src="figures/app-tour-step.png" alt="The guided tour pointing to the items on the Instrument tab."><div class="figcaption">The guided tour pointing to the items on the
+Instrument tab.</div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="instrument">1. Instrument<a class="anchor" aria-label="anchor" href="#instrument"></a>

@@ -19,7 +19,7 @@ The app needs a few suggested packages:
 ``` r
 
 install.packages(c("shiny", "bslib", "ellmer", "callr", "jsonlite"))
-# optional: readxl and writexl for Excel files
+# optional: readxl and writexl for Excel files, cicerone for the guided tour
 ```
 
 ``` r
@@ -38,6 +38,28 @@ res <- run_synthcheck_app(real = my_real_data, synthetic = my_earlier_run)
 
 When you close the app with the button in the Export tab, `res` holds
 the generated data, the benchmark, the instrument and the personas.
+
+## About
+
+![The About tab that opens the app.](figures/app-about.png)
+
+The About tab that opens the app.
+
+The app opens on the **About** tab. It explains what the app is for,
+lists what it can do and what it produces, and shows an animated picture
+of a language model answering survey items: A persona and the items go
+in, the model answers each item on the response scale, and synthcheck
+compares the answers with real people. A short guided demo lists the
+five steps.
+
+**Take the guided tour** walks through the app one control at a time and
+switches the tabs for you. The tour needs the cicerone package
+(`install.packages("cicerone")`).
+
+![The guided tour pointing to the items on the Instrument
+tab.](figures/app-tour-step.png)
+
+The guided tour pointing to the items on the Instrument tab.
 
 ## 1. Instrument
 
