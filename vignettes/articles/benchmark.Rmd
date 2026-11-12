@@ -1,0 +1,128 @@
+---
+title: "The synthetic authenticity benchmark"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 8, fig.height = 4.5,
+                      dpi = 96, out.width = "100%")
+```
+
+**Experimental.** `authenticity_benchmark()` compares several language models
+on Overlap, Structure and Behaviour, and puts them in one table with a single
+score per model. The benchmark compares models and supports decisions about
+them. It does not show that synthetic data can replace a field test.
+
+## A first benchmark
+
+Like the Behaviour functions, `authenticity_benchmark()` takes raw answers and
+an item table and does the keying itself. Here are two traits, Honesty-Humility
+and Conscientiousness (80 items), for Canada, with three attempts per model:
+
+```{r}
+library(synthcheck)
+
+items <- hexaco_items[hexaco_items$trait %in% c("H", "C"), ]
+real <- hexaco_real[hexaco_real$country == "Canada", ]
+ca <- hexaco_llm[hexaco_llm$country == "Canada" & hexaco_llm$attempt <= 3, ]
+synthetic <- as_synthetic_list(ca, items = items$item)
+```
+
+```{r}
+bm <- authenticity_benchmark(synthetic, real, items, n_splits = 10, n_floor = 10)
+bm
+```
+
+```{r, fig.height = 3.5}
+gg_benchmark(bm)
+```
+
+## Reading the anchored values
+
+Every column is rescaled between two anchors:
+
+- **Floor (0):** A dumb generator that draws each item column on its own from
+  the real data. It keeps every item's distribution but breaks people apart.
+- **Ceiling (100):** A second, separate sample of real people, scored against
+  the first with the same index.
+
+So 100 means "as close to real people as other real people are", and 0 means
+"no better than shuffled columns". Values below 0 mean the model is further
+from real people than shuffled real answers: Its respondents bunch into fewer
+score deciles (Overlap), its items correlate more than real ones (Structure),
+or its answers are tidier than real people's (Behaviour). Tables show the
+values as they are, and `gg_benchmark()` colours them from red (-100 or lower)
+through pale (0) to blue (100).
+
+```{r}
+bm$anchors
+```
+
+`n_floor` and `n_splits` set how many shuffled draws and real splits are
+averaged (20 by default). With `ceiling_n = "attempt"` (the default), the
+ceiling samples are the size of a typical synthetic attempt, so the
+sampling noise is comparable. `ceiling_n = "half"` uses the two halves of the
+real data.
+
+## Choosing the score
+
+The default score is the **weakest** column, named in `weakest`: A model is
+only as authentic as its weakest side. You can change it:
+
+```{r}
+bm_mean <- authenticity_benchmark(synthetic, real, items, score = "mean",
+                                  weights = c(overlap = 1, structure = 1, behaviour = 2),
+                                  n_splits = 10, n_floor = 10)
+bm_mean$table[, c("model", "score", "overlap", "structure", "behaviour")]
+```
+
+`score = "geometric"` takes the geometric mean of the clamped values, and a
+function of `overlap`, `structure` and `behaviour` gives your own score.
+
+## The plain-language summary
+
+```{r}
+summarise_benchmark(bm)
+```
+
+The text follows fixed rules and states only values in the table, so the
+same benchmark always gives the same summary.
+
+## The pieces behind the table
+
+```{r}
+names(bm)
+bm$attempts
+```
+
+`bm$behaviour` is the full `synthetic_behaviour()` result, so the behaviour
+strip comes for free:
+
+```{r, fig.height = 5}
+gg_behaviour(bm$behaviour)
+```
+
+## Settings that change the target
+
+- `clean_real = TRUE`: Compare against real respondents after careless ones
+  are removed (see [Behaviour](behaviour.html)). The flags are in
+  `bm$careless`.
+- `fit_scales`: The scales used for person fit. `character(0)` skips person
+  fit, which makes the benchmark much faster while you explore.
+- `cor = "polychoric"`: Polychoric correlations for Structure (needs polycor,
+  slow on many items).
+
+## All 240 items
+
+The full benchmark, with person fit on all six traits, takes several minutes:
+
+```{r, eval = FALSE}
+real <- hexaco_real[hexaco_real$country == "Canada", ]
+ca <- hexaco_llm[hexaco_llm$country == "Canada", ]
+bm_all <- authenticity_benchmark(as_synthetic_list(ca), real, hexaco_items)
+gg_benchmark(bm_all)
+```
+
+## Next
+
+[Generating synthetic respondents](generate.html) shows how to make your own
+synthetic data to benchmark.

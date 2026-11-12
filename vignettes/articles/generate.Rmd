@@ -1,0 +1,146 @@
+---
+title: "Generating synthetic respondents in R"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 8, fig.height = 4.5,
+                      dpi = 96, out.width = "100%")
+```
+
+**Experimental.** This tutorial makes synthetic respondents from your own
+instrument, personas and models, in R code. The
+[app](app-tour.html) does the same steps on screen. Synthetic respondents are
+for comparing models with the benchmark, not for replacing a field test.
+
+Everything below runs with the **mock** provider, which gives random answers
+without calling an API. Swap in `sc_model("anthropic")`, `sc_model("openai")`
+or `sc_model("ollama", ...)` for a real run.
+
+```{r}
+library(synthcheck)
+```
+
+## 1. The instrument
+
+`sc_instrument()` takes an item table (`item`, `statement`, and optionally
+`scale`, `facet` and `reverse`) or a plain vector of statements, plus the
+response scale:
+
+```{r}
+ins <- sc_instrument(hexaco_items[hexaco_items$trait == "H", ], scale = c(1, 7),
+                     name = "HEXACO Honesty-Humility")
+ins
+```
+
+Labels default to agree-disagree labels for 5- and 7-point scales. Give your
+own with `labels`, and your own text with `instructions`.
+
+A template item table ships with the package:
+
+```{r}
+tpl <- system.file("templates", "instrument_template.csv", package = "synthcheck")
+read.csv(tpl)
+```
+
+## 2. The personas
+
+A persona is the system prompt: Who the synthetic respondent is. Type them,
+or build every combination of a few attributes with `sc_persona_grid()`:
+
+```{r}
+per <- sc_persona_grid(age = c(25, 45, 65), gender = c("woman", "man"),
+                       country = c("Canada", "the United States"),
+                       template = "You are a {age}-year-old {gender} living in {country}.")
+per
+```
+
+The attribute columns are kept in the generated data, so you can compare
+groups later. `sc_personas()` takes a vector of descriptions or a table with
+a `description` column (see
+`system.file("templates", "personas_template.csv", package = "synthcheck")`).
+
+## 3. The prompt
+
+`sc_prompt()` shows exactly what is sent for one respondent:
+
+```{r}
+p <- sc_prompt(ins, per$description[1], items = ins$items$item[1:3])
+cat(p$system, "\n\n", p$user, sep = "")
+```
+
+The model answers in structured JSON, one whole number per item. Answers
+outside the scale and missing items are retried, then stored as `NA`.
+
+## 4. The models
+
+```{r}
+sc_default_models
+sc_model("anthropic", temperature = 1)
+sc_model("ollama", "gemma3:27b", name = "Gemma 3 27B")
+```
+
+The defaults are the cheapest models of each provider that take a
+temperature. `temperature = NULL` sends none, for models that do not take
+one. API keys come from `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` (for example
+in `.Renviron`) and are never written to the saved files.
+
+## 5. Generate
+
+An **attempt** is one full pass over the personas, with `respondents`
+respondents per persona. The number of calls is models × attempts × personas
+× respondents.
+
+```{r}
+models <- list(sc_model("mock", name = "Mock A"), sc_model("mock", name = "Mock B"))
+syn <- generate_synthetic(ins, models, per, attempts = 3, respondents = 10,
+                          progress = FALSE, seed = 1)
+dim(syn)
+syn[1:3, 1:12]
+```
+
+Useful settings for real runs:
+
+- `parallel`: How many calls run at the same time.
+- `batch_size`: Respondents per call. The default, 1, keeps every respondent
+  independent. Larger batches are cheaper, but respondents in one call may
+  depend on each other.
+- `block_size`: Items per call, for long instruments.
+- `shuffle`: A new item order for every respondent.
+- `output`: A folder. Each attempt is written there as soon as it is done,
+  with the settings (`run.json`) and every prompt (`prompts.json`) beside it,
+  so a stopped run keeps its finished attempts.
+
+```{r, eval = FALSE}
+syn <- generate_synthetic(ins, list(sc_model("anthropic"), sc_model("openai")), per,
+                          attempts = 5, respondents = 10, parallel = 8,
+                          output = "hexaco_run")
+```
+
+## 6. Save and read
+
+```{r}
+f <- tempfile(fileext = ".csv")
+write_synthetic(syn, f)
+syn2 <- read_synthetic(f)
+nrow(syn2)
+```
+
+`read_synthetic()` also reads a whole output folder back into one table.
+
+## 7. Benchmark
+
+`as_synthetic_list()` turns the long table into the list of models and
+attempts that the benchmark takes:
+
+```{r}
+real <- hexaco_real[hexaco_real$country == "Canada", ]
+bm <- authenticity_benchmark(as_synthetic_list(syn, items = ins$items$item), real, ins$items,
+                             fit_scales = character(0), n_splits = 5, n_floor = 5)
+bm
+summarise_benchmark(bm)
+```
+
+Random answers score close to 0 on every column, as they should: 0 is what
+shuffled real answers score. Real language models are not guaranteed to do
+better. On HEXACO, the six models in `hexaco_llm` often fall below 0 because
+their respondents bunch together; see [the benchmark](benchmark.html).
