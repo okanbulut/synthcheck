@@ -23,6 +23,19 @@ reference:
   contents:
   - authenticity_benchmark
   - gg_benchmark
+  - summarise_benchmark
+- title: Generating synthetic respondents
+  desc: Define an instrument and personas, call language models, save the data.
+  contents:
+  - run_synthcheck_app
+  - sc_instrument
+  - sc_personas
+  - sc_model
+  - sc_default_models
+  - sc_prompt
+  - generate_synthetic
+  - write_synthetic
+  - as_synthetic_list
 - title: Data
   contents:
   - hexaco_real
