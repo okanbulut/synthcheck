@@ -338,7 +338,7 @@ cognitive_interview <- function(instrument, models, personas = NULL, items = NUL
 #'   coder's system prompt).
 #' @examples
 #' ins <- sc_instrument(hexaco_items[1:3, ], scale = c(1, 7))
-#' p <- sc_interview_prompts(ins, "H1", "You are a 30-year-old teacher.")
+#' p <- sc_interview_prompts(ins, "HSinc1", "You are a 30-year-old teacher.")
 #' cat(p$think_aloud)
 #' cat(p$probes)
 #' @export
@@ -478,7 +478,7 @@ gg_interview <- function(x, flag = 0.3, max_items = 40) {
   s <- as.data.frame(s)
   s <- s[order(-s$any, s$item), , drop = FALSE]
   s <- utils::head(s, max_items)
-  lab <- paste0(s$item, ifelse(s$flagged, " ●", ""))
+  lab <- paste0(s$item, ifelse(s$flagged, " *", ""))
   cols <- c(sc_iv_stages, "any")
   long <- data.frame(item = factor(rep(lab, length(cols)), levels = rev(lab)),
                      stage = factor(rep(c(sc_iv_stage_names, any = "Any problem")[cols], each = nrow(s)),
@@ -498,7 +498,7 @@ gg_interview <- function(x, flag = 0.3, max_items = 40) {
     ggplot2::scale_x_discrete(position = "top") +
     ggplot2::labs(x = NULL, y = NULL,
                   title = "Where synthetic respondents ran into problems",
-                  subtitle = "Share of cognitive interviews in which the coder found a problem. ● flagged item.") +
+                  subtitle = "Share of cognitive interviews in which the coder found a problem. * Flagged item.") +
     theme_synthcheck() +
     ggplot2::theme(panel.grid = ggplot2::element_blank(),
                    legend.key.width = ggplot2::unit(1.5, "cm"))

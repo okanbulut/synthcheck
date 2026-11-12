@@ -35,7 +35,7 @@ the probes and the coder's instructions.
 }
 \examples{
 ins <- sc_instrument(hexaco_items[1:3, ], scale = c(1, 7))
-p <- sc_interview_prompts(ins, "H1", "You are a 30-year-old teacher.")
+p <- sc_interview_prompts(ins, "HSinc1", "You are a 30-year-old teacher.")
 cat(p$think_aloud)
 cat(p$probes)
 }
