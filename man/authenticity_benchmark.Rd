@@ -95,9 +95,15 @@ sample of real people against another, disjoint one (\code{n_splits} splits).
 With \code{ceiling_n = "attempt"} (the default) both samples have the size of
 a typical synthetic attempt (the median), so the sampling noise is
 comparable; with \code{"half"} they are the two halves of the real data. The
-floor draws have the same size. Values below 0 mean worse than shuffled
-columns; the table shows them unclamped, and \code{\link[=gg_benchmark]{gg_benchmark()}} clamps them
-to 0 to 100.
+floor draws have the same size.
+
+\strong{Negative values.} The floor uses the real data, which a language model
+never sees, so it is a strict baseline. A value below 0 means the model is
+further from real people than respondents pieced together from shuffled
+real answers: For example, its respondents bunch into fewer score deciles
+(Overlap), its items correlate more than real ones (Structure), or its
+answers are tidier than real people's (Behaviour). The table shows the
+values unclamped, and \code{\link[=gg_benchmark]{gg_benchmark()}} colours them from -100 (red) to 100 (blue).
 
 \strong{Score.} \code{score = "weakest"} (the default) takes the lowest of the three
 anchored columns and names it in \code{weakest}. \code{"mean"} takes the (weighted)

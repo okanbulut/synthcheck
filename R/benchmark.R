@@ -27,9 +27,15 @@
 #' With `ceiling_n = "attempt"` (the default) both samples have the size of
 #' a typical synthetic attempt (the median), so the sampling noise is
 #' comparable; with `"half"` they are the two halves of the real data. The
-#' floor draws have the same size. Values below 0 mean worse than shuffled
-#' columns; the table shows them unclamped, and [gg_benchmark()] clamps them
-#' to 0 to 100.
+#' floor draws have the same size.
+#'
+#' **Negative values.** The floor uses the real data, which a language model
+#' never sees, so it is a strict baseline. A value below 0 means the model is
+#' further from real people than respondents pieced together from shuffled
+#' real answers: For example, its respondents bunch into fewer score deciles
+#' (Overlap), its items correlate more than real ones (Structure), or its
+#' answers are tidier than real people's (Behaviour). The table shows the
+#' values unclamped, and [gg_benchmark()] colours them from -100 (red) to 100 (blue).
 #'
 #' **Score.** `score = "weakest"` (the default) takes the lowest of the three
 #' anchored columns and names it in `weakest`. `"mean"` takes the (weighted)
@@ -193,9 +199,10 @@ authenticity_benchmark <- function(synthetic, real, items, score = "weakest", we
 #'
 #' **Experimental.** One row per model, sorted by the benchmark score (best
 #' at the top), and one tile for each anchored column (Overlap, Structure,
-#' Behaviour). Tiles run from red (0, no better than shuffled columns) to
-#' pale (100, as close as a second sample of real people); values are
-#' clamped to 0 to 100 for the colour. The column that sets the score is
+#' Behaviour). Tiles run from red (-100 or lower, far worse than shuffled
+#' columns) through pale (around 0, no better than shuffled columns) to blue
+#' (100, as close as a second sample of real people). The number in each
+#' tile is the unclamped value. The column that sets the score is
 #' outlined when `score = "weakest"`. The score is printed at the right.
 #'
 #' @param x a result of [authenticity_benchmark()].
@@ -213,8 +220,9 @@ gg_benchmark <- function(x, title = NULL, subtitle = NULL) {
   d <- do.call(rbind, lapply(idx, function(k) data.frame(
     model = tab$model, column = tools::toTitleCase(k), value = tab[[k]],
     weakest = x$settings$score == "weakest" & tab$weakest == k, stringsAsFactors = FALSE)))
-  d$fill <- pmax(0, pmin(100, d$value))
+  d$fill <- pmax(-100, pmin(100, d$value))
   d$text <- bm_num(d$value)
+  d$ink <- ifelse(abs(d$fill) > 75, "white", "grey15")
   sc <- data.frame(model = tab$model, column = "Score", value = tab$score, stringsAsFactors = FALSE)
   sc$text <- bm_num(sc$value)
   d$model <- factor(d$model, levels = rev(tab$model)); sc$model <- factor(sc$model, levels = rev(tab$model))
@@ -228,11 +236,14 @@ gg_benchmark <- function(x, title = NULL, subtitle = NULL) {
     ggplot2::geom_tile(ggplot2::aes(fill = .data$fill), colour = "white", linewidth = 1) +
     ggplot2::geom_tile(data = d[d$weakest, , drop = FALSE], fill = NA, colour = "grey15",
                        linewidth = 0.9, width = 0.92, height = 0.88) +
-    ggplot2::geom_text(ggplot2::aes(label = .data$text), size = 3.8, colour = "grey15") +
+    ggplot2::geom_text(ggplot2::aes(label = .data$text, colour = .data$ink), size = 3.8) +
+    ggplot2::scale_colour_identity() +
     ggplot2::geom_text(data = sc, ggplot2::aes(label = .data$text), size = 4.2, fontface = "bold",
                        colour = "grey15") +
-    ggplot2::scale_fill_gradientn(colours = sc_palette[1:3], limits = c(0, 100),
-                                  breaks = c(0, 50, 100), name = "Anchored value") +
+    ggplot2::scale_fill_gradientn(colours = sc_palette, limits = c(-100, 100),
+                                  breaks = c(-100, 0, 100),
+                                  labels = c("-100 or less", "0: Shuffled", "100: Real"),
+                                  name = NULL) +
     ggplot2::scale_x_discrete(position = "top", drop = FALSE) +
     ggplot2::labs(x = NULL, y = NULL, title = title, subtitle = subtitle) +
     theme_synthcheck() +
