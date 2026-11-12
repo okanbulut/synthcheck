@@ -131,10 +131,17 @@ real people against another, disjoint one (`n_splits` splits). With
 `ceiling_n = "attempt"` (the default) both samples have the size of a
 typical synthetic attempt (the median), so the sampling noise is
 comparable; with `"half"` they are the two halves of the real data. The
-floor draws have the same size. Values below 0 mean worse than shuffled
-columns; the table shows them unclamped, and
+floor draws have the same size.
+
+**Negative values.** The floor uses the real data, which a language
+model never sees, so it is a strict baseline. A value below 0 means the
+model is further from real people than respondents pieced together from
+shuffled real answers: For example, its respondents bunch into fewer
+score deciles (Overlap), its items correlate more than real ones
+(Structure), or its answers are tidier than real people's (Behaviour).
+The table shows the values unclamped, and
 [`gg_benchmark()`](https://www.okanbulut.com/synthcheck/reference/gg_benchmark.md)
-clamps them to 0 to 100.
+colours them from -100 (red) to 100 (blue).
 
 **Score.** `score = "weakest"` (the default) takes the lowest of the
 three anchored columns and names it in `weakest`. `"mean"` takes the

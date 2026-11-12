@@ -19,7 +19,8 @@
   columns (0) and a second sample of real people (100), with the weakest
   column as the default score.
   [`gg_benchmark()`](https://www.okanbulut.com/synthcheck/reference/gg_benchmark.md)
-  draws it.
+  draws it on a scale from red (-100 or less) through pale (0) to blue
+  (100), so values below the shuffled baseline stay readable.
 
 - New:
   [`flag_careless()`](https://www.okanbulut.com/synthcheck/reference/flag_careless.md)

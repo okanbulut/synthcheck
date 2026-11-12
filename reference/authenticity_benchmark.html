@@ -160,9 +160,14 @@ sample of real people against another, disjoint one (<code>n_splits</code> split
 With <code>ceiling_n = "attempt"</code> (the default) both samples have the size of
 a typical synthetic attempt (the median), so the sampling noise is
 comparable; with <code>"half"</code> they are the two halves of the real data. The
-floor draws have the same size. Values below 0 mean worse than shuffled
-columns; the table shows them unclamped, and <code><a href="gg_benchmark.html">gg_benchmark()</a></code> clamps them
-to 0 to 100.</p>
+floor draws have the same size.</p>
+<p><strong>Negative values.</strong> The floor uses the real data, which a language model
+never sees, so it is a strict baseline. A value below 0 means the model is
+further from real people than respondents pieced together from shuffled
+real answers: For example, its respondents bunch into fewer score deciles
+(Overlap), its items correlate more than real ones (Structure), or its
+answers are tidier than real people's (Behaviour). The table shows the
+values unclamped, and <code><a href="gg_benchmark.html">gg_benchmark()</a></code> colours them from -100 (red) to 100 (blue).</p>
 <p><strong>Score.</strong> <code>score = "weakest"</code> (the default) takes the lowest of the three
 anchored columns and names it in <code>weakest</code>. <code>"mean"</code> takes the (weighted)
 mean, <code>"geometric"</code> the (weighted) geometric mean of the values clamped
