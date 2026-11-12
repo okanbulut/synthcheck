@@ -6,6 +6,19 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
     rv <- shiny::reactiveValues(models = list(), proc = NULL, run_dir = NULL, run_data = NULL,
                                 run_status = NULL, timing = NULL, benchmark = NULL, log = NULL)
 
+    # ---- About ----------------------------------------------------------------
+    shiny::observeEvent(input$about_start, bslib::nav_select("sc_nav", "instrument", session = session))
+    shiny::observeEvent(input$tour_start, {
+      if (sc_has_tour()) {
+        sc_app_tour()$init()$start()
+      } else {
+        shiny::showModal(shiny::modalDialog(
+          title = "Guided tour",
+          "The guided tour needs the cicerone package: install.packages(\"cicerone\").",
+          easyClose = TRUE))
+      }
+    })
+
     # ---- 1. Instrument -------------------------------------------------------
     shiny::observeEvent(input$ins_source, {
       if (input$ins_source == "hexaco") {

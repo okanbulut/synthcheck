@@ -1,5 +1,12 @@
 # synthcheck (development version)
 
+* The app has a new look in the logo colours, with the logo in the navbar
+  and a coverage strip under it. A new About tab opens the app: It explains
+  the purpose, lists what the app can do and produce, shows an animated
+  picture of a language model answering survey items, gives the designer's
+  contact details and starts a guided tour of the five tabs (with the
+  cicerone package, in Suggests).
+
 * The README, `citation("synthcheck")` and `CITATION.cff` give the Zenodo
   DOI that covers all versions (10.5281/zenodo.24173113).
 
