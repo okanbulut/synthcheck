@@ -1,0 +1,23 @@
+url: https://www.okanbulut.com/synthcheck/
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#1c5cab"
+
+reference:
+- title: Overlap and Structure
+  desc: Where synthetic respondents land and how their items relate.
+  contents:
+  - synthetic_coverage
+  - gg_coverage
+  - blend_llms
+- title: Data
+  contents:
+  - hexaco_real
+  - hexaco_llm
+  - hexaco_items
+- title: Helpers
+  contents:
+  - theme_synthcheck
+  - synthcheck-package
