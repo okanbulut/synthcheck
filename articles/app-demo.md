@@ -12,6 +12,11 @@ library(synthcheck)
 run_synthcheck_app()
 ```
 
+The app opens on the **About** tab. Click **Start with the instrument**
+to go straight to the first step, or **Take the guided tour** for a
+walkthrough that points to each control in turn (it needs the cicerone
+package). The demos below start on the Instrument tab.
+
 ## Demo 1: Benchmark the six built-in models
 
 The package ships synthetic answers from six language models to the

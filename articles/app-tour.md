@@ -5,8 +5,8 @@
 opens an app that does the whole synthcheck workflow without code:
 Define an instrument and personas, generate synthetic respondents with
 one or more language models, benchmark them against real data and save
-everything. This article walks through its five tabs. For worked
-examples, see [the app
+everything. This article walks through the About tab that opens the app
+and the five tabs of the workflow. For worked examples, see [the app
 demos](https://www.okanbulut.com/synthcheck/articles/app-demo.md).
 
 The benchmark compares models and supports decisions about them. It does

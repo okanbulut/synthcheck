@@ -9,6 +9,10 @@
   the designer’s contact details and starts a guided tour of the five
   tabs (with the cicerone package, in Suggests).
 
+- The website matches the app: A navy navbar with the coverage strip
+  under it, navy headings and framed screenshots. The app articles
+  describe the About tab and the guided tour.
+
 - The README, `citation("synthcheck")` and `CITATION.cff` give the
   Zenodo DOI that covers all versions (10.5281/zenodo.24173113).
 

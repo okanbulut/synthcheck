@@ -1,0 +1,45 @@
+/* synthcheck website theme. Colours come from the package logo and the
+   coverage strip, as in the app: navy #10213d, blue #1c5cab, light blue
+   #86b6ef, pale #f0efec, light red #f0a09a and red #c0302b. */
+
+:root {
+  --sc-navy: #10213d;
+  --sc-blue: #1c5cab;
+  --sc-lightblue: #86b6ef;
+  --sc-pale: #f0efec;
+  --sc-lightred: #f0a09a;
+  --sc-red: #c0302b;
+}
+
+/* navbar: navy, with a thin coverage strip underneath */
+.navbar {
+  background-color: var(--sc-navy) !important;
+  border-bottom: 5px solid transparent;
+  border-image: linear-gradient(90deg,
+    var(--sc-red) 0 20%, var(--sc-lightred) 20% 40%, var(--sc-pale) 40% 60%,
+    var(--sc-lightblue) 60% 80%, var(--sc-blue) 80% 100%) 1;
+}
+.navbar .navbar-brand, .navbar .navbar-brand:hover { color: #fff !important; font-weight: 600; }
+.navbar .nav-link { color: rgba(255, 255, 255, .8) !important; }
+.navbar .nav-link:hover, .navbar .nav-link:focus { color: #fff !important; }
+.navbar .nav-item.active > .nav-link, .navbar .nav-link.active { color: #fff !important; }
+.navbar .navbar-toggler { border-color: rgba(255, 255, 255, .4); }
+.navbar .navbar-toggler-icon { filter: invert(1); }
+.navbar .nav-text.text-muted, .navbar .version { color: rgba(255, 255, 255, .6) !important; }
+.navbar .form-control { background: rgba(255, 255, 255, .95); }
+
+/* headings in navy, with a blue rule under the page title */
+h1, h2, h3, h4 { color: var(--sc-navy); }
+.page-header { border-bottom: 3px solid var(--sc-lightblue); padding-bottom: .4rem; }
+
+/* figures and screenshots: a soft frame */
+.contents img:not(.logo) { border: 1px solid #e3e1db; border-radius: .5rem; }
+
+/* code: a pale background and a blue left rule */
+pre { background-color: #f7f6f3; border-left: 3px solid var(--sc-lightblue); }
+
+/* sidebar headings */
+aside h2, aside h3 { color: var(--sc-navy); }
+
+/* footer */
+footer { border-top: 3px solid var(--sc-pale); }
