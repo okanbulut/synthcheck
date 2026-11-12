@@ -1,4 +1,4 @@
-# synthcheck
+# synthcheck <a href="https://www.okanbulut.com/synthcheck/"><img src="man/figures/logo.png" align="right" height="139" alt="synthcheck website" /></a>
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/okanbulut/synthcheck/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/okanbulut/synthcheck/actions/workflows/R-CMD-check.yaml)
