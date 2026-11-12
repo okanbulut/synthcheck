@@ -35,11 +35,11 @@ sc_app_about <- function(has_real = FALSE) {
                          "Generate synthetic respondents and benchmark them against the real ones."),
              shiny::span(shiny::strong("No, not yet. "),
                          "Pretest the scale on synthetic respondents alone: Item screening, agreement",
-                         "across models and the structure you designed.")),
+                         "across models, the structure you designed and cognitive interviews.")),
            choiceValues = list("real", "pretest"),
            selected = if (has_real) "real" else character(0)),
          shiny::p(class = "small text-muted mb-0",
-                  "The answer sets the fourth tab: Compare with real data, or Pretest without it.",
+                  "The answer sets the fourth tab: Compare with real data, or Pretest and Interviews without it.",
                   "You can change it at any time, for example to benchmark the same synthetic data",
                   "once real responses come in.")),
     bslib::layout_columns(
@@ -77,6 +77,7 @@ sc_app_about <- function(has_real = FALSE) {
              li("Show a progress bar with the time left, and stop a run at any time"),
              li("Benchmark several models against real data in one table"),
              li("Without real data, pretest a scale on synthetic respondents and see which flagged items hold across models"),
+             li("Without real data, run cognitive interviews in which models play your personas and think aloud on the items"),
              li("Explain each model's result in plain language"))),
       card("What it produces",
            shiny::tags$ul(
@@ -86,6 +87,7 @@ sc_app_about <- function(has_real = FALSE) {
              li("A behaviour strip of eight answer features per model"),
              li("A plain-language summary for each model"),
              li("Without real data: Flagged items, their agreement across models and a check of the designed structure"),
+             li("Cognitive interview transcripts, coded problems per item and suggested rewordings"),
              li("An R script that repeats the comparison"))),
       card("Designer",
            shiny::div(
@@ -112,6 +114,8 @@ sc_app_about <- function(has_real = FALSE) {
               ". Or pick ", shiny::em("hexaco_llm"), " to compare six models without generating anything."),
            li(shiny::strong("Pretest "), "(no real data): Press ", shiny::em("Run the pretest"),
               " to see which items are flagged and whether the models agree."),
+           li(shiny::strong("Interviews "), "(no real data): Press ", shiny::em("Run the interviews"),
+              " to have each persona think aloud on the flagged items and read what tripped them up."),
            li(shiny::strong("Export: "), "Download the data, the plot and an R script, or close the app",
               " to get everything back in R.")),
          shiny::p(class = "mb-0 small text-muted",
@@ -131,7 +135,13 @@ sc_app_tour <- function(path = NULL) {
          "pretest", "right"),
     list("pt_plot_card", "Flagged items",
          "Items that barely vary, link weakly to their scale or duplicate another item, and how many models agree.",
-         "pretest", "left")
+         "pretest", "left"),
+    list("iv_items_card", "4b. Cognitive interviews",
+         "Models play your personas, think aloud on each item and answer probes. Start with the items the pretest flagged, or choose your own.",
+         "interviews", "right"),
+    list("iv_plot_card", "Problems per item",
+         "Where the interviews ran into comprehension, retrieval, judgement, response or sensitivity problems. A screening aid, not a substitute for real interviews.",
+         "interviews", "left")
   ) else list(
     list("cmp_data_card", "4. Compare: The data",
          "Choose the real data and the synthetic data. The built-in hexaco_llm has six models.", "compare",

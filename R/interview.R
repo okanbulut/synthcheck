@@ -554,10 +554,7 @@ sc_iv_pretest <- function(pretest, items) {
     d <- data.frame(item = as.character(pretest), flag = "flagged by the pretest",
                     stringsAsFactors = FALSE)
   } else {
-    if (inherits(pretest, "sc_pretest")) {
-      pretest <- as.data.frame(pretest$agreement, stringsAsFactors = FALSE)
-      pretest <- pretest[pretest$flagged_in > 0, , drop = FALSE]
-    }
+    if (inherits(pretest, "sc_pretest")) pretest <- as.data.frame(pretest$agreement, stringsAsFactors = FALSE)
     d <- if (is.data.frame(pretest)) pretest else if (is.list(pretest) && is.data.frame(pretest$agreement))
       pretest$agreement else if (is.list(pretest) && is.data.frame(pretest$flags)) pretest$flags else NULL
     if (is.null(d) || !"item" %in% names(d))
@@ -565,6 +562,7 @@ sc_iv_pretest <- function(pretest, items) {
            "or item names.", call. = FALSE)
     d <- as.data.frame(d, stringsAsFactors = FALSE)
     if ("flagged" %in% names(d)) d <- d[as.logical(d$flagged) %in% TRUE, , drop = FALSE]
+    if ("flagged_in" %in% names(d)) d <- d[d$flagged_in %in% seq_len(1e6), , drop = FALSE]
     fc <- intersect(c("flag", "flags", "reason", "reasons", "conditions"), names(d))
     d <- data.frame(item = as.character(d$item),
                     flag = if (length(fc)) as.character(d[[fc[1]]]) else "flagged by the pretest",
@@ -972,11 +970,24 @@ sc_iv_write <- function(x, output, format, instrument, models, coder, personas, 
                        null = "null", na = "null", digits = NA)
   tdir <- file.path(output, "transcripts")
   dir.create(tdir, showWarnings = FALSE)
+  for (i in unique(d$item))
+    writeLines(sc_iv_markdown(x, i), file.path(tdir, paste0(sc_slug(i), ".md")))
+  if (!is.null(attr(x, "log")))
+    utils::write.csv(attr(x, "log"), file.path(output, "log.csv"), row.names = FALSE)
+  invisible(TRUE)
+}
+
+# the transcripts of the given items as Markdown lines
+sc_iv_markdown <- function(x, items = unique(x$item)) {
+  d <- as.data.frame(x)
+  probes <- attr(x, "probes") %||% sc_probes()
   pr_all <- as.data.frame(probes)
-  for (i in unique(d$item)) {
+  unlist(lapply(items, function(i) {
     s <- d[d$item == i, , drop = FALSE]
+    if (!nrow(s)) return(character(0))
     md <- c(sprintf("# %s: %s", i, s$statement[1]), "",
-            if (!is.na(s$pretest[1])) c(sprintf("Pretest flag: %s", s$pretest[1]), ""),
+            if ("pretest" %in% names(s) && !is.na(s$pretest[1]))
+              c(sprintf("Pretest flag: %s", s$pretest[1]), ""),
             "Transcripts written by language models playing personas. A screening aid, not a",
             "substitute for cognitive interviews with real people.", "")
     for (r in seq_len(nrow(s))) {
@@ -998,9 +1009,6 @@ sc_iv_write <- function(x, output, format, instrument, models, coder, personas, 
               if (!is.na(s$revision[r]) && nzchar(s$revision[r]))
                 sprintf("**Suggested rewording:** %s", s$revision[r]), "")
     }
-    writeLines(md, file.path(tdir, paste0(sc_slug(i), ".md")))
-  }
-  if (!is.null(attr(x, "log")))
-    utils::write.csv(attr(x, "log"), file.path(output, "log.csv"), row.names = FALSE)
-  invisible(TRUE)
+    md
+  }))
 }
