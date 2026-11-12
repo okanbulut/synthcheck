@@ -134,7 +134,7 @@ holds the item text, facets and keys.
 
 Run `citation("synthcheck")` for the citation, or use the “Cite this
 repository” button on GitHub. Each release is archived on Zenodo
-(<doi:%5B10.5281/zenodo.24173114>\](<https://doi.org/10.5281/zenodo.24173114>)).
+(<doi:%5B10.5281/zenodo.24173113>\](<https://doi.org/10.5281/zenodo.24173113>)).
 
 ## Related
 

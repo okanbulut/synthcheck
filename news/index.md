@@ -3,7 +3,7 @@
 ## synthcheck (development version)
 
 - The README, `citation("synthcheck")` and `CITATION.cff` give the
-  Zenodo DOI (10.5281/zenodo.24173114).
+  Zenodo DOI that covers all versions (10.5281/zenodo.24173113).
 
 ## synthcheck 0.1.0
 
