@@ -48,6 +48,18 @@ Checks beside the benchmark that do not change its score.
 - [`synthetic_copula()`](https://www.okanbulut.com/synthcheck/reference/synthetic_copula.md)
   : Respondents drawn from a Gaussian copula of the real data
 
+## Pretest without real data
+
+Pilot screening of a scale on synthetic respondents alone, with
+agreement across conditions.
+
+- [`synthetic_pretest()`](https://www.okanbulut.com/synthcheck/reference/synthetic_pretest.md)
+  : Pretest a scale on synthetic respondents, without real data
+- [`gg_pretest()`](https://www.okanbulut.com/synthcheck/reference/gg_pretest.md)
+  : Draw the pretest
+- [`summarise_pretest()`](https://www.okanbulut.com/synthcheck/reference/summarise_pretest.md)
+  : Describe the pretest in plain language
+
 ## Generating synthetic respondents
 
 Define an instrument and personas, call language models, save the data.

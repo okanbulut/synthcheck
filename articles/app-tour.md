@@ -52,6 +52,18 @@ in, the model answers each item on the response scale, and synthcheck
 compares the answers with real people. A short guided demo lists the
 five steps.
 
+**First step: Do you already have real responses to this instrument?**
+The answer sets the fourth tab. With real data, it is **Compare**, the
+benchmark against real people. Without real data, it is **Pretest**,
+pilot screening of the scale on synthetic respondents alone. You can
+change the answer at any time, for example to benchmark the same
+synthetic data once real responses come in.
+
+![The first step on the About tab: Real data or
+not?](figures/app-path.png)
+
+The first step on the About tab: Real data or not?
+
 **Take the guided tour** walks through the app one control at a time and
 switches the tabs for you. The tour needs the cicerone package
 (`install.packages("cicerone")`).
@@ -183,6 +195,30 @@ blue means higher, and pale means a match.
   real data. It is slower; switch it off while you explore.
 - **Real splits and shuffled draws:** How many draws set the 0 and 100
   anchors. More is steadier and slower.
+
+## 4. Pretest (without real data)
+
+![The Pretest tab after a pretest of six
+models.](figures/app-pretest.png)
+
+The Pretest tab after a pretest of six models.
+
+Without real data, the fourth tab runs
+[`synthetic_pretest()`](https://www.okanbulut.com/synthcheck/reference/synthetic_pretest.md)
+on the synthetic data: This session’s run, the built-in `hexaco_llm`, or
+files saved by an earlier run. **Compare the flags across** sets the
+conditions: Models (each label in the Models tab), temperatures,
+personas, or nothing. To check temperatures, type several in **Or
+several temperatures** in the Models tab; the app adds one model per
+temperature.
+
+The tab shows a plain-language summary, the flagged items with the
+number of conditions that flag each one, and the reliability of each
+scale with the dimensions parallel analysis finds and whether the items
+and reverse keys follow the structure you designed. The items, scales
+and reverse keys come from the Instrument tab. The [pretest
+tutorial](https://www.okanbulut.com/synthcheck/articles/pretest.md)
+explains each result. It is pilot screening, not validation.
 
 ## 5. Export
 

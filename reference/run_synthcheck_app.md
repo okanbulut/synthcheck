@@ -5,7 +5,7 @@ the whole workflow in five tabs. It opens on an **About** tab that
 explains the purpose of the app, lists what it can do and produce, shows
 an animated picture of a language model answering survey items and
 starts a guided tour of the five tabs (the tour needs the cicerone
-package):
+package).
 
 ## Usage
 
@@ -47,9 +47,22 @@ run_synthcheck_app(
 Invisibly, when the app is closed with its Close button: A list with
 `synthetic` (the generated data), `benchmark` (the
 [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md)
-result, if one was run), `instrument` and `personas`.
+result, if one was run), `pretest` (the
+[`synthetic_pretest()`](https://www.okanbulut.com/synthcheck/reference/synthetic_pretest.md)
+result, if one was run), `path` (`"real"`, `"pretest"` or `NULL`),
+`instrument` and `personas`.
 
 ## Details
+
+The About tab starts with one question: **Do you already have real
+responses to this instrument?** With real data, the fourth tab is
+**Compare** (the benchmark below). Without real data, it is **Pretest**:
+Pilot screening of the items on synthetic respondents alone, with the
+agreement across models or temperatures and a check of the structure you
+designed
+([`synthetic_pretest()`](https://www.okanbulut.com/synthcheck/reference/synthetic_pretest.md)).
+The answer can be changed at any time, so you can come back with real
+data later and compare the same synthetic data.
 
 1.  **Instrument:** Upload an item table or use the IPIP-HEXACO items,
     and set the response scale and instructions
@@ -79,8 +92,17 @@ and `"personas_template.csv"`.
     and a plain-language summary per model
     ([`summarise_benchmark()`](https://www.okanbulut.com/synthcheck/reference/summarise_benchmark.md)).
 
-3.  **Export:** Download the data (CSV, JSON, RDS or Excel), the
-    benchmark and an R script that repeats the comparison.
+3.  **Pretest** (without real data): Run
+    [`synthetic_pretest()`](https://www.okanbulut.com/synthcheck/reference/synthetic_pretest.md)
+    on the generated data, with
+    [`gg_pretest()`](https://www.okanbulut.com/synthcheck/reference/gg_pretest.md)
+    and a plain-language summary
+    ([`summarise_pretest()`](https://www.okanbulut.com/synthcheck/reference/summarise_pretest.md)).
+    Add the same model at several temperatures in the Models tab to
+    check whether the flags hold.
+
+4.  **Export:** Download the data (CSV, JSON, RDS or Excel), the
+    benchmark or the pretest, and an R script that repeats the analysis.
 
 **API keys** typed into the app stay in memory for that session only:
 They are never written to the saved data, the run settings or the R

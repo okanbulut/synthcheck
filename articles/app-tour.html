@@ -37,6 +37,7 @@
     <li><a class="dropdown-item" href="../articles/behaviour.html">Behaviour: How synthetic respondents answer</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">The synthetic authenticity benchmark</a></li>
     <li><a class="dropdown-item" href="../articles/diagnostics.html">Diagnostics beside the benchmark</a></li>
+    <li><a class="dropdown-item" href="../articles/pretest.html">Pretesting a scale without real data</a></li>
     <li><a class="dropdown-item" href="../articles/generate.html">Generating synthetic respondents in R</a></li>
   </ul>
 </li>
@@ -115,6 +116,17 @@ animated picture of a language model answering survey items: A persona
 and the items go in, the model answers each item on the response scale,
 and synthcheck compares the answers with real people. A short guided
 demo lists the five steps.</p>
+<p><strong>First step: Do you already have real responses to this
+instrument?</strong> The answer sets the fourth tab. With real data, it
+is <strong>Compare</strong>, the benchmark against real people. Without
+real data, it is <strong>Pretest</strong>, pilot screening of the scale
+on synthetic respondents alone. You can change the answer at any time,
+for example to benchmark the same synthetic data once real responses
+come in.</p>
+<div class="float">
+<img src="figures/app-path.png" alt="The first step on the About tab: Real data or not?"><div class="figcaption">The first step on the About tab: Real data or
+not?</div>
+</div>
 <p><strong>Take the guided tour</strong> walks through the app one
 control at a time and switches the tabs for you. The tour needs the
 cicerone package (<code>install.packages("cicerone")</code>).</p>
@@ -258,6 +270,28 @@ explore.</li>
 <strong>Real splits and shuffled draws:</strong> How many draws set
 the 0 and 100 anchors. More is steadier and slower.</li>
 </ul>
+</div>
+<div class="section level2">
+<h2 id="pretest-without-real-data">4. Pretest (without real data)<a class="anchor" aria-label="anchor" href="#pretest-without-real-data"></a>
+</h2>
+<div class="float">
+<img src="figures/app-pretest.png" alt="The Pretest tab after a pretest of six models."><div class="figcaption">The Pretest tab after a pretest of six
+models.</div>
+</div>
+<p>Without real data, the fourth tab runs
+<code><a href="../reference/synthetic_pretest.html">synthetic_pretest()</a></code> on the synthetic data: This session’s
+run, the built-in <code>hexaco_llm</code>, or files saved by an earlier
+run. <strong>Compare the flags across</strong> sets the conditions:
+Models (each label in the Models tab), temperatures, personas, or
+nothing. To check temperatures, type several in <strong>Or several
+temperatures</strong> in the Models tab; the app adds one model per
+temperature.</p>
+<p>The tab shows a plain-language summary, the flagged items with the
+number of conditions that flag each one, and the reliability of each
+scale with the dimensions parallel analysis finds and whether the items
+and reverse keys follow the structure you designed. The items, scales
+and reverse keys come from the Instrument tab. The <a href="pretest.html">pretest tutorial</a> explains each result. It is
+pilot screening, not validation.</p>
 </div>
 <div class="section level2">
 <h2 id="export">5. Export<a class="anchor" aria-label="anchor" href="#export"></a>

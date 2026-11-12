@@ -40,6 +40,7 @@
     <li><a class="dropdown-item" href="articles/behaviour.html">Behaviour: How synthetic respondents answer</a></li>
     <li><a class="dropdown-item" href="articles/benchmark.html">The synthetic authenticity benchmark</a></li>
     <li><a class="dropdown-item" href="articles/diagnostics.html">Diagnostics beside the benchmark</a></li>
+    <li><a class="dropdown-item" href="articles/pretest.html">Pretesting a scale without real data</a></li>
     <li><a class="dropdown-item" href="articles/generate.html">Generating synthetic respondents in R</a></li>
   </ul>
 </li>
@@ -85,6 +86,7 @@
 </ul>
 <p>Each index is anchored between a shuffled baseline (0) and a second sample of real people (100). The <strong>synthetic authenticity benchmark</strong> compares several models in one table, scored by their weakest column by default.</p>
 <p>Three diagnostics sit beside the benchmark and do not change its score: <code><a href="reference/synthetic_construct.html">synthetic_construct()</a></code> checks whether the scales hold together and relate as they do in real people (trait correlations, alpha and Tucker’s congruence against a permutation null), <code><a href="reference/respondent_coverage.html">respondent_coverage()</a></code> checks whether every real person has a synthetic look-alike, and <code>authenticity_benchmark(copula = TRUE)</code> adds a Gaussian copula row, a generator without a language model, as a reference.</p>
+<p><strong>No real data yet?</strong> <code><a href="reference/synthetic_pretest.html">synthetic_pretest()</a></code> screens a new scale on synthetic respondents alone: Item-rest correlations, items that barely vary or duplicate each other, reverse keys, reliability, parallel analysis, IRT slopes, and whether the scales you designed come back. It flags items in each model, temperature, prompt wording or persona set and shows how many agree. This is pilot screening, not validation: Language models answer more tidily than people, so the pretest points to items to read again, and a field test still decides.</p>
 <p>The package compares models and supports decisions about them. It does not show that synthetic respondents can replace a field test.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -135,7 +137,7 @@
 <div class="section level2">
 <h2 id="generating-synthetic-data-in-an-app">Generating synthetic data in an app<a class="anchor" aria-label="anchor" href="#generating-synthetic-data-in-an-app"></a>
 </h2>
-<p><code><a href="reference/run_synthcheck_app.html">run_synthcheck_app()</a></code> opens an app that starts on an About tab with a guided tour and then does the whole workflow: Define an instrument and personas, generate synthetic respondents with Anthropic, OpenAI or local Ollama models (with their temperature and the number of attempts), watch a progress bar with the time left, save the data as CSV, JSON, RDS or Excel, and benchmark the models against real data with a plain-language summary for each one.</p>
+<p><code><a href="reference/run_synthcheck_app.html">run_synthcheck_app()</a></code> opens an app that starts on an About tab with a guided tour and one question: Do you already have real responses? With real data, the app benchmarks the models; without it, the app pretests the scale on synthetic respondents. Then it does the whole workflow: Define an instrument and personas, generate synthetic respondents with Anthropic, OpenAI or local Ollama models (with their temperature and the number of attempts), watch a progress bar with the time left, save the data as CSV, JSON, RDS or Excel, and benchmark the models against real data with a plain-language summary for each one.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"shiny"</span>, <span class="st">"bslib"</span>, <span class="st">"ellmer"</span>, <span class="st">"callr"</span>, <span class="st">"jsonlite"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/run_synthcheck_app.html">run_synthcheck_app</a></span><span class="op">(</span>real <span class="op">=</span> <span class="va">my_real_data</span><span class="op">)</span></span>

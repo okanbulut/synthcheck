@@ -3,11 +3,11 @@
 the whole workflow in five tabs. It opens on an About tab that
 explains the purpose of the app, lists what it can do and produce, shows
 an animated picture of a language model answering survey items and starts
-a guided tour of the five tabs (the tour needs the cicerone package):"><meta property="og:description" content="Experimental. run_synthcheck_app() opens an app that walks through
+a guided tour of the five tabs (the tour needs the cicerone package)."><meta property="og:description" content="Experimental. run_synthcheck_app() opens an app that walks through
 the whole workflow in five tabs. It opens on an About tab that
 explains the purpose of the app, lists what it can do and produce, shows
 an animated picture of a language model answering survey items and starts
-a guided tour of the five tabs (the tour needs the cicerone package):"><meta property="og:image" content="https://www.okanbulut.com/synthcheck/logo.svg"></head><body>
+a guided tour of the five tabs (the tour needs the cicerone package)."><meta property="og:image" content="https://www.okanbulut.com/synthcheck/logo.svg"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -30,6 +30,7 @@ a guided tour of the five tabs (the tour needs the cicerone package):"><meta pro
     <li><a class="dropdown-item" href="../articles/behaviour.html">Behaviour: How synthetic respondents answer</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark.html">The synthetic authenticity benchmark</a></li>
     <li><a class="dropdown-item" href="../articles/diagnostics.html">Diagnostics beside the benchmark</a></li>
+    <li><a class="dropdown-item" href="../articles/pretest.html">Pretesting a scale without real data</a></li>
     <li><a class="dropdown-item" href="../articles/generate.html">Generating synthetic respondents in R</a></li>
   </ul></li>
 <li class="nav-item dropdown">
@@ -59,7 +60,7 @@ a guided tour of the five tabs (the tour needs the cicerone package):"><meta pro
 the whole workflow in five tabs. It opens on an <strong>About</strong> tab that
 explains the purpose of the app, lists what it can do and produce, shows
 an animated picture of a language model answering survey items and starts
-a guided tour of the five tabs (the tour needs the cicerone package):</p>
+a guided tour of the five tabs (the tour needs the cicerone package).</p>
     </div>
 
     <div class="section level2">
@@ -101,13 +102,20 @@ own computer only.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Invisibly, when the app is closed with its Close button: A list
 with <code>synthetic</code> (the generated data), <code>benchmark</code> (the
-<code><a href="authenticity_benchmark.html">authenticity_benchmark()</a></code> result, if one was run), <code>instrument</code> and
-<code>personas</code>.</p>
+<code><a href="authenticity_benchmark.html">authenticity_benchmark()</a></code> result, if one was run), <code>pretest</code> (the
+<code><a href="synthetic_pretest.html">synthetic_pretest()</a></code> result, if one was run), <code>path</code> (<code>"real"</code>,
+<code>"pretest"</code> or <code>NULL</code>), <code>instrument</code> and <code>personas</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-
-<ol><li><p><strong>Instrument:</strong> Upload an item table or use the IPIP-HEXACO items,
+    <p>The About tab starts with one question: <strong>Do you already have real
+responses to this instrument?</strong> With real data, the fourth tab is
+<strong>Compare</strong> (the benchmark below). Without real data, it is <strong>Pretest</strong>:
+Pilot screening of the items on synthetic respondents alone, with the
+agreement across models or temperatures and a check of the structure you
+designed (<code><a href="synthetic_pretest.html">synthetic_pretest()</a></code>). The answer can be changed at any time,
+so you can come back with real data later and compare the same synthetic
+data.</p><ol><li><p><strong>Instrument:</strong> Upload an item table or use the IPIP-HEXACO items,
 and set the response scale and instructions (<code><a href="sc_instrument.html">sc_instrument()</a></code>).</p></li>
 <li><p><strong>Personas:</strong> Type, upload or build the personas that take the
 instrument (<code><a href="sc_personas.html">sc_personas()</a></code>, <code><a href="sc_personas.html">sc_persona_grid()</a></code>).</p></li>
@@ -119,8 +127,12 @@ the time left.</p></li>
 <li><p><strong>Compare:</strong> Load real data and run <code><a href="authenticity_benchmark.html">authenticity_benchmark()</a></code>, with
 <code><a href="gg_benchmark.html">gg_benchmark()</a></code>, <code><a href="gg_behaviour.html">gg_behaviour()</a></code> and a plain-language summary per
 model (<code><a href="summarise_benchmark.html">summarise_benchmark()</a></code>).</p></li>
+<li><p><strong>Pretest</strong> (without real data): Run <code><a href="synthetic_pretest.html">synthetic_pretest()</a></code> on the
+generated data, with <code><a href="gg_pretest.html">gg_pretest()</a></code> and a plain-language summary
+(<code><a href="summarise_pretest.html">summarise_pretest()</a></code>). Add the same model at several temperatures in
+the Models tab to check whether the flags hold.</p></li>
 <li><p><strong>Export:</strong> Download the data (CSV, JSON, RDS or Excel), the
-benchmark and an R script that repeats the comparison.</p></li>
+benchmark or the pretest, and an R script that repeats the analysis.</p></li>
 </ol><p><strong>API keys</strong> typed into the app stay in memory for that session only:
 They are never written to the saved data, the run settings or the R
 script. Keys set as <code>ANTHROPIC_API_KEY</code> or <code>OPENAI_API_KEY</code> (for example
