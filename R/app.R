@@ -1,0 +1,300 @@
+# The synthcheck app: Generate synthetic respondents with several language
+# models and compare them with real data, in five tabs.
+
+#' Generate and benchmark synthetic data in a Shiny app
+#'
+#' **Experimental.** `run_synthcheck_app()` opens an app that walks through
+#' the whole workflow in five tabs:
+#'
+#' 1. **Instrument:** Upload an item table or use the IPIP-HEXACO items,
+#'    and set the response scale and instructions ([sc_instrument()]).
+#' 2. **Personas:** Type, upload or build the personas that take the
+#'    instrument ([sc_personas()], [sc_persona_grid()]).
+#'
+#' Both upload panels offer a template to fill in. The templates are also
+#' in the package: `system.file("templates", "instrument_template.csv",
+#' package = "synthcheck")` and `"personas_template.csv"`.
+#'
+#' 3. **Models:** Add Anthropic, OpenAI or local Ollama models with their
+#'    temperature, enter API keys, choose the number of attempts and
+#'    respondents, and run [generate_synthetic()] with a progress bar and
+#'    the time left.
+#' 4. **Compare:** Load real data and run [authenticity_benchmark()], with
+#'    [gg_benchmark()], [gg_behaviour()] and a plain-language summary per
+#'    model ([summarise_benchmark()]).
+#' 5. **Export:** Download the data (CSV, JSON, RDS or Excel), the
+#'    benchmark and an R script that repeats the comparison.
+#'
+#' **API keys** typed into the app stay in memory for that session only:
+#' They are never written to the saved data, the run settings or the R
+#' script. Keys set as `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` (for example
+#' in `.Renviron`) are used without being shown. The app runs on your own
+#' computer; do not deploy it on a shared server with keys typed in.
+#'
+#' Runs go to a background R process when callr is installed, so the app
+#' stays responsive and the Stop button works. Every attempt is written to
+#' the output folder as soon as it is done.
+#'
+#' Synthetic respondents are experimental: The benchmark compares models and
+#' supports decisions about them. It does not show that synthetic data can
+#' replace a field test.
+#'
+#' @param real optional data frame of real responses, loaded into the
+#'   Compare tab.
+#' @param synthetic optional data frame of synthetic respondents (for
+#'   example from [generate_synthetic()] or [read_synthetic()]), loaded into
+#'   the Compare tab.
+#' @param host,port where to serve the app. The default serves it on your
+#'   own computer only.
+#' @param launch.browser open the app in a browser?
+#' @return Invisibly, when the app is closed with its Close button: A list
+#'   with `synthetic` (the generated data), `benchmark` (the
+#'   [authenticity_benchmark()] result, if one was run), `instrument` and
+#'   `personas`.
+#' @seealso [generate_synthetic()], [authenticity_benchmark()]
+#' @examples
+#' if (interactive()) {
+#'   res <- run_synthcheck_app()
+#'   res$benchmark
+#' }
+#' @export
+run_synthcheck_app <- function(real = NULL, synthetic = NULL, host = "127.0.0.1", port = NULL,
+                               launch.browser = TRUE) {
+  sc_need("shiny", "to run the app")
+  sc_need("bslib", "to run the app")
+  app <- sc_app(real = real, synthetic = synthetic)
+  res <- shiny::runApp(app, host = host, port = port, launch.browser = launch.browser)
+  invisible(res)
+}
+
+# the app object, also used by the tests
+sc_app <- function(real = NULL, synthetic = NULL) {
+  shiny::shinyApp(sc_app_ui(has_real = !is.null(real), has_syn = !is.null(synthetic)),
+                  sc_app_server(real = real, synthetic = synthetic))
+}
+
+sc_model_choices <- list(
+  anthropic = c("claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5"),
+  openai = c("gpt-4.1-nano", "gpt-5-nano", "gpt-4.1-mini", "gpt-4.1"),
+  ollama = character(0),
+  mock = "mock"
+)
+
+sc_trait_choices <- c("Honesty-Humility" = "H", "Emotionality" = "E", "Extraversion" = "X",
+                      "Agreeableness" = "A", "Conscientiousness" = "C", "Openness" = "O")
+
+sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
+  card <- function(title, ...) bslib::card(bslib::card_header(title),
+                                           bslib::card_body(fillable = FALSE, ...))
+  row <- function(...) {
+    args <- list(...)
+    w <- 12 %/% length(args)
+    do.call(shiny::fluidRow, lapply(args, function(a) shiny::column(w, a)))
+  }
+  notice <- shiny::div(
+    class = "alert alert-warning py-2 mb-3",
+    shiny::strong("Experimental. "),
+    "The benchmark compares models and supports decisions about them. ",
+    "It does not show that synthetic data can replace a field test.")
+
+  instrument <- bslib::nav_panel(
+    "1. Instrument",
+    notice,
+    bslib::layout_columns(
+      col_widths = c(5, 7), fill = FALSE,
+      card("Items",
+           shiny::radioButtons("ins_source", NULL,
+                               c("IPIP-HEXACO (built in)" = "hexaco", "Upload an item table" = "upload"),
+                               inline = TRUE),
+           shiny::conditionalPanel(
+             "input.ins_source == 'hexaco'",
+             shiny::checkboxGroupInput("ins_traits", "Traits", sc_trait_choices,
+                                       selected = c("H", "C"), inline = TRUE),
+             shiny::helpText("All six traits give 240 items. Two traits (80 items) make faster, cheaper runs.")),
+           shiny::conditionalPanel(
+             "input.ins_source == 'upload'",
+             shiny::fileInput("ins_file", "Item table (CSV or Excel)", accept = c(".csv", ".xlsx")),
+             shiny::helpText("Columns: item (short name), statement (the text), and optionally",
+                             "scale, facet and reverse (TRUE for reverse-keyed items)."),
+             shiny::downloadButton("tpl_instrument", "Download a template", class = "btn-sm")),
+           shiny::textInput("ins_name", "Name", "IPIP-HEXACO"),
+           row(
+             shiny::numericInput("ins_min", "Lowest category", 1, step = 1),
+             shiny::numericInput("ins_max", "Highest category", 7, step = 1)),
+           shiny::textAreaInput("ins_labels", "Category labels, one per line (lowest first)",
+                                paste(sc_default_labels(7), collapse = "\n"), rows = 7),
+           shiny::textAreaInput("ins_instructions", "Instructions", sc_default_instructions, rows = 3)),
+      bslib::layout_columns(
+        col_widths = 12, row_heights = "auto", fill = FALSE,
+        card("Check", shiny::uiOutput("ins_status"), shiny::tableOutput("ins_preview")),
+        card("Prompt sent for each respondent", shiny::verbatimTextOutput("ins_prompt"))))
+  )
+
+  personas <- bslib::nav_panel(
+    "2. Personas",
+    bslib::layout_columns(
+      col_widths = c(5, 7), fill = FALSE,
+      card("Personas",
+           shiny::radioButtons("per_source", NULL,
+                               c("No persona" = "none", "Type them" = "type",
+                                 "Build a grid" = "grid", "Upload a table" = "upload")),
+           shiny::conditionalPanel(
+             "input.per_source == 'type'",
+             shiny::textAreaInput("per_text", "One persona per line",
+                                  paste("You are a 34-year-old nurse living in Calgary, Canada.",
+                                        "You are a 67-year-old retired farmer in rural Ontario, Canada.",
+                                        "You are a 21-year-old university student in Toronto, Canada.",
+                                        sep = "\n"), rows = 8)),
+           shiny::conditionalPanel(
+             "input.per_source == 'grid'",
+             shiny::textAreaInput("per_grid", "Attributes, one per line (name: value, value, ...)",
+                                  "age: 25, 45, 65\ngender: woman, man\ncountry: Canada, the United States",
+                                  rows = 4),
+             shiny::textAreaInput("per_template", "Description, with {name} for each attribute",
+                                  "You are a {age}-year-old {gender} living in {country}.", rows = 2)),
+           shiny::conditionalPanel(
+             "input.per_source == 'upload'",
+             shiny::fileInput("per_file", "Persona table (CSV or Excel)", accept = c(".csv", ".xlsx")),
+             shiny::helpText("A description column, plus optional persona_id and attribute columns",
+                             "(kept in the generated data)."),
+             shiny::downloadButton("tpl_personas", "Download a template", class = "btn-sm"))),
+      card("Preview", shiny::uiOutput("per_status"), shiny::tableOutput("per_preview")))
+  )
+
+  models <- bslib::nav_panel(
+    "3. Models",
+    bslib::layout_columns(
+      col_widths = c(4, 8), fill = FALSE,
+      bslib::layout_columns(
+        col_widths = 12, row_heights = "auto", fill = FALSE,
+        card("API keys",
+             shiny::passwordInput("key_anthropic", "Anthropic API key"),
+             shiny::uiOutput("key_anthropic_env"),
+             shiny::passwordInput("key_openai", "OpenAI API key"),
+             shiny::uiOutput("key_openai_env"),
+             shiny::textInput("ollama_url", "Ollama server", "http://localhost:11434"),
+             shiny::helpText("Keys stay in memory for this session only. They are never saved.")),
+        card("Add a model",
+             shiny::selectInput("mod_provider", "Provider",
+                                c("Anthropic" = "anthropic", "OpenAI" = "openai",
+                                  "Ollama (local)" = "ollama", "Mock (random answers, no API)" = "mock")),
+             shiny::selectizeInput("mod_model", "Model id", sc_model_choices$anthropic,
+                                   options = list(create = TRUE)),
+             shiny::actionButton("mod_refresh", "Refresh the model list", class = "btn-sm btn-outline-secondary mb-3"),
+             shiny::checkboxInput("mod_send_temp", "Send a temperature", TRUE),
+             shiny::sliderInput("mod_temp", "Temperature", min = 0, max = 2, value = 1, step = 0.1),
+             shiny::textInput("mod_name", "Label (optional)", ""),
+             shiny::actionButton("mod_add", "Add model", class = "btn-primary"))),
+      bslib::layout_columns(
+        col_widths = 12, row_heights = "auto", fill = FALSE,
+        card("Models in this run",
+             shiny::tableOutput("mod_table"),
+             shiny::div(shiny::actionButton("mod_remove_last", "Remove last", class = "btn-sm"),
+                        shiny::actionButton("mod_clear", "Clear", class = "btn-sm"))),
+        card("Run",
+             row(
+               shiny::numericInput("run_attempts", "Attempts", 2, min = 1, step = 1),
+               shiny::numericInput("run_respondents", "Respondents per persona per attempt", 5, min = 1, step = 1),
+               shiny::numericInput("run_parallel", "Calls at the same time", 4, min = 1, max = 32, step = 1)),
+             row(
+               shiny::numericInput("run_batch", "Respondents per call", 1, min = 1, max = 50, step = 1),
+               shiny::numericInput("run_block", "Items per call (0 = all)", 0, min = 0, step = 10),
+               shiny::numericInput("run_retries", "Retries for invalid answers", 2, min = 0, max = 5),
+               shiny::checkboxInput("run_shuffle", "Shuffle item order per respondent", FALSE)),
+             row(
+               shiny::textInput("run_output", "Save to folder",
+                                file.path(getwd(), paste0("synthcheck-run-", format(Sys.Date())))),
+               shiny::selectInput("run_format", "File format",
+                                  c("CSV" = "csv", "JSON" = "json", "RDS" = "rds", "Excel" = "xlsx"))),
+             shiny::conditionalPanel(
+               "input.run_batch > 1",
+               shiny::div(class = "alert alert-warning py-2 small",
+                          "More than one respondent per call is cheaper, but respondents in the same",
+                          "call may depend on each other: The model sees its own earlier answers.",
+                          "Keep 1 for independent respondents.")),
+             shiny::uiOutput("run_plan"),
+             shiny::div(
+               shiny::actionButton("run_test", "Estimate run time", class = "btn-outline-primary"),
+               shiny::actionButton("run_start", "Generate data", class = "btn-primary"),
+               shiny::actionButton("run_stop", "Stop", class = "btn-outline-danger")),
+             shiny::uiOutput("run_progress"),
+             shiny::verbatimTextOutput("run_log"))))
+  )
+
+  compare <- bslib::nav_panel(
+    "4. Compare",
+    bslib::layout_columns(
+      col_widths = c(4, 8), fill = FALSE,
+      bslib::layout_columns(
+        col_widths = 12, row_heights = "auto", fill = FALSE,
+        card("Real data",
+             shiny::radioButtons("real_source", NULL,
+                                 c(if (has_real) c("Data given to run_synthcheck_app()" = "arg"),
+                                   "hexaco_real (built in)" = "hexaco", "Upload" = "upload")),
+             shiny::conditionalPanel(
+               "input.real_source == 'hexaco'",
+               shiny::selectInput("real_country", "Country",
+                                  c("Canada", "Great Britain", "United States", "All"))),
+             shiny::conditionalPanel(
+               "input.real_source == 'upload'",
+               shiny::fileInput("real_file", "Real responses (CSV, Excel or RDS)",
+                                accept = c(".csv", ".xlsx", ".rds"))),
+             shiny::uiOutput("real_status")),
+        card("Synthetic data",
+             shiny::radioButtons("syn_source", NULL,
+                                 c("This session's run" = "run",
+                                   if (has_syn) c("Data given to run_synthcheck_app()" = "arg"),
+                                   "hexaco_llm (built in)" = "hexaco", "Upload files" = "upload"),
+                                 selected = if (has_syn) "arg" else "run"),
+             shiny::conditionalPanel(
+               "input.syn_source == 'hexaco'",
+               shiny::selectInput("syn_country", "Country", c("Canada", "Great Britain", "United States")),
+               shiny::numericInput("syn_attempts", "Attempts per model", 3, min = 1, max = 10)),
+             shiny::conditionalPanel(
+               "input.syn_source == 'upload'",
+               shiny::fileInput("syn_files", "Files saved by a run", multiple = TRUE,
+                                accept = c(".csv", ".json", ".rds", ".xlsx"))),
+             shiny::uiOutput("syn_status")),
+        card("Benchmark settings",
+             shiny::selectInput("bm_score", "Score",
+                                c("Weakest column" = "weakest", "Mean" = "mean", "Geometric mean" = "geometric")),
+             shiny::checkboxInput("bm_clean", "Remove careless real respondents first", FALSE),
+             shiny::checkboxInput("bm_fit", "Include person fit (slower)", TRUE),
+             shiny::numericInput("bm_splits", "Real splits and shuffled draws", 20, min = 3, max = 50),
+             shiny::helpText("The items come from the Instrument tab."),
+             shiny::actionButton("bm_run", "Run the benchmark", class = "btn-primary"))),
+      bslib::layout_columns(
+        col_widths = 12, row_heights = "auto", fill = FALSE,
+        card("Plain-language summary", shiny::uiOutput("bm_summary")),
+        card("Synthetic authenticity benchmark", shiny::plotOutput("bm_plot", height = "320px"),
+             shiny::tableOutput("bm_table")),
+        card("Behaviour strip", shiny::plotOutput("bm_behaviour", height = "360px"))))
+  )
+
+  export <- bslib::nav_panel(
+    "5. Export",
+    bslib::layout_columns(
+      col_widths = c(6, 6), fill = FALSE,
+      card("Download",
+           shiny::selectInput("exp_format", "Format for the synthetic data",
+                              c("CSV" = "csv", "JSON" = "json", "RDS" = "rds", "Excel" = "xlsx")),
+           shiny::downloadButton("dl_synthetic", "Synthetic data"),
+           shiny::downloadButton("dl_benchmark", "Benchmark table (CSV)"),
+           shiny::downloadButton("dl_summary", "Summary (text)"),
+           shiny::downloadButton("dl_plot", "Benchmark plot (PNG)")),
+      card("Repeat it in R",
+           shiny::verbatimTextOutput("exp_script"),
+           shiny::downloadButton("dl_script", "R script"),
+           shiny::hr(),
+           shiny::helpText("Close the app to get the data and the benchmark back in R:",
+                           "res <- run_synthcheck_app()."),
+           shiny::actionButton("app_close", "Close the app and return to R", class = "btn-outline-primary")))
+  )
+
+  bslib::page_navbar(
+    title = "synthcheck",
+    fillable = FALSE,
+    theme = bslib::bs_theme(version = 5, primary = "#1c5cab"),
+    instrument, personas, models, compare, export
+  )
+}
