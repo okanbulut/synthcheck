@@ -27,6 +27,7 @@ Imports:
     patchwork,
     stats,
     tibble,
+    tools,
     utils
 Suggests: 
     polycor,

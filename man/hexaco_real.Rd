@@ -51,6 +51,7 @@ Differences, 42}(8), 1515-1526. \doi{10.1016/j.paid.2006.10.027}
 }
 \seealso{
 \link{hexaco_llm} for the language model answers to the same items,
-\link{hexaco_items} for the items and their keys, and \code{\link[=synthetic_coverage]{synthetic_coverage()}}.
+\link{hexaco_items} for the items and their keys, \code{\link[=synthetic_coverage]{synthetic_coverage()}} and
+\code{\link[=authenticity_benchmark]{authenticity_benchmark()}}.
 }
 \keyword{datasets}

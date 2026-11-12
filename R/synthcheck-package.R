@@ -5,16 +5,17 @@
 #' [synthetic_coverage()] gives Overlap (do synthetic respondents land where
 #' real people land?) and Structure (do the items relate to each other as
 #' they do in real people?), and [gg_coverage()] draws them as a coverage
-#' strip. Behaviour (do synthetic respondents answer the way people do?) and
-#' the synthetic authenticity benchmark, which anchors all three indices and
-#' compares several models, are being added.
+#' strip. [synthetic_behaviour()] gives Behaviour (do synthetic respondents
+#' answer the way people do?), and [authenticity_benchmark()] anchors all
+#' three indices and compares several models in the synthetic authenticity
+#' benchmark.
 #'
 #' The package compares models and supports decisions about them. It does not
 #' show that synthetic respondents can replace a field test.
 #'
 #' @keywords internal
 #' @importFrom generics tidy
-#' @importFrom ggplot2 autoplot
+#' @importFrom ggplot2 autoplot .data
 #' @importFrom stats sd median qnorm setNames
 "_PACKAGE"
 

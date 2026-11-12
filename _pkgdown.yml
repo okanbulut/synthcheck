@@ -12,6 +12,17 @@ reference:
   - synthetic_coverage
   - gg_coverage
   - blend_llms
+- title: Behaviour
+  desc: How synthetic respondents answer.
+  contents:
+  - synthetic_behaviour
+  - gg_behaviour
+  - behaviour_features
+  - flag_careless
+- title: The synthetic authenticity benchmark
+  contents:
+  - authenticity_benchmark
+  - gg_benchmark
 - title: Data
   contents:
   - hexaco_real

@@ -10,8 +10,12 @@ are listed at the end.
 
 - 2026-11-12: Phase 1 is in the first pull request (skeleton, GPL-3, CI, pkgdown, ported
   `synthetic_coverage()`, `blend_llms()` and `gg_coverage()` with their tests, four-model HEXACO data).
-- Next: Add the Claude and ChatGPT data (Okan's folder `C:\Users\bulut\Desktop\New Data` on his
-  Windows PC) to `hexaco_llm`, then phase 2.
+- 2026-11-12: The second pull request adds Claude Haiku 5.5 and GPT-4.1 mini to `hexaco_llm` (six
+  models, 89,597 respondents) and phase 2: `behaviour_features()`, `synthetic_behaviour()`,
+  `gg_behaviour()`, `flag_careless()`, `authenticity_benchmark()` and `gg_benchmark()`. The files in
+  the `GPT-4o` folder log `gpt-4.1-mini` as the model, so Okan chose to name the model GPT-4.1 mini
+  and to drop the 11 rows logged as `gpt-4o-2024-08-06`.
+- Next: Phase 3 (the article "Benchmarking six LLMs on HEXACO" and the extras).
 
 ## Goal
 

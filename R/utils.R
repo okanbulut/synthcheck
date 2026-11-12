@@ -17,3 +17,14 @@ as_tbl <- function(df) {
 }
 
 item_names <- function(x) mirt::extract.mirt(x, "itemnames")
+
+# run `code` with a fixed seed, then restore the caller's random state
+with_seed <- function(seed, code) {
+  env <- globalenv()
+  had <- exists(".Random.seed", envir = env, inherits = FALSE)
+  old <- if (had) get(".Random.seed", envir = env, inherits = FALSE)
+  on.exit(if (had) assign(".Random.seed", old, envir = env) else
+    if (exists(".Random.seed", envir = env, inherits = FALSE)) rm(".Random.seed", envir = env))
+  set.seed(seed)
+  code
+}

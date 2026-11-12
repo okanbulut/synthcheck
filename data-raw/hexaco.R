@@ -1,18 +1,30 @@
 # Builds hexaco_real, hexaco_llm and hexaco_items from the study files.
-# Run from the folder that holds "Real Data" and "LLM Data"; set pkg_dir to
-# the package folder.
+# Run from the folder that holds "Real Data", "LLM Data" (the four open-weight
+# models) and "New Data" (Claude Haiku 5.5 and the GPT-4o folder, whose files
+# are CSV text with an .xls ending, named like "hexaco_canada_1 (5).xls", and
+# log gpt-4.1-mini as the model); set pkg_dir to the package folder.
 pkg_dir <- "synthcheck"
 items <- read.csv("Real Data/HEXACO Items.csv", stringsAsFactors = FALSE)
 real <- read.csv("Real Data/HEXACO Responses.csv", check.names = FALSE, fileEncoding = "UTF-8-BOM")
 ids <- items$item
 cat(setdiff(names(real), ids), "\n")
 model_id <- c("Gemma 4 26B" = "gemma-4-26b-a4b", "GPT-OSS-120B" = "gpt-oss-120b",
-              "Qwen 3.8 27B" = "qwen38-27b", "Qwen 3.5 122B" = "qwen35-122b")
+              "Qwen 3.8 27B" = "qwen38-27b", "Qwen 3.5 122B" = "qwen35-122b",
+              "Claude Haiku 5.5" = "claude-haiku-5-5", "GPT-4.1 mini" = "gpt-4.1-mini")
+llm_file <- function(m, slug, r) {
+  if (m == "Claude Haiku 5.5") return(sprintf("New Data/%s/hexaco_%s_%d.csv", m, slug, r))
+  if (m == "GPT-4.1 mini") {
+    f <- Sys.glob(sprintf("New Data/GPT-4o/hexaco_%s_%d (*).xls", slug, r))
+    stopifnot(length(f) == 1)
+    return(f)
+  }
+  sprintf("LLM Data/%s/hexaco_%s_%d.csv", m, slug, r)
+}
 cslug <- c("Canada" = "canada", "Great Britain" = "great_britain", "United States" = "united_states")
 out <- list()
 for (m in names(model_id)) for (cn in names(cslug)) for (r in 1:10) {
-  d <- read.csv(sprintf("LLM Data/%s/hexaco_%s_%d.csv", m, cslug[[cn]], r), check.names = FALSE)
-  d <- d[d$model == model_id[[m]], ]
+  d <- read.csv(llm_file(m, cslug[[cn]], r), check.names = FALSE)
+  d <- d[d$model == model_id[[m]], ]  # drops rows logged under another model
   x <- as.data.frame(lapply(d[ids], as.integer))
   out[[length(out) + 1]] <- data.frame(model = m, country = cn, attempt = r, x, check.names = FALSE)
 }
