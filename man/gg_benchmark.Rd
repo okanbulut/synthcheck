@@ -17,9 +17,10 @@ A ggplot object.
 \description{
 \strong{Experimental.} One row per model, sorted by the benchmark score (best
 at the top), and one tile for each anchored column (Overlap, Structure,
-Behaviour). Tiles run from red (0, no better than shuffled columns) to
-pale (100, as close as a second sample of real people); values are
-clamped to 0 to 100 for the colour. The column that sets the score is
+Behaviour). Tiles run from red (-100 or lower, far worse than shuffled
+columns) through pale (around 0, no better than shuffled columns) to blue
+(100, as close as a second sample of real people). The number in each
+tile is the unclamped value. The column that sets the score is
 outlined when \code{score = "weakest"}. The score is printed at the right.
 }
 \examples{

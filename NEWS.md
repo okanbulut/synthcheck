@@ -9,7 +9,8 @@
   benchmark: Overlap, Structure and Behaviour for every model, each anchored
   between shuffled real columns (0) and a second sample of real people
   (100), with the weakest column as the default score. `gg_benchmark()`
-  draws it.
+  draws it on a scale from red (-100 or less) through pale (0) to blue
+  (100), so values below the shuffled baseline stay readable.
 * New: `flag_careless()` flags careless real respondents, and
   `clean_real = TRUE` compares against the remaining ones.
 * Data: `hexaco_llm` now holds six models (89,597 synthetic respondents).
