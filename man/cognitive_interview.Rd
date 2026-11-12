@@ -40,7 +40,7 @@ items, or only the flagged items when \code{pretest} is given.}
 respondent model to code its own interviews. The coder's temperature is
 set to 0 when it takes one.}
 
-\item{pretest}{optional result of \code{synthetic_pretest()}, or a data frame
+\item{pretest}{optional result of \code{\link[=synthetic_pretest]{synthetic_pretest()}}, or a data frame
 with an \code{item} column and an optional \code{flag} column (the reason, for
 example \code{"low item-rest correlation"}), or a vector of item names.
 Flagged items come first and get one extra probe.}
@@ -85,7 +85,7 @@ interviews. Summarise it with \code{\link[=summarise_interviews]{summarise_inter
 \strong{Experimental.} \code{cognitive_interview()} asks one or more language
 models to take part in a cognitive interview about each survey item, as
 each persona. It is meant for screening items when there are no real
-respondents yet, for example after a \code{synthetic_pretest()}: It points to
+respondents yet, for example after a \code{\link[=synthetic_pretest]{synthetic_pretest()}}: It points to
 wording to look at. It is not a substitute for cognitive interviews with
 real people or for a field test.
 }

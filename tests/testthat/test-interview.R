@@ -180,3 +180,19 @@ test_that("a real provider goes through think-aloud, probes and coding", {
   expect_match(sent[3], "Hmm, two things at once")
   expect_match(sent[3], "Answer to paraphrase")
 })
+
+test_that("a synthetic_pretest() result chooses the items", {
+  h <- hexaco_items[hexaco_items$trait %in% c("H", "C"), ]
+  ca <- hexaco_llm[hexaco_llm$country == "Canada" & hexaco_llm$attempt <= 2, ]
+  pt <- synthetic_pretest(ca, h, irt = FALSE, n_pa = 2)
+  flagged <- pt$agreement$item[pt$agreement$flagged_in > 0]
+  skip_if(!length(flagged), "the pretest flags no items")
+  ins <- sc_instrument(h, scale = c(1, 7))
+  iv <- suppressMessages(cognitive_interview(ins, sc_model("mock"), pretest = pt,
+                                             progress = FALSE))
+  expect_equal(unique(iv$item), flagged)
+  expect_false(anyNA(iv$pretest))
+  expect_true(all(c("probe_pretest", "pretest") %in% names(iv)))
+  expect_equal(summarise_interviews(iv)$agreement %in% c("both", "pretest only"),
+               rep(TRUE, length(flagged)))
+})

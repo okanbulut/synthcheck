@@ -91,7 +91,7 @@ sc_probes <- function(stage = NULL, probe = NULL, probe_id = NULL) {
 #' **Experimental.** `cognitive_interview()` asks one or more language
 #' models to take part in a cognitive interview about each survey item, as
 #' each persona. It is meant for screening items when there are no real
-#' respondents yet, for example after a `synthetic_pretest()`: It points to
+#' respondents yet, for example after a [synthetic_pretest()]: It points to
 #' wording to look at. It is not a substitute for cognitive interviews with
 #' real people or for a field test.
 #'
@@ -134,7 +134,7 @@ sc_probes <- function(stage = NULL, probe = NULL, probe_id = NULL) {
 #' @param coder an [sc_model()] that codes the transcripts. `NULL` uses each
 #'   respondent model to code its own interviews. The coder's temperature is
 #'   set to 0 when it takes one.
-#' @param pretest optional result of `synthetic_pretest()`, or a data frame
+#' @param pretest optional result of [synthetic_pretest()], or a data frame
 #'   with an `item` column and an optional `flag` column (the reason, for
 #'   example `"low item-rest correlation"`), or a vector of item names.
 #'   Flagged items come first and get one extra probe.

@@ -7,7 +7,16 @@
 #' the whole workflow in five tabs. It opens on an **About** tab that
 #' explains the purpose of the app, lists what it can do and produce, shows
 #' an animated picture of a language model answering survey items and starts
-#' a guided tour of the five tabs (the tour needs the cicerone package):
+#' a guided tour of the five tabs (the tour needs the cicerone package).
+#'
+#' The About tab starts with one question: **Do you already have real
+#' responses to this instrument?** With real data, the fourth tab is
+#' **Compare** (the benchmark below). Without real data, it is **Pretest**:
+#' Pilot screening of the items on synthetic respondents alone, with the
+#' agreement across models or temperatures and a check of the structure you
+#' designed ([synthetic_pretest()]). The answer can be changed at any time,
+#' so you can come back with real data later and compare the same synthetic
+#' data.
 #'
 #' 1. **Instrument:** Upload an item table or use the IPIP-HEXACO items,
 #'    and set the response scale and instructions ([sc_instrument()]).
@@ -25,8 +34,12 @@
 #' 4. **Compare:** Load real data and run [authenticity_benchmark()], with
 #'    [gg_benchmark()], [gg_behaviour()] and a plain-language summary per
 #'    model ([summarise_benchmark()]).
+#' 4. **Pretest** (without real data): Run [synthetic_pretest()] on the
+#'    generated data, with [gg_pretest()] and a plain-language summary
+#'    ([summarise_pretest()]). Add the same model at several temperatures in
+#'    the Models tab to check whether the flags hold.
 #' 5. **Export:** Download the data (CSV, JSON, RDS or Excel), the
-#'    benchmark and an R script that repeats the comparison.
+#'    benchmark or the pretest, and an R script that repeats the analysis.
 #'
 #' **API keys** typed into the app stay in memory for that session only:
 #' They are never written to the saved data, the run settings or the R
@@ -52,8 +65,9 @@
 #' @param launch.browser open the app in a browser?
 #' @return Invisibly, when the app is closed with its Close button: A list
 #'   with `synthetic` (the generated data), `benchmark` (the
-#'   [authenticity_benchmark()] result, if one was run), `instrument` and
-#'   `personas`.
+#'   [authenticity_benchmark()] result, if one was run), `pretest` (the
+#'   [synthetic_pretest()] result, if one was run), `path` (`"real"`,
+#'   `"pretest"` or `NULL`), `instrument` and `personas`.
 #' @seealso [generate_synthetic()], [authenticity_benchmark()]
 #' @examples
 #' if (interactive()) {
@@ -187,6 +201,10 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
              shiny::actionButton("mod_refresh", "Refresh the model list", class = "btn-sm btn-outline-secondary mb-3"),
              shiny::checkboxInput("mod_send_temp", "Send a temperature", TRUE),
              shiny::sliderInput("mod_temp", "Temperature", min = 0, max = 2, value = 1, step = 0.1),
+             shiny::textInput("mod_temps", "Or several temperatures (optional)", "",
+                              placeholder = "for example 0.3, 0.7, 1.2"),
+             shiny::helpText("Several temperatures add one model per temperature. Without real data,",
+                             "the Pretest tab then shows whether the flagged items hold across them."),
              shiny::textInput("mod_name", "Label (optional)", ""),
              shiny::actionButton("mod_add", "Add model", class = "btn-primary"))),
       bslib::layout_columns(
@@ -275,6 +293,53 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
         card("Behaviour strip", shiny::plotOutput("bm_behaviour", height = "360px"))))
   )
 
+  pretest <- bslib::nav_panel(
+    "4. Pretest", value = "pretest", icon = shiny::icon("clipboard-check"),
+    shiny::div(
+      class = "alert alert-warning py-2 mb-3",
+      shiny::strong("Pilot screening, not validation. "),
+      "Language models answer more tidily than people. The pretest flags items worth a second look;",
+      "it does not show that the scale works in people."),
+    bslib::layout_columns(
+      col_widths = c(4, 8), fill = FALSE,
+      bslib::layout_columns(
+        col_widths = 12, row_heights = "auto", fill = FALSE, id = "pt_data_card",
+        card("Synthetic data",
+             shiny::radioButtons("pt_source", NULL,
+                                 c("This session's run" = "run",
+                                   if (has_syn) c("Data given to run_synthcheck_app()" = "arg"),
+                                   "hexaco_llm (built in)" = "hexaco", "Upload files" = "upload"),
+                                 selected = if (has_syn) "arg" else "run"),
+             shiny::conditionalPanel(
+               "input.pt_source == 'hexaco'",
+               shiny::selectInput("pt_country", "Country", c("Canada", "Great Britain", "United States")),
+               shiny::numericInput("pt_attempts", "Attempts per model", 3, min = 1, max = 10)),
+             shiny::conditionalPanel(
+               "input.pt_source == 'upload'",
+               shiny::fileInput("pt_files", "Files saved by a run", multiple = TRUE,
+                                accept = c(".csv", ".json", ".rds", ".xlsx"))),
+             shiny::uiOutput("pt_status")),
+        card("Pretest settings",
+             shiny::selectInput("pt_by", "Compare the flags across",
+                                c("Models (each label in the Models tab)" = "model",
+                                  "Temperatures" = "temperature",
+                                  "Personas" = "persona_id",
+                                  "Nothing: Pool all respondents" = "none")),
+             shiny::checkboxInput("pt_irt", "Include IRT slopes (graded response model, slower)", FALSE),
+             shiny::numericInput("pt_pa", "Random data sets for parallel analysis", 20, min = 0, max = 100),
+             shiny::helpText("The items, their scales and reverse keys come from the Instrument tab:",
+                             "They are the structure the pretest checks."),
+             shiny::div(shiny::actionButton("pt_run", "Run the pretest", class = "btn-primary")))),
+      bslib::layout_columns(
+        col_widths = 12, row_heights = "auto", fill = FALSE,
+        card("Plain-language summary", shiny::uiOutput("pt_summary")),
+        card("Flagged items", id = "pt_plot_card", shiny::plotOutput("pt_plot", height = "640px"),
+             shiny::tableOutput("pt_table")),
+        card("Scales and the structure you designed", id = "pt_structure_card",
+             shiny::plotOutput("pt_scales", height = "300px"),
+             shiny::tableOutput("pt_structure"))))
+  )
+
   export <- bslib::nav_panel(
     "5. Export", value = "export", icon = shiny::icon("download"),
     bslib::layout_columns(
@@ -283,9 +348,16 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
            shiny::selectInput("exp_format", "Format for the synthetic data",
                               c("CSV" = "csv", "JSON" = "json", "RDS" = "rds", "Excel" = "xlsx")),
            shiny::downloadButton("dl_synthetic", "Synthetic data"),
-           shiny::downloadButton("dl_benchmark", "Benchmark table (CSV)"),
-           shiny::downloadButton("dl_summary", "Summary (text)"),
-           shiny::downloadButton("dl_plot", "Benchmark plot (PNG)")),
+           shiny::conditionalPanel(
+             "input.sc_path != 'pretest'",
+             shiny::downloadButton("dl_benchmark", "Benchmark table (CSV)"),
+             shiny::downloadButton("dl_summary", "Summary (text)"),
+             shiny::downloadButton("dl_plot", "Benchmark plot (PNG)")),
+           shiny::conditionalPanel(
+             "input.sc_path != 'real'",
+             shiny::downloadButton("dl_pt_items", "Pretest items (CSV)"),
+             shiny::downloadButton("dl_pt_summary", "Pretest summary (text)"),
+             shiny::downloadButton("dl_pt_plot", "Pretest plot (PNG)"))),
       card("Repeat it in R", id = "exp_script_card",
            shiny::verbatimTextOutput("exp_script"),
            shiny::downloadButton("dl_script", "R script"),
@@ -308,9 +380,13 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
       shiny::tags$link(rel = "stylesheet", href = "synthcheck-www/synthcheck.css"),
       shiny::tags$link(rel = "icon", type = "image/png", href = "synthcheck-www/logo.png"),
       if (sc_has_tour()) cicerone::use_cicerone()),
-    sc_app_about(), instrument, personas, models, compare, export
+    sc_app_about(has_real = has_real), instrument, personas, models, compare, pretest, export
   )
 }
+
+# the tabs that belong to one path only: Shown for that path, hidden for the
+# other (tabs in neither list are on both paths)
+sc_path_tabs <- list(real = "compare", pretest = "pretest")
 
 # a Bootstrap 5 theme in the logo colours (navy, the coverage strip blues and reds)
 sc_app_theme <- function() {
