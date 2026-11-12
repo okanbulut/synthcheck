@@ -11,9 +11,10 @@ large language models with real respondents to the same items.
 \code{\link[=synthetic_coverage]{synthetic_coverage()}} gives Overlap (do synthetic respondents land where
 real people land?) and Structure (do the items relate to each other as
 they do in real people?), and \code{\link[=gg_coverage]{gg_coverage()}} draws them as a coverage
-strip. Behaviour (do synthetic respondents answer the way people do?) and
-the synthetic authenticity benchmark, which anchors all three indices and
-compares several models, are being added.
+strip. \code{\link[=synthetic_behaviour]{synthetic_behaviour()}} gives Behaviour (do synthetic respondents
+answer the way people do?), and \code{\link[=authenticity_benchmark]{authenticity_benchmark()}} anchors all
+three indices and compares several models in the synthetic authenticity
+benchmark.
 }
 \details{
 The package compares models and supports decisions about them. It does not

@@ -12,12 +12,12 @@ It looks at three things:
 
 - **Overlap:** Do synthetic respondents land where real people land?
 - **Structure:** Do the items relate to each other as they do in real people?
-- **Behaviour (coming next):** Do synthetic respondents answer the way people
-  do, including variability, extreme and midpoint answers, acquiescence,
-  consistency and person fit?
+- **Behaviour:** Do synthetic respondents answer the way people do, including
+  variability, extreme and midpoint answers, acquiescence, consistency and
+  person fit?
 
-Each index will be anchored between a shuffled baseline (0) and a second
-sample of real people (100). The **synthetic authenticity benchmark** compares
+Each index is anchored between a shuffled baseline (0) and a second sample
+of real people (100). The **synthetic authenticity benchmark** compares
 several models in one table, scored by their weakest column by default.
 
 The package compares models and supports decisions about them. It does not
@@ -35,7 +35,7 @@ remotes::install_github("okanbulut/synthcheck")
 ```r
 library(synthcheck)
 
-# Honesty-Humility, Canada: real people and four language models
+# Honesty-Humility, Canada: real people and six language models
 h <- hexaco_items$item[hexaco_items$trait == "H"]
 rev_items <- intersect(h, hexaco_items$item[hexaco_items$reverse])
 keyed <- function(d) { d <- d[h]; d[rev_items] <- 8 - d[rev_items]; d }
@@ -50,12 +50,28 @@ cov
 gg_coverage(cov)
 ```
 
+The synthetic authenticity benchmark takes the raw answers and the item
+table, and does the keying itself:
+
+```r
+real <- hexaco_real[hexaco_real$country == "Canada", ]
+ca <- hexaco_llm[hexaco_llm$country == "Canada", ]
+synthetic <- lapply(split(ca, ca$model), function(m) split(m, m$attempt))
+
+bm <- authenticity_benchmark(synthetic, real, hexaco_items)
+bm
+gg_benchmark(bm)
+
+# the eight behaviour features behind the Behaviour column
+gg_behaviour(bm$behaviour)
+```
+
 ## Data
 
 `hexaco_real` holds 17,874 real respondents to the 240 IPIP-HEXACO items from
 Canada, Great Britain and the United States (Open-Source Psychometrics
-Project). `hexaco_llm` holds 59,611 synthetic respondents from four open-weight
-language models (10 attempts per country), and `hexaco_items` holds the item
+Project). `hexaco_llm` holds 89,597 synthetic respondents from six language models
+(10 attempts per country), and `hexaco_items` holds the item
 text, facets and keys.
 
 ## Related
