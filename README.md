@@ -84,12 +84,13 @@ gg_respondent_coverage(respondent_coverage(synthetic, real, hexaco_items))
 
 ## Generating synthetic data in an app
 
-`run_synthcheck_app()` opens an app that does the whole workflow: Define an
-instrument and personas, generate synthetic respondents with Anthropic,
-OpenAI or local Ollama models (with their temperature and the number of
-attempts), watch a progress bar with the time left, save the data as CSV,
-JSON, RDS or Excel, and benchmark the models against real data with a
-plain-language summary for each one.
+`run_synthcheck_app()` opens an app that starts on an About tab with a
+guided tour and then does the whole workflow: Define an instrument and
+personas, generate synthetic respondents with Anthropic, OpenAI or local
+Ollama models (with their temperature and the number of attempts), watch a
+progress bar with the time left, save the data as CSV, JSON, RDS or Excel,
+and benchmark the models against real data with a plain-language summary
+for each one.
 
 ```r
 install.packages(c("shiny", "bslib", "ellmer", "callr", "jsonlite"))

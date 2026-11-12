@@ -2,10 +2,17 @@ url: https://www.okanbulut.com/synthcheck/
 
 template:
   bootstrap: 5
+  light-switch: false
   bslib:
     primary: "#1c5cab"
+    navbar-bg: "#10213d"
+    link-color: "#1c5cab"
+    link-hover-color: "#10213d"
+    headings-color: "#10213d"
+    code-color: "#1c5cab"
 
 navbar:
+  type: dark
   structure:
     left: [intro, tutorials, app, reference, news]
   components:
