@@ -3,6 +3,36 @@
 ## synthcheck 0.0.0.9000
 
 - New:
+  [`synthetic_construct()`](https://www.okanbulut.com/synthcheck/reference/synthetic_construct.md)
+  and
+  [`gg_construct()`](https://www.okanbulut.com/synthcheck/reference/gg_construct.md)
+  check the construct structure of each model: The gap between the
+  synthetic and the real correlations between scales, alpha per scale
+  (above the real value means too coherent) and Tucker’s congruence of
+  the loadings, read against a permutation null (after Lukauskas &
+  Šarkauskaitė, 2026).
+
+- New:
+  [`respondent_coverage()`](https://www.okanbulut.com/synthcheck/reference/respondent_coverage.md)
+  and
+  [`gg_respondent_coverage()`](https://www.okanbulut.com/synthcheck/reference/gg_respondent_coverage.md)
+  give the respondent coverage gap (RCG) and the off-support ratio (OSR)
+  of Kumagae and Kaneko (2026): Whether every real person has a
+  synthetic look-alike, and whether synthetic respondents sit outside
+  the real data.
+
+- New:
+  [`synthetic_copula()`](https://www.okanbulut.com/synthcheck/reference/synthetic_copula.md)
+  draws respondents from a Gaussian copula of the real data, and
+  `authenticity_benchmark(copula = TRUE)` adds it as a reference row.
+
+- Website: Get started, four tutorials (Overlap and Structure,
+  Behaviour, the benchmark, generating synthetic respondents in R), a
+  tour of the app with screenshots of each tab, and three app demos (the
+  built-in models, a practice run with the mock provider, and your own
+  questionnaire).
+
+- New:
   [`run_synthcheck_app()`](https://www.okanbulut.com/synthcheck/reference/run_synthcheck_app.md)
   opens a Shiny app that generates synthetic respondents with several
   language models and benchmarks them in five tabs: Instrument,

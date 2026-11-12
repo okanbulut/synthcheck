@@ -15,7 +15,21 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/synthcheck.html">Get started</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-tutorials" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Tutorials</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials"><li><a class="dropdown-item" href="../articles/overlap-structure.html">Overlap and Structure: The coverage strip</a></li>
+    <li><a class="dropdown-item" href="../articles/behaviour.html">Behaviour: How synthetic respondents answer</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark.html">The synthetic authenticity benchmark</a></li>
+    <li><a class="dropdown-item" href="../articles/diagnostics.html">Diagnostics beside the benchmark</a></li>
+    <li><a class="dropdown-item" href="../articles/generate.html">Generating synthetic respondents in R</a></li>
+  </ul></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-the-app" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">The app</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-the-app"><li><a class="dropdown-item" href="../articles/app-tour.html">A tour of the synthcheck app</a></li>
+    <li><a class="dropdown-item" href="../articles/app-demo.html">App demos: Three ways to use the app</a></li>
+  </ul></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -127,6 +141,50 @@
 
         </dt>
         <dd>Describe the benchmark in plain language</dd>
+      </dl></div><div class="section level2">
+      <h2 id="diagnostics">Diagnostics<a class="anchor" aria-label="anchor" href="#diagnostics"></a></h2>
+
+      <div class="section-desc"><p>Checks beside the benchmark that do not change its score.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="synthetic_construct.html">synthetic_construct()</a></code>
+
+        </dt>
+        <dd>Construct structure of synthetic respondents</dd>
+
+        <dt>
+
+          <code><a href="gg_construct.html">gg_construct()</a></code>
+
+        </dt>
+        <dd>Draw the construct structure</dd>
+
+        <dt>
+
+          <code><a href="respondent_coverage.html">respondent_coverage()</a></code>
+
+        </dt>
+        <dd>Respondent coverage of synthetic respondents</dd>
+
+        <dt>
+
+          <code><a href="gg_respondent_coverage.html">gg_respondent_coverage()</a></code>
+
+        </dt>
+        <dd>Draw the respondent coverage</dd>
+
+        <dt>
+
+          <code><a href="synthetic_copula.html">synthetic_copula()</a></code>
+
+        </dt>
+        <dd>Respondents drawn from a Gaussian copula of the real data</dd>
       </dl></div><div class="section level2">
       <h2 id="generating-synthetic-respondents">Generating synthetic respondents<a class="anchor" aria-label="anchor" href="#generating-synthetic-respondents"></a></h2>
 

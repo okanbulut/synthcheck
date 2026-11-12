@@ -33,6 +33,21 @@ How synthetic respondents answer.
 - [`summarise_benchmark()`](https://www.okanbulut.com/synthcheck/reference/summarise_benchmark.md)
   : Describe the benchmark in plain language
 
+## Diagnostics
+
+Checks beside the benchmark that do not change its score.
+
+- [`synthetic_construct()`](https://www.okanbulut.com/synthcheck/reference/synthetic_construct.md)
+  : Construct structure of synthetic respondents
+- [`gg_construct()`](https://www.okanbulut.com/synthcheck/reference/gg_construct.md)
+  : Draw the construct structure
+- [`respondent_coverage()`](https://www.okanbulut.com/synthcheck/reference/respondent_coverage.md)
+  : Respondent coverage of synthetic respondents
+- [`gg_respondent_coverage()`](https://www.okanbulut.com/synthcheck/reference/gg_respondent_coverage.md)
+  : Draw the respondent coverage
+- [`synthetic_copula()`](https://www.okanbulut.com/synthcheck/reference/synthetic_copula.md)
+  : Respondents drawn from a Gaussian copula of the real data
+
 ## Generating synthetic respondents
 
 Define an instrument and personas, call language models, save the data.

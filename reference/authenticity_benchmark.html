@@ -19,7 +19,21 @@ model:"><meta property="og:image" content="https://www.okanbulut.com/synthcheck/
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/synthcheck.html">Get started</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-tutorials" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Tutorials</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials"><li><a class="dropdown-item" href="../articles/overlap-structure.html">Overlap and Structure: The coverage strip</a></li>
+    <li><a class="dropdown-item" href="../articles/behaviour.html">Behaviour: How synthetic respondents answer</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark.html">The synthetic authenticity benchmark</a></li>
+    <li><a class="dropdown-item" href="../articles/diagnostics.html">Diagnostics beside the benchmark</a></li>
+    <li><a class="dropdown-item" href="../articles/generate.html">Generating synthetic respondents in R</a></li>
+  </ul></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-the-app" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">The app</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-the-app"><li><a class="dropdown-item" href="../articles/app-tour.html">A tour of the synthcheck app</a></li>
+    <li><a class="dropdown-item" href="../articles/app-demo.html">App demos: Three ways to use the app</a></li>
+  </ul></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -57,6 +71,7 @@ model:</p>
 <span>  ceiling_n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"attempt"</span>, <span class="st">"half"</span><span class="op">)</span>,</span>
 <span>  fit_scales <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pearson"</span>, <span class="st">"polychoric"</span><span class="op">)</span>,</span>
+<span>  copula <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -122,6 +137,10 @@ respondents.</p></dd>
 many items) or <code>"polychoric"</code> (needs the polycor package; slow).</p></dd>
 
 
+<dt id="arg-copula">copula<a class="anchor" aria-label="anchor" href="#arg-copula"></a></dt>
+<dd><p>add the Gaussian copula reference row (see Details).</p></dd>
+
+
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>random seed for breaking ties.</p></dd>
 
@@ -129,7 +148,8 @@ many items) or <code>"polychoric"</code> (needs the polycor package; slow).</p><
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object of class <code>sc_benchmark</code>: A list with <code>table</code> (a tibble
-with one row per model, sorted by score: <code>model</code>, <code>attempts</code>, <code>score</code>,
+with one row per model, sorted by score: <code>model</code>, <code>reference</code> (<code>TRUE</code>
+for the copula row), <code>attempts</code>, <code>score</code>,
 <code>weakest</code>, the anchored <code>overlap</code>, <code>structure</code> and <code>behaviour</code>, their
 raw values (<code>*_raw</code>), and the lowest and highest anchored values over
 the attempts), <code>attempts</code> (raw and anchored values per attempt),
@@ -173,6 +193,16 @@ anchored columns and names it in <code>weakest</code>. <code>"mean"</code> takes
 mean, <code>"geometric"</code> the (weighted) geometric mean of the values clamped
 to 0 to 100, and a function of three arguments (<code>overlap</code>, <code>structure</code>,
 <code>behaviour</code>) gives any other score.</p>
+<p><strong>Copula reference.</strong> With <code>copula = TRUE</code>, a row named "Gaussian copula
+(reference)" is added. Its respondents come from <code><a href="synthetic_copula.html">synthetic_copula()</a></code>,
+which keeps every item's distribution and the correlations between items
+of the real data and nothing else. It has the median number and size of
+the synthetic attempts. A model below this row does no better than a
+generator without a language model. The copula is fitted to the real
+target, so it is an in-sample reference (<code>reference = TRUE</code> in the
+table), not a competitor. For the same reason, its Overlap and Structure
+can be above 100: It reproduces the full real sample more closely than
+a second, smaller sample of real people does.</p>
 <p>Synthetic respondents are experimental: The benchmark compares models and
 supports decisions about them. It does not show that synthetic data can
 replace a field test.</p>

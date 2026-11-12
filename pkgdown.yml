@@ -1,8 +1,16 @@
 pandoc: 3.8.3
 pkgdown: 2.2.1
 pkgdown_sha: ~
-articles: {}
-last_built: 2026-11-12T17:47Z
+articles:
+  articles/app-demo: app-demo.html
+  articles/app-tour: app-tour.html
+  articles/behaviour: behaviour.html
+  articles/benchmark: benchmark.html
+  articles/diagnostics: diagnostics.html
+  articles/generate: generate.html
+  articles/overlap-structure: overlap-structure.html
+  articles/synthcheck: synthcheck.html
+last_built: 2026-11-12T19:06Z
 urls:
   reference: https://www.okanbulut.com/synthcheck/reference
   article: https://www.okanbulut.com/synthcheck/articles

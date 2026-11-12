@@ -18,6 +18,16 @@ sample of real people (100). The **synthetic authenticity benchmark**
 compares several models in one table, scored by their weakest column by
 default.
 
+Three diagnostics sit beside the benchmark and do not change its score:
+[`synthetic_construct()`](https://www.okanbulut.com/synthcheck/reference/synthetic_construct.md)
+checks whether the scales hold together and relate as they do in real
+people (trait correlations, alpha and Tucker’s congruence against a
+permutation null),
+[`respondent_coverage()`](https://www.okanbulut.com/synthcheck/reference/respondent_coverage.md)
+checks whether every real person has a synthetic look-alike, and
+`authenticity_benchmark(copula = TRUE)` adds a Gaussian copula row, a
+generator without a language model, as a reference.
+
 The package compares models and supports decisions about them. It does
 not show that synthetic respondents can replace a field test.
 
@@ -65,6 +75,13 @@ gg_benchmark(bm)
 
 # the eight behaviour features behind the Behaviour column
 gg_behaviour(bm$behaviour)
+
+# with a Gaussian copula row as a reference
+bm <- authenticity_benchmark(synthetic, real, hexaco_items, copula = TRUE)
+
+# diagnostics
+gg_construct(synthetic_construct(synthetic, real, hexaco_items))
+gg_respondent_coverage(respondent_coverage(synthetic, real, hexaco_items))
 ```
 
 ## Generating synthetic data in an app
@@ -100,6 +117,10 @@ real <- hexaco_real[hexaco_real$country == "Canada", ]
 bm <- authenticity_benchmark(as_synthetic_list(syn), real, ins$items)
 summarise_benchmark(bm)
 ```
+
+See the [website](https://www.okanbulut.com/synthcheck/) for a Get
+started article, tutorials on each step and a tour of the app with
+demos.
 
 ## Data
 
@@ -151,6 +172,21 @@ How synthetic respondents answer.
 - [`summarise_benchmark()`](https://www.okanbulut.com/synthcheck/reference/summarise_benchmark.md)
   : Describe the benchmark in plain language
 
+## Diagnostics
+
+Checks beside the benchmark that do not change its score.
+
+- [`synthetic_construct()`](https://www.okanbulut.com/synthcheck/reference/synthetic_construct.md)
+  : Construct structure of synthetic respondents
+- [`gg_construct()`](https://www.okanbulut.com/synthcheck/reference/gg_construct.md)
+  : Draw the construct structure
+- [`respondent_coverage()`](https://www.okanbulut.com/synthcheck/reference/respondent_coverage.md)
+  : Respondent coverage of synthetic respondents
+- [`gg_respondent_coverage()`](https://www.okanbulut.com/synthcheck/reference/gg_respondent_coverage.md)
+  : Draw the respondent coverage
+- [`synthetic_copula()`](https://www.okanbulut.com/synthcheck/reference/synthetic_copula.md)
+  : Respondents drawn from a Gaussian copula of the real data
+
 ## Generating synthetic respondents
 
 Define an instrument and personas, call language models, save the data.
@@ -193,3 +229,33 @@ Define an instrument and personas, call language models, save the data.
   [`synthcheck-package`](https://www.okanbulut.com/synthcheck/reference/synthcheck-package.md)
   : synthcheck: Check how authentic synthetic survey respondents are
 
+# Articles
+
+### Get started
+
+- [Get
+  started](https://www.okanbulut.com/synthcheck/articles/synthcheck.md):
+
+### Tutorials
+
+One step of the workflow at a time, with the functions behind it.
+
+- [Overlap and Structure: The coverage
+  strip](https://www.okanbulut.com/synthcheck/articles/overlap-structure.md):
+- [Behaviour: How synthetic respondents
+  answer](https://www.okanbulut.com/synthcheck/articles/behaviour.md):
+- [The synthetic authenticity
+  benchmark](https://www.okanbulut.com/synthcheck/articles/benchmark.md):
+- [Diagnostics beside the
+  benchmark](https://www.okanbulut.com/synthcheck/articles/diagnostics.md):
+- [Generating synthetic respondents in
+  R](https://www.okanbulut.com/synthcheck/articles/generate.md):
+
+### The synthcheck app
+
+The whole workflow on screen, from an instrument to a benchmark.
+
+- [A tour of the synthcheck
+  app](https://www.okanbulut.com/synthcheck/articles/app-tour.md):
+- [App demos: Three ways to use the
+  app](https://www.okanbulut.com/synthcheck/articles/app-demo.md):

@@ -18,6 +18,16 @@ sample of real people (100). The **synthetic authenticity benchmark**
 compares several models in one table, scored by their weakest column by
 default.
 
+Three diagnostics sit beside the benchmark and do not change its score:
+[`synthetic_construct()`](https://www.okanbulut.com/synthcheck/reference/synthetic_construct.md)
+checks whether the scales hold together and relate as they do in real
+people (trait correlations, alpha and Tucker’s congruence against a
+permutation null),
+[`respondent_coverage()`](https://www.okanbulut.com/synthcheck/reference/respondent_coverage.md)
+checks whether every real person has a synthetic look-alike, and
+`authenticity_benchmark(copula = TRUE)` adds a Gaussian copula row, a
+generator without a language model, as a reference.
+
 The package compares models and supports decisions about them. It does
 not show that synthetic respondents can replace a field test.
 
@@ -65,6 +75,13 @@ gg_benchmark(bm)
 
 # the eight behaviour features behind the Behaviour column
 gg_behaviour(bm$behaviour)
+
+# with a Gaussian copula row as a reference
+bm <- authenticity_benchmark(synthetic, real, hexaco_items, copula = TRUE)
+
+# diagnostics
+gg_construct(synthetic_construct(synthetic, real, hexaco_items))
+gg_respondent_coverage(respondent_coverage(synthetic, real, hexaco_items))
 ```
 
 ## Generating synthetic data in an app
@@ -100,6 +117,10 @@ real <- hexaco_real[hexaco_real$country == "Canada", ]
 bm <- authenticity_benchmark(as_synthetic_list(syn), real, ins$items)
 summarise_benchmark(bm)
 ```
+
+See the [website](https://www.okanbulut.com/synthcheck/) for a Get
+started article, tutorials on each step and a tour of the app with
+demos.
 
 ## Data
 

@@ -20,6 +20,7 @@ authenticity_benchmark(
   ceiling_n = c("attempt", "half"),
   fit_scales = NULL,
   cor = c("pearson", "polychoric"),
+  copula = FALSE,
   seed = 1
 )
 ```
@@ -86,6 +87,10 @@ authenticity_benchmark(
   correlations for Structure: `"pearson"` (the default, fast on many
   items) or `"polychoric"` (needs the polycor package; slow).
 
+- copula:
+
+  add the Gaussian copula reference row (see Details).
+
 - seed:
 
   random seed for breaking ties.
@@ -93,11 +98,12 @@ authenticity_benchmark(
 ## Value
 
 An object of class `sc_benchmark`: A list with `table` (a tibble with
-one row per model, sorted by score: `model`, `attempts`, `score`,
-`weakest`, the anchored `overlap`, `structure` and `behaviour`, their
-raw values (`*_raw`), and the lowest and highest anchored values over
-the attempts), `attempts` (raw and anchored values per attempt),
-`anchors` (floor and ceiling of each index), `behaviour` (the
+one row per model, sorted by score: `model`, `reference` (`TRUE` for the
+copula row), `attempts`, `score`, `weakest`, the anchored `overlap`,
+`structure` and `behaviour`, their raw values (`*_raw`), and the lowest
+and highest anchored values over the attempts), `attempts` (raw and
+anchored values per attempt), `anchors` (floor and ceiling of each
+index), `behaviour` (the
 [`synthetic_behaviour()`](https://www.okanbulut.com/synthcheck/reference/synthetic_behaviour.md)
 result), `careless` (the flags, with `clean_real = TRUE`) and
 `settings`. It has [`print()`](https://rdrr.io/r/base/print.html),
@@ -148,6 +154,18 @@ three anchored columns and names it in `weakest`. `"mean"` takes the
 (weighted) mean, `"geometric"` the (weighted) geometric mean of the
 values clamped to 0 to 100, and a function of three arguments
 (`overlap`, `structure`, `behaviour`) gives any other score.
+
+**Copula reference.** With `copula = TRUE`, a row named "Gaussian copula
+(reference)" is added. Its respondents come from
+[`synthetic_copula()`](https://www.okanbulut.com/synthcheck/reference/synthetic_copula.md),
+which keeps every item's distribution and the correlations between items
+of the real data and nothing else. It has the median number and size of
+the synthetic attempts. A model below this row does no better than a
+generator without a language model. The copula is fitted to the real
+target, so it is an in-sample reference (`reference = TRUE` in the
+table), not a competitor. For the same reason, its Overlap and Structure
+can be above 100: It reproduces the full real sample more closely than a
+second, smaller sample of real people does.
 
 Synthetic respondents are experimental: The benchmark compares models
 and supports decisions about them. It does not show that synthetic data
