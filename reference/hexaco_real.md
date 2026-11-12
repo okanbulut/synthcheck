@@ -49,8 +49,10 @@ constructs in the HEXACO model. *Personality and Individual Differences,
 [hexaco_llm](https://www.okanbulut.com/synthcheck/reference/hexaco_llm.md)
 for the language model answers to the same items,
 [hexaco_items](https://www.okanbulut.com/synthcheck/reference/hexaco_items.md)
-for the items and their keys, and
-[`synthetic_coverage()`](https://www.okanbulut.com/synthcheck/reference/synthetic_coverage.md).
+for the items and their keys,
+[`synthetic_coverage()`](https://www.okanbulut.com/synthcheck/reference/synthetic_coverage.md)
+and
+[`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md).
 
 ## Examples
 

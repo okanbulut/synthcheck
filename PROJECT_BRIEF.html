@@ -38,7 +38,8 @@
 <div class="section level2">
 <h2 id="status">Status<a class="anchor" aria-label="anchor" href="#status"></a></h2>
 <ul><li>2026-11-12: Phase 1 is in the first pull request (skeleton, GPL-3, CI, pkgdown, ported <code><a href="reference/synthetic_coverage.html">synthetic_coverage()</a></code>, <code><a href="reference/blend_llms.html">blend_llms()</a></code> and <code><a href="reference/gg_coverage.html">gg_coverage()</a></code> with their tests, four-model HEXACO data).</li>
-<li>Next: Add the Claude and ChatGPT data (Okan’s folder <code>C:\Users\bulut\Desktop\New Data</code> on his Windows PC) to <code>hexaco_llm</code>, then phase 2.</li>
+<li>2026-11-12: The second pull request adds Claude Haiku 5.5 and GPT-4.1 mini to <code>hexaco_llm</code> (six models, 89,597 respondents) and phase 2: <code><a href="reference/behaviour_features.html">behaviour_features()</a></code>, <code><a href="reference/synthetic_behaviour.html">synthetic_behaviour()</a></code>, <code><a href="reference/gg_behaviour.html">gg_behaviour()</a></code>, <code><a href="reference/flag_careless.html">flag_careless()</a></code>, <code><a href="reference/authenticity_benchmark.html">authenticity_benchmark()</a></code> and <code><a href="reference/gg_benchmark.html">gg_benchmark()</a></code>. The files in the <code>GPT-4o</code> folder log <code>gpt-4.1-mini</code> as the model, so Okan chose to name the model GPT-4.1 mini and to drop the 11 rows logged as <code>gpt-4o-2024-08-06</code>.</li>
+<li>Next: Phase 3 (the article “Benchmarking six LLMs on HEXACO” and the extras).</li>
 </ul></div>
 <div class="section level2">
 <h2 id="goal">Goal<a class="anchor" aria-label="anchor" href="#goal"></a></h2>
@@ -220,7 +221,7 @@ Behaviour = mean of B_f over the eight features</code></pre>
 <ol style="list-style-type: decimal"><li>
 <strong>Phase 1, skeleton and port:</strong> Package skeleton (GPL-3, the same as mirtverse, because ported code carries over its license), R-CMD-check CI on Ubuntu, macOS and Windows, pkgdown site, README. Port <code><a href="reference/synthetic_coverage.html">synthetic_coverage()</a></code> and <code><a href="reference/gg_coverage.html">gg_coverage()</a></code> with their tests from <code>reference/ai-coverage.R</code> and <code>reference/test-ai-coverage.R</code>, along with the HEXACO data.</li>
 <li>
-<strong>Phase 2, the new indices:</strong> <code>behaviour_features()</code>, <code>synthetic_behaviour()</code>, <code>gg_behaviour()</code>, <code>flag_careless()</code>, then <code>authenticity_benchmark()</code> and <code>gg_benchmark()</code>. Tests include the pilot targets above and simulated data with planted careless respondents.</li>
+<strong>Phase 2, the new indices:</strong> <code><a href="reference/behaviour_features.html">behaviour_features()</a></code>, <code><a href="reference/synthetic_behaviour.html">synthetic_behaviour()</a></code>, <code><a href="reference/gg_behaviour.html">gg_behaviour()</a></code>, <code><a href="reference/flag_careless.html">flag_careless()</a></code>, then <code><a href="reference/authenticity_benchmark.html">authenticity_benchmark()</a></code> and <code><a href="reference/gg_benchmark.html">gg_benchmark()</a></code>. Tests include the pilot targets above and simulated data with planted careless respondents.</li>
 <li>
 <strong>Phase 3, extras:</strong> The six-model dataset, an article “Benchmarking six LLMs on HEXACO”, and later blending (port <code><a href="reference/blend_llms.html">blend_llms()</a></code>), DIF between humans and models with mirt multiple-group models, effective human sample size, and group contrast recovery.</li>
 </ol></div>

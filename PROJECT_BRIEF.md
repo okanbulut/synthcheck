@@ -17,9 +17,20 @@ the end.
   and
   [`gg_coverage()`](https://www.okanbulut.com/synthcheck/reference/gg_coverage.md)
   with their tests, four-model HEXACO data).
-- Next: Add the Claude and ChatGPT data (Okan’s folder
-  `C:\Users\bulut\Desktop\New Data` on his Windows PC) to `hexaco_llm`,
-  then phase 2.
+- 2026-11-12: The second pull request adds Claude Haiku 5.5 and GPT-4.1
+  mini to `hexaco_llm` (six models, 89,597 respondents) and phase 2:
+  [`behaviour_features()`](https://www.okanbulut.com/synthcheck/reference/behaviour_features.md),
+  [`synthetic_behaviour()`](https://www.okanbulut.com/synthcheck/reference/synthetic_behaviour.md),
+  [`gg_behaviour()`](https://www.okanbulut.com/synthcheck/reference/gg_behaviour.md),
+  [`flag_careless()`](https://www.okanbulut.com/synthcheck/reference/flag_careless.md),
+  [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md)
+  and
+  [`gg_benchmark()`](https://www.okanbulut.com/synthcheck/reference/gg_benchmark.md).
+  The files in the `GPT-4o` folder log `gpt-4.1-mini` as the model, so
+  Okan chose to name the model GPT-4.1 mini and to drop the 11 rows
+  logged as `gpt-4o-2024-08-06`.
+- Next: Phase 3 (the article “Benchmarking six LLMs on HEXACO” and the
+  extras).
 
 ## Goal
 
@@ -242,11 +253,17 @@ not the index.
     [`gg_coverage()`](https://www.okanbulut.com/synthcheck/reference/gg_coverage.md)
     with their tests from `reference/ai-coverage.R` and
     `reference/test-ai-coverage.R`, along with the HEXACO data.
-2.  **Phase 2, the new indices:** `behaviour_features()`,
-    `synthetic_behaviour()`, `gg_behaviour()`, `flag_careless()`, then
-    `authenticity_benchmark()` and `gg_benchmark()`. Tests include the
-    pilot targets above and simulated data with planted careless
-    respondents.
+2.  **Phase 2, the new indices:**
+    [`behaviour_features()`](https://www.okanbulut.com/synthcheck/reference/behaviour_features.md),
+    [`synthetic_behaviour()`](https://www.okanbulut.com/synthcheck/reference/synthetic_behaviour.md),
+    [`gg_behaviour()`](https://www.okanbulut.com/synthcheck/reference/gg_behaviour.md),
+    [`flag_careless()`](https://www.okanbulut.com/synthcheck/reference/flag_careless.md),
+    then
+    [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md)
+    and
+    [`gg_benchmark()`](https://www.okanbulut.com/synthcheck/reference/gg_benchmark.md).
+    Tests include the pilot targets above and simulated data with
+    planted careless respondents.
 3.  **Phase 3, extras:** The six-model dataset, an article “Benchmarking
     six LLMs on HEXACO”, and later blending (port
     [`blend_llms()`](https://www.okanbulut.com/synthcheck/reference/blend_llms.md)),

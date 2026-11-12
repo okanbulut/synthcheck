@@ -6,7 +6,12 @@
 <url><loc>https://www.okanbulut.com/synthcheck/authors.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/index.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/news/index.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/behaviour_features.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/blend_llms.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/flag_careless.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/gg_behaviour.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/gg_benchmark.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/gg_coverage.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/hexaco_items.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/hexaco_llm.html</loc></url>
@@ -14,6 +19,7 @@
 <url><loc>https://www.okanbulut.com/synthcheck/reference/index.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/reexports.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/synthcheck-package.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/synthetic_behaviour.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/synthetic_coverage.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/theme_synthcheck.html</loc></url>
 </urlset>

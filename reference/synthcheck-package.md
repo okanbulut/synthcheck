@@ -7,10 +7,13 @@ gives Overlap (do synthetic respondents land where real people land?)
 and Structure (do the items relate to each other as they do in real
 people?), and
 [`gg_coverage()`](https://www.okanbulut.com/synthcheck/reference/gg_coverage.md)
-draws them as a coverage strip. Behaviour (do synthetic respondents
-answer the way people do?) and the synthetic authenticity benchmark,
-which anchors all three indices and compares several models, are being
-added.
+draws them as a coverage strip.
+[`synthetic_behaviour()`](https://www.okanbulut.com/synthcheck/reference/synthetic_behaviour.md)
+gives Behaviour (do synthetic respondents answer the way people do?),
+and
+[`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md)
+anchors all three indices and compares several models in the synthetic
+authenticity benchmark.
 
 ## Details
 
