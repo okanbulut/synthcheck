@@ -205,3 +205,14 @@ test_that("parallel calls run through the async path and keep the order", {
   expect_equal(syn$i1, rep(1:5, each = 2))
   expect_equal(syn$persona_id, rep(sprintf("p%03d", 1:5), each = 2))
 })
+
+test_that("the templates load as an instrument and personas", {
+  ins <- sc_instrument(read.csv(system.file("templates", "instrument_template.csv",
+                                            package = "synthcheck")), scale = c(1, 5))
+  expect_equal(nrow(ins$items), 8)
+  expect_equal(sum(ins$items$reverse), 4)
+  per <- sc_personas(read.csv(system.file("templates", "personas_template.csv",
+                                          package = "synthcheck")))
+  expect_equal(nrow(per), 4)
+  expect_true(all(c("age", "country") %in% names(per)))
+})

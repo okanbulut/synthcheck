@@ -10,6 +10,11 @@
 #'    and set the response scale and instructions ([sc_instrument()]).
 #' 2. **Personas:** Type, upload or build the personas that take the
 #'    instrument ([sc_personas()], [sc_persona_grid()]).
+#'
+#' Both upload panels offer a template to fill in. The templates are also
+#' in the package: `system.file("templates", "instrument_template.csv",
+#' package = "synthcheck")` and `"personas_template.csv"`.
+#'
 #' 3. **Models:** Add Anthropic, OpenAI or local Ollama models with their
 #'    temperature, enter API keys, choose the number of attempts and
 #'    respondents, and run [generate_synthetic()] with a progress bar and
@@ -110,7 +115,8 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
              "input.ins_source == 'upload'",
              shiny::fileInput("ins_file", "Item table (CSV or Excel)", accept = c(".csv", ".xlsx")),
              shiny::helpText("Columns: item (short name), statement (the text), and optionally",
-                             "scale, facet and reverse (TRUE for reverse-keyed items).")),
+                             "scale, facet and reverse (TRUE for reverse-keyed items)."),
+             shiny::downloadButton("tpl_instrument", "Download a template", class = "btn-sm")),
            shiny::textInput("ins_name", "Name", "IPIP-HEXACO"),
            row(
              shiny::numericInput("ins_min", "Lowest category", 1, step = 1),
@@ -150,7 +156,8 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
              "input.per_source == 'upload'",
              shiny::fileInput("per_file", "Persona table (CSV or Excel)", accept = c(".csv", ".xlsx")),
              shiny::helpText("A description column, plus optional persona_id and attribute columns",
-                             "(kept in the generated data)."))),
+                             "(kept in the generated data)."),
+             shiny::downloadButton("tpl_personas", "Download a template", class = "btn-sm"))),
       card("Preview", shiny::uiOutput("per_status"), shiny::tableOutput("per_preview")))
   )
 
@@ -207,7 +214,7 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
                           "Keep 1 for independent respondents.")),
              shiny::uiOutput("run_plan"),
              shiny::div(
-               shiny::actionButton("run_test", "Time one call per model", class = "btn-outline-primary"),
+               shiny::actionButton("run_test", "Estimate run time", class = "btn-outline-primary"),
                shiny::actionButton("run_start", "Generate data", class = "btn-primary"),
                shiny::actionButton("run_stop", "Stop", class = "btn-outline-danger")),
              shiny::uiOutput("run_progress"),

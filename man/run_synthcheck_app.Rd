@@ -41,6 +41,11 @@ the whole workflow in five tabs:
 and set the response scale and instructions (\code{\link[=sc_instrument]{sc_instrument()}}).
 \item \strong{Personas:} Type, upload or build the personas that take the
 instrument (\code{\link[=sc_personas]{sc_personas()}}, \code{\link[=sc_persona_grid]{sc_persona_grid()}}).
+}
+
+Both upload panels offer a template to fill in. The templates are also
+in the package: \code{system.file("templates", "instrument_template.csv", package = "synthcheck")} and \code{"personas_template.csv"}.
+\enumerate{
 \item \strong{Models:} Add Anthropic, OpenAI or local Ollama models with their
 temperature, enter API keys, choose the number of attempts and
 respondents, and run \code{\link[=generate_synthetic]{generate_synthetic()}} with a progress bar and

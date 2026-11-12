@@ -58,7 +58,10 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
       paste0("SYSTEM\n", p$system, "\n\nUSER (first 4 items shown)\n", p$user)
     })
 
+    output$tpl_instrument <- sc_template_handler("instrument_template.csv")
+
     # ---- 2. Personas ---------------------------------------------------------
+    output$tpl_personas <- sc_template_handler("personas_template.csv")
     persona_table <- shiny::reactive({
       switch(input$per_source,
              none = NULL,
@@ -158,7 +161,7 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
                                                   rv$timing$model)], na.rm = TRUE) /
           max(1, input$run_parallel %||% 1)
         sprintf(" From the test calls, the run should take about %s.", sc_duration(secs))
-      } else " Time one call per model for an estimate of how long it will take."
+      } else " Click Estimate run time to send one test call per model and see how long the run should take."
       # with batches, the test call times one batch
       b <- max(1, input$run_batch %||% 1)
       calls <- if (b > 1) sprintf(" in about %s calls", format(ceiling(n / b), big.mark = ",")) else ""
@@ -172,7 +175,7 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
       if (inherits(ins, "error") || !length(rv$models))
         return(shiny::showNotification("Define the instrument and add a model first.", type = "warning"))
       p <- personas_ok(); desc <- if (is.null(p) || inherits(p, "error")) NA_character_ else p$description[1]
-      shiny::withProgress(message = "Timing one call per model", value = 0, {
+      shiny::withProgress(message = "Sending one test call per model", value = 0, {
         tm <- lapply(seq_along(rv$models), function(i) {
           m <- rv$models[[i]]
           shiny::incProgress(1 / length(rv$models), detail = m$name)
@@ -449,6 +452,12 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
 }
 
 # ---- helpers --------------------------------------------------------------
+
+sc_template_handler <- function(file) {
+  shiny::downloadHandler(filename = function() file,
+                         content = function(path)
+                           file.copy(system.file("templates", file, package = "synthcheck"), path))
+}
 
 sc_ok <- function(text) shiny::div(class = "text-success", text)
 

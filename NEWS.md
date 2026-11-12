@@ -5,6 +5,7 @@
   Instrument, Personas, Models (API keys, temperature, attempts, a progress
   bar with the time left), Compare (the benchmark with a plain-language
   summary per model) and Export. API keys stay in memory for the session.
+  The Instrument and Personas tabs offer CSV templates to fill in.
 * New: `sc_instrument()`, `sc_personas()`, `sc_persona_grid()`, `sc_model()`
   and `sc_prompt()` define what synthetic respondents take and who they are,
   and `generate_synthetic()` asks Anthropic, OpenAI or local Ollama models
