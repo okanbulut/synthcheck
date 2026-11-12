@@ -112,6 +112,9 @@ bm <- authenticity_benchmark(as_synthetic_list(syn), real, ins$items)
 summarise_benchmark(bm)
 ```
 
+See the [website](https://www.okanbulut.com/synthcheck/) for a Get started
+article, tutorials on each step and a tour of the app with demos.
+
 ## Data
 
 `hexaco_real` holds 17,874 real respondents to the 240 IPIP-HEXACO items from

@@ -12,6 +12,10 @@
 * New: `synthetic_copula()` draws respondents from a Gaussian copula of the
   real data, and `authenticity_benchmark(copula = TRUE)` adds it as a
   reference row.
+* Website: Get started, four tutorials (Overlap and Structure, Behaviour, the
+  benchmark, generating synthetic respondents in R), a tour of the app with
+  screenshots of each tab, and three app demos (the built-in models, a
+  practice run with the mock provider, and your own questionnaire).
 * New: `run_synthcheck_app()` opens a Shiny app that generates synthetic
   respondents with several language models and benchmarks them in five tabs:
   Instrument, Personas, Models (API keys, temperature, attempts, a progress

@@ -5,6 +5,50 @@ template:
   bslib:
     primary: "#1c5cab"
 
+navbar:
+  structure:
+    left: [intro, tutorials, app, reference, news]
+  components:
+    intro:
+      text: Get started
+      href: articles/synthcheck.html
+    tutorials:
+      text: Tutorials
+      menu:
+      - text: "Overlap and Structure: The coverage strip"
+        href: articles/overlap-structure.html
+      - text: "Behaviour: How synthetic respondents answer"
+        href: articles/behaviour.html
+      - text: The synthetic authenticity benchmark
+        href: articles/benchmark.html
+      - text: Generating synthetic respondents in R
+        href: articles/generate.html
+    app:
+      text: The app
+      menu:
+      - text: A tour of the synthcheck app
+        href: articles/app-tour.html
+      - text: "App demos: Three ways to use the app"
+        href: articles/app-demo.html
+
+articles:
+- title: Get started
+  navbar: ~
+  contents:
+  - synthcheck
+- title: Tutorials
+  desc: One step of the workflow at a time, with the functions behind it.
+  contents:
+  - overlap-structure
+  - behaviour
+  - benchmark
+  - generate
+- title: The synthcheck app
+  desc: The whole workflow on screen, from an instrument to a benchmark.
+  contents:
+  - app-tour
+  - app-demo
+
 reference:
 - title: Overlap and Structure
   desc: Where synthetic respondents land and how their items relate.
