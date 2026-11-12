@@ -7,6 +7,9 @@
   contact details and starts a guided tour of the five tabs (with the
   cicerone package, in Suggests).
 
+* The README, `citation("synthcheck")` and `CITATION.cff` give the Zenodo
+  DOI that covers all versions (10.5281/zenodo.24173113).
+
 # synthcheck 0.1.0
 
 First release, archived on Zenodo. synthcheck is experimental: The benchmark

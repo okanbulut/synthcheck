@@ -2,6 +2,7 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/okanbulut/synthcheck/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/okanbulut/synthcheck/actions/workflows/R-CMD-check.yaml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24173113.svg)](https://doi.org/10.5281/zenodo.24173113)
 <!-- badges: end -->
 
 **Experimental.** synthcheck checks how authentic synthetic survey
@@ -126,7 +127,8 @@ text, facets and keys.
 ## Citation
 
 Run `citation("synthcheck")` for the citation, or use the "Cite this
-repository" button on GitHub. Each release is archived on Zenodo.
+repository" button on GitHub. Each release is archived on Zenodo
+(doi:[10.5281/zenodo.24173113](https://doi.org/10.5281/zenodo.24173113)).
 
 ## Related
 
