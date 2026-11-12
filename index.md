@@ -130,6 +130,11 @@ Psychometrics Project). `hexaco_llm` holds 89,597 synthetic respondents
 from six language models (10 attempts per country), and `hexaco_items`
 holds the item text, facets and keys.
 
+## Citation
+
+Run `citation("synthcheck")` for the citation, or use the “Cite this
+repository” button on GitHub. Each release is archived on Zenodo.
+
 ## Related
 
 synthcheck grew out of the coverage strip in

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">synthcheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,23 +46,59 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.0.0.9000" id="synthcheck-0009000">synthcheck 0.0.0.9000<a class="anchor" aria-label="anchor" href="#synthcheck-0009000"></a></h2>
-<ul><li><p>New: <code><a href="../reference/synthetic_construct.html">synthetic_construct()</a></code> and <code><a href="../reference/gg_construct.html">gg_construct()</a></code> check the construct structure of each model: The gap between the synthetic and the real correlations between scales, alpha per scale (above the real value means too coherent) and Tucker’s congruence of the loadings, read against a permutation null (after Lukauskas &amp; Šarkauskaitė, 2026).</p></li>
-<li><p>New: <code><a href="../reference/respondent_coverage.html">respondent_coverage()</a></code> and <code><a href="../reference/gg_respondent_coverage.html">gg_respondent_coverage()</a></code> give the respondent coverage gap (RCG) and the off-support ratio (OSR) of Kumagae and Kaneko (2026): Whether every real person has a synthetic look-alike, and whether synthetic respondents sit outside the real data.</p></li>
-<li><p>New: <code><a href="../reference/synthetic_copula.html">synthetic_copula()</a></code> draws respondents from a Gaussian copula of the real data, and <code>authenticity_benchmark(copula = TRUE)</code> adds it as a reference row.</p></li>
-<li><p>Website: Get started, four tutorials (Overlap and Structure, Behaviour, the benchmark, generating synthetic respondents in R), a tour of the app with screenshots of each tab, and three app demos (the built-in models, a practice run with the mock provider, and your own questionnaire).</p></li>
-<li><p>New: <code><a href="../reference/run_synthcheck_app.html">run_synthcheck_app()</a></code> opens a Shiny app that generates synthetic respondents with several language models and benchmarks them in five tabs: Instrument, Personas, Models (API keys, temperature, attempts, a progress bar with the time left), Compare (the benchmark with a plain-language summary per model) and Export. API keys stay in memory for the session. The Instrument and Personas tabs offer CSV templates to fill in.</p></li>
-<li><p>New: <code><a href="../reference/sc_instrument.html">sc_instrument()</a></code>, <code><a href="../reference/sc_personas.html">sc_personas()</a></code>, <code><a href="../reference/sc_personas.html">sc_persona_grid()</a></code>, <code><a href="../reference/sc_model.html">sc_model()</a></code> and <code><a href="../reference/sc_prompt.html">sc_prompt()</a></code> define what synthetic respondents take and who they are, and <code><a href="../reference/generate_synthetic.html">generate_synthetic()</a></code> asks Anthropic, OpenAI or local Ollama models (through ellmer) to answer, one respondent per call.</p></li>
-<li><p>New: <code><a href="../reference/write_synthetic.html">write_synthetic()</a></code> and <code><a href="../reference/write_synthetic.html">read_synthetic()</a></code> save and load generated data as CSV, JSON, RDS or Excel, and <code><a href="../reference/as_synthetic_list.html">as_synthetic_list()</a></code> turns a long table into the input of <code><a href="../reference/authenticity_benchmark.html">authenticity_benchmark()</a></code>.</p></li>
-<li><p>New: <code><a href="../reference/summarise_benchmark.html">summarise_benchmark()</a></code> describes each model’s benchmark result in a few plain sentences.</p></li>
-<li><p>New: <code><a href="../reference/behaviour_features.html">behaviour_features()</a></code> gives eight behaviour features per respondent (variability, extreme and midpoint answers, acquiescence, key inconsistency, even-odd consistency, Mahalanobis distance and person fit lz), <code><a href="../reference/synthetic_behaviour.html">synthetic_behaviour()</a></code> turns them into the Behaviour index, and <code><a href="../reference/gg_behaviour.html">gg_behaviour()</a></code> draws the behaviour strip.</p></li>
-<li><p>New: <code><a href="../reference/authenticity_benchmark.html">authenticity_benchmark()</a></code> builds the synthetic authenticity benchmark: Overlap, Structure and Behaviour for every model, each anchored between shuffled real columns (0) and a second sample of real people (100), with the weakest column as the default score. <code><a href="../reference/gg_benchmark.html">gg_benchmark()</a></code> draws it on a scale from red (-100 or less) through pale (0) to blue (100), so values below the shuffled baseline stay readable.</p></li>
-<li><p>New: <code><a href="../reference/flag_careless.html">flag_careless()</a></code> flags careless real respondents, and <code>clean_real = TRUE</code> compares against the remaining ones.</p></li>
-<li><p>Data: <code>hexaco_llm</code> now holds six models (89,597 synthetic respondents). Claude Haiku 5.5 and GPT-4.1 mini were added.</p></li>
-<li><p>First version of the package. <code><a href="../reference/synthetic_coverage.html">synthetic_coverage()</a></code>, <code><a href="../reference/blend_llms.html">blend_llms()</a></code> and <code><a href="../reference/gg_coverage.html">gg_coverage()</a></code> (Overlap, Structure and the best blend of models, drawn as a coverage strip) are ported from mirtverse, with <code><a href="../reference/theme_synthcheck.html">theme_synthcheck()</a></code>.</p></li>
-<li><p>Data: <code>hexaco_real</code> (17,874 real respondents from Canada, Great Britain and the United States), <code>hexaco_llm</code> (59,611 synthetic respondents from four language models) and <code>hexaco_items</code> for the 240 IPIP-HEXACO items, also from mirtverse.</p></li>
+<h2 class="pkg-version" data-toc-text="0.1.0" id="synthcheck-010">synthcheck 0.1.0<a class="anchor" aria-label="anchor" href="#synthcheck-010"></a></h2>
+<p>First release, archived on Zenodo. synthcheck is experimental: The benchmark compares models and supports decisions about them. It does not show that synthetic respondents can replace a field test.</p>
+<div class="section level3">
+<h3 id="the-synthetic-authenticity-benchmark-0-1-0">The synthetic authenticity benchmark<a class="anchor" aria-label="anchor" href="#the-synthetic-authenticity-benchmark-0-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/authenticity_benchmark.html">authenticity_benchmark()</a></code> builds the synthetic authenticity benchmark: Overlap, Structure and Behaviour for every model, each anchored between shuffled real columns (0) and a second sample of real people (100), with the weakest column as the default score. <code><a href="../reference/gg_benchmark.html">gg_benchmark()</a></code> draws it on a scale from red (-100 or less) through pale (0) to blue (100), so values below the shuffled baseline stay readable.</li>
+<li>
+<code><a href="../reference/summarise_benchmark.html">summarise_benchmark()</a></code> describes each model’s benchmark result in a few plain sentences.</li>
+<li>
+<code><a href="../reference/flag_careless.html">flag_careless()</a></code> flags careless real respondents, and <code>clean_real = TRUE</code> compares against the remaining ones.</li>
 </ul></div>
-  </main></div>
+<div class="section level3">
+<h3 id="overlap-structure-and-behaviour-0-1-0">Overlap, Structure and Behaviour<a class="anchor" aria-label="anchor" href="#overlap-structure-and-behaviour-0-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/synthetic_coverage.html">synthetic_coverage()</a></code>, <code><a href="../reference/blend_llms.html">blend_llms()</a></code> and <code><a href="../reference/gg_coverage.html">gg_coverage()</a></code> give Overlap, Structure and the best blend of models, drawn as a coverage strip, with <code><a href="../reference/theme_synthcheck.html">theme_synthcheck()</a></code>. They are ported from mirtverse.</li>
+<li>
+<code><a href="../reference/behaviour_features.html">behaviour_features()</a></code> gives eight behaviour features per respondent (variability, extreme and midpoint answers, acquiescence, key inconsistency, even-odd consistency, Mahalanobis distance and person fit lz), <code><a href="../reference/synthetic_behaviour.html">synthetic_behaviour()</a></code> turns them into the Behaviour index, and <code><a href="../reference/gg_behaviour.html">gg_behaviour()</a></code> draws the behaviour strip.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="diagnostics-beside-the-benchmark-0-1-0">Diagnostics beside the benchmark<a class="anchor" aria-label="anchor" href="#diagnostics-beside-the-benchmark-0-1-0"></a></h3>
+<p>These do not change the benchmark score.</p>
+<ul><li>
+<code><a href="../reference/synthetic_construct.html">synthetic_construct()</a></code> and <code><a href="../reference/gg_construct.html">gg_construct()</a></code> check the construct structure of each model: The gap between the synthetic and the real correlations between scales, alpha per scale (above the real value means too coherent) and Tucker’s congruence of the loadings, read against a permutation null (after Lukauskas &amp; Šarkauskaitė, 2026).</li>
+<li>
+<code><a href="../reference/respondent_coverage.html">respondent_coverage()</a></code> and <code><a href="../reference/gg_respondent_coverage.html">gg_respondent_coverage()</a></code> give the respondent coverage gap (RCG) and the off-support ratio (OSR) of Kumagae and Kaneko (2026): Whether every real person has a synthetic look-alike, and whether synthetic respondents sit outside the real data.</li>
+<li>
+<code><a href="../reference/synthetic_copula.html">synthetic_copula()</a></code> draws respondents from a Gaussian copula of the real data, and <code>authenticity_benchmark(copula = TRUE)</code> adds it as a reference row.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="generating-synthetic-respondents-0-1-0">Generating synthetic respondents<a class="anchor" aria-label="anchor" href="#generating-synthetic-respondents-0-1-0"></a></h3>
+<ul><li>
+<code><a href="../reference/run_synthcheck_app.html">run_synthcheck_app()</a></code> opens a Shiny app that generates synthetic respondents with several language models and benchmarks them in five tabs: Instrument, Personas, Models (API keys, temperature, attempts, a progress bar with the time left), Compare (the benchmark with a plain-language summary per model) and Export. API keys stay in memory for the session. The Instrument and Personas tabs offer CSV templates to fill in.</li>
+<li>
+<code><a href="../reference/sc_instrument.html">sc_instrument()</a></code>, <code><a href="../reference/sc_personas.html">sc_personas()</a></code>, <code><a href="../reference/sc_personas.html">sc_persona_grid()</a></code>, <code><a href="../reference/sc_model.html">sc_model()</a></code> and <code><a href="../reference/sc_prompt.html">sc_prompt()</a></code> define what synthetic respondents take and who they are, and <code><a href="../reference/generate_synthetic.html">generate_synthetic()</a></code> asks Anthropic, OpenAI or local Ollama models (through ellmer) to answer, one respondent per call.</li>
+<li>
+<code><a href="../reference/write_synthetic.html">write_synthetic()</a></code> and <code><a href="../reference/write_synthetic.html">read_synthetic()</a></code> save and load generated data as CSV, JSON, RDS or Excel, and <code><a href="../reference/as_synthetic_list.html">as_synthetic_list()</a></code> turns a long table into the input of <code><a href="../reference/authenticity_benchmark.html">authenticity_benchmark()</a></code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="data-0-1-0">Data<a class="anchor" aria-label="anchor" href="#data-0-1-0"></a></h3>
+<ul><li>
+<code>hexaco_real</code> holds 17,874 real respondents from Canada, Great Britain and the United States, and <code>hexaco_items</code> the 240 IPIP-HEXACO items (both from mirtverse).</li>
+<li>
+<code>hexaco_llm</code> holds 89,597 synthetic respondents from six language models, including Claude Haiku 5.5 and GPT-4.1 mini.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-1-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-0"></a></h3>
+<ul><li>The website has a Get started article, four tutorials (Overlap and Structure, Behaviour, the benchmark, generating synthetic respondents in R), an article on the diagnostics beside the benchmark, a tour of the app with screenshots of each tab, and three app demos (the built-in models, a practice run with the mock provider, and your own questionnaire).</li>
+<li>
+<code>citation("synthcheck")</code>, <code>CITATION.cff</code> and <code>.zenodo.json</code> give the citation and the Zenodo metadata.</li>
+</ul></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
