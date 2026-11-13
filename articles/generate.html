@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">synthcheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -257,11 +257,53 @@ finished attempts.</li>
 <code class="sourceCode R"><span><span class="va">syn</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_synthetic.html">generate_synthetic</a></span><span class="op">(</span><span class="va">ins</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="../reference/sc_model.html">sc_model</a></span><span class="op">(</span><span class="st">"anthropic"</span><span class="op">)</span>, <span class="fu"><a href="../reference/sc_model.html">sc_model</a></span><span class="op">(</span><span class="st">"openai"</span><span class="op">)</span><span class="op">)</span>, <span class="va">per</span>,</span>
 <span>                          attempts <span class="op">=</span> <span class="fl">5</span>, respondents <span class="op">=</span> <span class="fl">10</span>, parallel <span class="op">=</span> <span class="fl">8</span>,</span>
 <span>                          output <span class="op">=</span> <span class="st">"hexaco_run"</span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="what-a-run-costs">What a run costs<a class="anchor" aria-label="anchor" href="#what-a-run-costs"></a>
+</h3>
+<p><code><a href="../reference/estimate_cost.html">estimate_cost()</a></code> takes the same arguments and tells you
+what the run is likely to cost before you start it. It counts the calls,
+guesses their tokens from the prompts and multiplies them by the list
+prices in <code>sc_prices</code>. Ollama models are free, and so are
+calls already in the cache.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/estimate_cost.html">estimate_cost</a></span><span class="op">(</span><span class="va">ins</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="../reference/sc_model.html">sc_model</a></span><span class="op">(</span><span class="st">"anthropic"</span><span class="op">)</span>, <span class="fu"><a href="../reference/sc_model.html">sc_model</a></span><span class="op">(</span><span class="st">"openai"</span><span class="op">)</span><span class="op">)</span>, <span class="va">per</span>,</span>
+<span>              attempts <span class="op">=</span> <span class="fl">5</span>, respondents <span class="op">=</span> <span class="fl">10</span>, cache <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Estimated cost: $0.20 for 1,200 calls.</span></span>
+<span><span class="co">#&gt;  model            calls cached tokens_in tokens_out cost  prices_of </span></span>
+<span><span class="co">#&gt;  claude-haiku-5-5 600   0      644,400   99,000     $0.11 2026-11-03</span></span>
+<span><span class="co">#&gt;  gpt-4.1-nano     600   0      452,400   99,000     $0.08 2026-02-18</span></span>
+<span><span class="co">#&gt; An estimate: Tokens are guessed from the prompts, and retries add to it.</span></span></code></pre></div>
+<p>It is an estimate: Retries add to it, and reasoning models also bill
+their hidden reasoning. Prices change, so check them before a large run
+and pass your own table as <code>prices</code> when they differ
+(<code>sc_prices</code> has the date of each price in
+<code>checked</code>).</p>
+</div>
+<div class="section level3">
+<h3 id="the-response-cache">The response cache<a class="anchor" aria-label="anchor" href="#the-response-cache"></a>
+</h3>
+<p>Every answer is saved on disk, under a key made of the provider, the
+model, the temperature, the prompts, the respondent, the attempt and the
+<code>seed</code>. Running the same settings again reads the answers
+back instead of calling the models: The run is repeatable and costs
+nothing. More attempts or respondents call the models only for the new
+ones. A new <code>seed</code> asks again.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/sc_cache_info.html">sc_cache_info</a></span><span class="op">(</span><span class="op">)</span>                       <span class="co"># what is saved, per model</span></span>
+<span><span class="va">syn</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_synthetic.html">generate_synthetic</a></span><span class="op">(</span><span class="va">...</span>, cache <span class="op">=</span> <span class="fu"><a href="../reference/sc_cache.html">sc_cache</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="st">"refresh"</span><span class="op">)</span><span class="op">)</span>   <span class="co"># ask again</span></span>
+<span><span class="va">syn</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_synthetic.html">generate_synthetic</a></span><span class="op">(</span><span class="va">...</span>, cache <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>                        <span class="co"># no cache</span></span>
+<span><span class="fu"><a href="../reference/sc_cache_info.html">sc_cache_clear</a></span><span class="op">(</span>model <span class="op">=</span> <span class="st">"gpt-4.1-nano"</span><span class="op">)</span>                               <span class="co"># delete some</span></span></code></pre></div>
+<p>The cache lives in
+<code>tools::R_user_dir("synthcheck", "cache")</code>; give
+<code>sc_cache("my_folder")</code> to keep it with a project. It holds
+answers only, never API keys. <code><a href="../reference/cognitive_interview.html">cognitive_interview()</a></code> uses it
+too, and <code><a href="../reference/estimate_cost.html">estimate_interview_cost()</a></code> estimates its cost.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="save-and-read">6. Save and read<a class="anchor" aria-label="anchor" href="#save-and-read"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".csv"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/write_synthetic.html">write_synthetic</a></span><span class="op">(</span><span class="va">syn</span>, <span class="va">f</span><span class="op">)</span></span>
 <span><span class="va">syn2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/write_synthetic.html">read_synthetic</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span>
@@ -275,7 +317,7 @@ into one table.</p>
 </h2>
 <p><code><a href="../reference/as_synthetic_list.html">as_synthetic_list()</a></code> turns the long table into the list
 of models and attempts that the benchmark takes:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">real</span> <span class="op">&lt;-</span> <span class="va">hexaco_real</span><span class="op">[</span><span class="va">hexaco_real</span><span class="op">$</span><span class="va">country</span> <span class="op">==</span> <span class="st">"Canada"</span>, <span class="op">]</span></span>
 <span><span class="va">bm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/authenticity_benchmark.html">authenticity_benchmark</a></span><span class="op">(</span><span class="fu"><a href="../reference/as_synthetic_list.html">as_synthetic_list</a></span><span class="op">(</span><span class="va">syn</span>, items <span class="op">=</span> <span class="va">ins</span><span class="op">$</span><span class="va">items</span><span class="op">$</span><span class="va">item</span><span class="op">)</span>, <span class="va">real</span>, <span class="va">ins</span><span class="op">$</span><span class="va">items</span>,</span>
 <span>                             fit_scales <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>, n_splits <span class="op">=</span> <span class="fl">5</span>, n_floor <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>

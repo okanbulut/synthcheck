@@ -22,6 +22,7 @@
 <url><loc>https://www.okanbulut.com/synthcheck/reference/blend_llms.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/cognitive_interview.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/dass.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/estimate_cost.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/flag_careless.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/generate_synthetic.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/gg_behaviour.html</loc></url>
@@ -41,11 +42,14 @@
 <url><loc>https://www.okanbulut.com/synthcheck/reference/rses.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/run_synthcheck_app.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/sc_builtin_instrument.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/sc_cache.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/sc_cache_info.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/sc_default_models.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/sc_instrument.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/sc_interview_prompts.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/sc_model.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/sc_personas.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/sc_prices.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/sc_probes.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/sc_prompt.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/summarise_benchmark.html</loc></url>

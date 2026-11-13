@@ -93,7 +93,13 @@ The tabs, in order (with real data: 1 to 4 and 5. Export; without: 1 to
   temperature (or several temperatures, one model each), enter API keys,
   choose the number of attempts and respondents, and run
   [`generate_synthetic()`](https://www.okanbulut.com/synthcheck/reference/generate_synthetic.md)
-  with a progress bar and the time left.
+  with a progress bar and the time left. Before a run with paid models,
+  the app shows its estimated cost
+  ([`estimate_cost()`](https://www.okanbulut.com/synthcheck/reference/estimate_cost.md))
+  and asks you to confirm. Answers are kept in the response cache
+  ([`sc_cache()`](https://www.okanbulut.com/synthcheck/reference/sc_cache.md)),
+  so the same run again is repeatable and free; choose to reuse, refresh
+  or skip saved answers, or clear them.
 
 - **4. Compare** (with real data): Load real data and run
   [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md),

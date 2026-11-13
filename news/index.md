@@ -23,6 +23,40 @@
 
 - New article: “Short instruments with known item problems”.
 
+- New response cache:
+  [`generate_synthetic()`](https://www.okanbulut.com/synthcheck/reference/generate_synthetic.md)
+  and
+  [`cognitive_interview()`](https://www.okanbulut.com/synthcheck/reference/cognitive_interview.md)
+  save every answer on disk
+  ([`sc_cache()`](https://www.okanbulut.com/synthcheck/reference/sc_cache.md)),
+  under a key made of the provider, model, temperature, prompts,
+  respondent, attempt, retry and `seed`. The same run again reads the
+  answers back: It is repeatable and costs nothing. More attempts or
+  respondents call the models only for the new ones. `mode = "refresh"`
+  asks again, `cache = FALSE` turns it off, and
+  [`sc_cache_info()`](https://www.okanbulut.com/synthcheck/reference/sc_cache_info.md)
+  and
+  [`sc_cache_clear()`](https://www.okanbulut.com/synthcheck/reference/sc_cache_info.md)
+  show and delete what is saved. Failed calls and mock answers are never
+  saved.
+
+- New
+  [`estimate_cost()`](https://www.okanbulut.com/synthcheck/reference/estimate_cost.md)
+  and
+  [`estimate_interview_cost()`](https://www.okanbulut.com/synthcheck/reference/estimate_cost.md):
+  What a run is likely to cost before it starts, from the number of
+  calls, guessed tokens and a price table (`sc_prices`, with the date of
+  each price). Ollama models and cached calls are free. You can pass
+  your own prices.
+
+- The app shows the estimated cost under the run plan of the Models and
+  Interviews tabs and asks you to confirm before a run with paid models.
+  A new setting chooses whether to reuse, refresh or skip saved answers,
+  and a button clears the cache.
+
+- With one respondent per call, a retry now asks only for the items
+  still missing, in both the one-at-a-time and the parallel paths.
+
 ## synthcheck 0.2.0
 
 Adds a path for scales without real data (a synthetic pretest and

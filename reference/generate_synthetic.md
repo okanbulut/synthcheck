@@ -27,7 +27,8 @@ generate_synthetic(
   progress = interactive(),
   progress_file = NULL,
   stop_file = NULL,
-  seed = 1
+  seed = 1,
+  cache = sc_cache()
 )
 ```
 
@@ -113,13 +114,25 @@ generate_synthetic(
 
 - seed:
 
-  random seed for shuffling and for the mock provider.
+  random seed for shuffling and for the mock provider. It is also part
+  of the cache key: The same `seed` reuses saved answers, a new one asks
+  the models again.
+
+- cache:
+
+  the response cache: An
+  [`sc_cache()`](https://www.okanbulut.com/synthcheck/reference/sc_cache.md),
+  a folder, `TRUE` (the default folder) or `FALSE` (no cache). By
+  default, saved answers are reused, so the same run twice gives the
+  same data and the second run costs nothing. Use
+  `sc_cache(mode = "refresh")` to ask again.
 
 ## Value
 
 A tibble with `model`, `provider`, `model_id`, `temperature`, `attempt`,
 `persona_id`, `respondent`, any persona attributes, and one column per
-item. The attribute `log` holds the failed calls.
+item. The attribute `log` holds the failed calls, and `cache` the number
+of answers taken from the cache (`hits`) and saved to it (`saved`).
 
 ## Details
 
@@ -137,6 +150,13 @@ done, with `run.json` (the settings, without API keys) and
 finished attempts. Read the folder back with
 [`read_synthetic()`](https://www.okanbulut.com/synthcheck/reference/write_synthetic.md).
 
+Answers are saved in a response cache on disk (see
+[`sc_cache()`](https://www.okanbulut.com/synthcheck/reference/sc_cache.md)):
+A run with the same settings and `seed` reuses them instead of calling
+the models again, which makes it repeatable and free. See what a run
+will cost first with
+[`estimate_cost()`](https://www.okanbulut.com/synthcheck/reference/estimate_cost.md).
+
 Use them to compare models with
 [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md),
 not to replace a field test.
@@ -146,6 +166,8 @@ not to replace a field test.
 [`sc_instrument()`](https://www.okanbulut.com/synthcheck/reference/sc_instrument.md),
 [`sc_personas()`](https://www.okanbulut.com/synthcheck/reference/sc_personas.md),
 [`sc_model()`](https://www.okanbulut.com/synthcheck/reference/sc_model.md),
+[`estimate_cost()`](https://www.okanbulut.com/synthcheck/reference/estimate_cost.md),
+[`sc_cache()`](https://www.okanbulut.com/synthcheck/reference/sc_cache.md),
 [`as_synthetic_list()`](https://www.okanbulut.com/synthcheck/reference/as_synthetic_list.md),
 [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md)
 

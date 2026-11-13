@@ -17,7 +17,7 @@ whole number per item."><meta property="og:image" content="https://www.okanbulut
 
     <a class="navbar-brand me-2" href="../index.html">synthcheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,7 +86,8 @@ whole number per item.</p>
 <span>  progress <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  progress_file <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  stop_file <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">1</span></span>
+<span>  seed <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  cache <span class="op">=</span> <span class="fu"><a href="sc_cache.html">sc_cache</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -169,14 +170,25 @@ after the calls in progress and returns what is done.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>random seed for shuffling and for the mock provider.</p></dd>
+<dd><p>random seed for shuffling and for the mock provider. It is
+also part of the cache key: The same <code>seed</code> reuses saved answers, a new
+one asks the models again.</p></dd>
+
+
+<dt id="arg-cache">cache<a class="anchor" aria-label="anchor" href="#arg-cache"></a></dt>
+<dd><p>the response cache: An <code><a href="sc_cache.html">sc_cache()</a></code>, a folder, <code>TRUE</code> (the
+default folder) or <code>FALSE</code> (no cache). By default, saved answers are
+reused, so the same run twice gives the same data and the second run
+costs nothing. Use <code>sc_cache(mode = "refresh")</code> to ask again.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A tibble with <code>model</code>, <code>provider</code>, <code>model_id</code>, <code>temperature</code>,
 <code>attempt</code>, <code>persona_id</code>, <code>respondent</code>, any persona attributes, and one
-column per item. The attribute <code>log</code> holds the failed calls.</p>
+column per item. The attribute <code>log</code> holds the failed calls, and
+<code>cache</code> the number of answers taken from the cache (<code>hits</code>) and saved to
+it (<code>saved</code>).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -189,13 +201,18 @@ are retried up to <code>max_retries</code> times and then stored as <code>NA</co
 done, with <code>run.json</code> (the settings, without API keys) and
 <code>prompts.json</code> (every prompt sent) beside it, so a stopped run keeps the
 finished attempts. Read the folder back with <code><a href="write_synthetic.html">read_synthetic()</a></code>.</p>
+<p>Answers are saved in a response cache on disk (see <code><a href="sc_cache.html">sc_cache()</a></code>): A run
+with the same settings and <code>seed</code> reuses them instead of calling the
+models again, which makes it repeatable and free. See what a run will cost
+first with <code><a href="estimate_cost.html">estimate_cost()</a></code>.</p>
 <p>Use them to compare models with
 <code><a href="authenticity_benchmark.html">authenticity_benchmark()</a></code>, not to replace a field test.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="sc_instrument.html">sc_instrument()</a></code>, <code><a href="sc_personas.html">sc_personas()</a></code>, <code><a href="sc_model.html">sc_model()</a></code>,
-<code><a href="as_synthetic_list.html">as_synthetic_list()</a></code>, <code><a href="authenticity_benchmark.html">authenticity_benchmark()</a></code></p></div>
+<code><a href="estimate_cost.html">estimate_cost()</a></code>, <code><a href="sc_cache.html">sc_cache()</a></code>, <code><a href="as_synthetic_list.html">as_synthetic_list()</a></code>,
+<code><a href="authenticity_benchmark.html">authenticity_benchmark()</a></code></p></div>
     </div>
 
     <div class="section level2">

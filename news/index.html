@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">synthcheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,6 +54,10 @@
 <li><p>New <code><a href="../reference/sc_builtin_instrument.html">sc_builtin_instrument()</a></code> returns any bundled instrument, with its response scale, category labels and instructions.</p></li>
 <li><p>The app’s Instrument tab offers all four built-in instruments, and the Compare tab’s built-in real data follow the instrument chosen there, with a country filter.</p></li>
 <li><p>New article: “Short instruments with known item problems”.</p></li>
+<li><p>New response cache: <code><a href="../reference/generate_synthetic.html">generate_synthetic()</a></code> and <code><a href="../reference/cognitive_interview.html">cognitive_interview()</a></code> save every answer on disk (<code><a href="../reference/sc_cache.html">sc_cache()</a></code>), under a key made of the provider, model, temperature, prompts, respondent, attempt, retry and <code>seed</code>. The same run again reads the answers back: It is repeatable and costs nothing. More attempts or respondents call the models only for the new ones. <code>mode = "refresh"</code> asks again, <code>cache = FALSE</code> turns it off, and <code><a href="../reference/sc_cache_info.html">sc_cache_info()</a></code> and <code><a href="../reference/sc_cache_info.html">sc_cache_clear()</a></code> show and delete what is saved. Failed calls and mock answers are never saved.</p></li>
+<li><p>New <code><a href="../reference/estimate_cost.html">estimate_cost()</a></code> and <code><a href="../reference/estimate_cost.html">estimate_interview_cost()</a></code>: What a run is likely to cost before it starts, from the number of calls, guessed tokens and a price table (<code>sc_prices</code>, with the date of each price). Ollama models and cached calls are free. You can pass your own prices.</p></li>
+<li><p>The app shows the estimated cost under the run plan of the Models and Interviews tabs and asks you to confirm before a run with paid models. A new setting chooses whether to reuse, refresh or skip saved answers, and a button clears the cache.</p></li>
+<li><p>With one respondent per call, a retry now asks only for the items still missing, in both the one-at-a-time and the parallel paths.</p></li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="synthcheck-020">synthcheck 0.2.0<a class="anchor" aria-label="anchor" href="#synthcheck-020"></a></h2>

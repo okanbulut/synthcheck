@@ -17,7 +17,7 @@ path chosen in the first step."><meta property="og:image" content="https://www.o
 
     <a class="navbar-brand me-2" href="../index.html">synthcheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -135,7 +135,11 @@ offer a template to fill in. The templates are also in the package:
 <li><p><strong>3. Models:</strong> Add Anthropic, OpenAI or local Ollama models with their
 temperature (or several temperatures, one model each), enter API keys,
 choose the number of attempts and respondents, and run
-<code><a href="generate_synthetic.html">generate_synthetic()</a></code> with a progress bar and the time left.</p></li>
+<code><a href="generate_synthetic.html">generate_synthetic()</a></code> with a progress bar and the time left. Before a
+run with paid models, the app shows its estimated cost
+(<code><a href="estimate_cost.html">estimate_cost()</a></code>) and asks you to confirm. Answers are kept in the
+response cache (<code><a href="sc_cache.html">sc_cache()</a></code>), so the same run again is repeatable and
+free; choose to reuse, refresh or skip saved answers, or clear them.</p></li>
 <li><p><strong>4. Compare</strong> (with real data): Load real data and run
 <code><a href="authenticity_benchmark.html">authenticity_benchmark()</a></code>, with <code><a href="gg_benchmark.html">gg_benchmark()</a></code>, <code><a href="gg_behaviour.html">gg_behaviour()</a></code>
 and a plain-language summary per model (<code><a href="summarise_benchmark.html">summarise_benchmark()</a></code>).</p></li>

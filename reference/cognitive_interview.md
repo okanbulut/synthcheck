@@ -27,7 +27,8 @@ cognitive_interview(
   progress = interactive(),
   progress_file = NULL,
   stop_file = NULL,
-  seed = 1
+  seed = 1,
+  cache = sc_cache()
 )
 ```
 
@@ -116,7 +117,16 @@ cognitive_interview(
 
 - seed:
 
-  random seed for the mock provider.
+  random seed for the mock provider, also part of the cache key.
+
+- cache:
+
+  the response cache, as in
+  [`generate_synthetic()`](https://www.okanbulut.com/synthcheck/reference/generate_synthetic.md):
+  An
+  [`sc_cache()`](https://www.okanbulut.com/synthcheck/reference/sc_cache.md),
+  a folder, `TRUE` or `FALSE`. The respondent's two answers and the
+  coding are saved, so the same interviews again cost nothing.
 
 ## Value
 
@@ -190,7 +200,9 @@ QAS-99.* Research Triangle Institute.
 [`sc_probes()`](https://www.okanbulut.com/synthcheck/reference/sc_probes.md),
 [`summarise_interviews()`](https://www.okanbulut.com/synthcheck/reference/summarise_interviews.md),
 [`gg_interview()`](https://www.okanbulut.com/synthcheck/reference/gg_interview.md),
-[`sc_interview_prompts()`](https://www.okanbulut.com/synthcheck/reference/sc_interview_prompts.md)
+[`sc_interview_prompts()`](https://www.okanbulut.com/synthcheck/reference/sc_interview_prompts.md),
+[`estimate_interview_cost()`](https://www.okanbulut.com/synthcheck/reference/estimate_cost.md),
+[`sc_cache()`](https://www.okanbulut.com/synthcheck/reference/sc_cache.md)
 
 ## Examples
 

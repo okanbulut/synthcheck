@@ -81,6 +81,16 @@ Define an instrument and personas, call language models, save the data.
   : Build the prompts for one synthetic respondent
 - [`generate_synthetic()`](https://www.okanbulut.com/synthcheck/reference/generate_synthetic.md)
   : Generate synthetic respondents with language models
+- [`estimate_cost()`](https://www.okanbulut.com/synthcheck/reference/estimate_cost.md)
+  [`estimate_interview_cost()`](https://www.okanbulut.com/synthcheck/reference/estimate_cost.md)
+  : Estimate what a run will cost
+- [`sc_prices`](https://www.okanbulut.com/synthcheck/reference/sc_prices.md)
+  : Prices of language models
+- [`sc_cache()`](https://www.okanbulut.com/synthcheck/reference/sc_cache.md)
+  : Keep model answers on disk
+- [`sc_cache_info()`](https://www.okanbulut.com/synthcheck/reference/sc_cache_info.md)
+  [`sc_cache_clear()`](https://www.okanbulut.com/synthcheck/reference/sc_cache_info.md)
+  : See or clear the response cache
 - [`write_synthetic()`](https://www.okanbulut.com/synthcheck/reference/write_synthetic.md)
   [`read_synthetic()`](https://www.okanbulut.com/synthcheck/reference/write_synthetic.md)
   : Save and read synthetic respondents
