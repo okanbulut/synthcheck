@@ -176,7 +176,40 @@ nrow(syn2)
 
 `read_synthetic()` also reads a whole output folder back into one table.
 
-## 7. Benchmark
+## 7. Check the personas
+
+A persona-based run assumes the model follows its personas. `persona_fidelity()`
+checks that. For each model and scale it measures how much of the scale
+score lies between personas (eta squared) and compares it with the same
+data after shuffling the persona labels. Add `target_<scale>` columns to the
+persona table (1 for high, 0 for average, -1 for low) to check the direction
+too:
+
+```{r}
+per2 <- sc_personas(data.frame(
+  description = c("You never bend the rules to get ahead and you dislike flattery.",
+                  "You will say what people want to hear if it gets you what you want."),
+  target_H = c(1, -1)))
+syn_p <- generate_synthetic(ins, models[1], per2, respondents = 20, progress = FALSE)
+fid <- persona_fidelity(syn_p, ins, per2)
+fid
+```
+
+```{r, fig.height = 3}
+gg_persona_fidelity(fid)
+```
+
+The mock provider ignores personas, so its Honesty-Humility scores do not
+separate, and the personas miss their targets. A model that follows its
+personas separates them, with each persona on the side of its target. Give `real` to standardize the scores against real
+people, so a target of 1 means one standard deviation above them. The check
+shows whether a model follows its personas. It does not show that a persona
+answers like real people like it: The benchmark does that.
+
+In the app, the Models tab shows the same check after a run with two or more
+personas.
+
+## 8. Benchmark
 
 `as_synthetic_list()` turns the long table into the list of models and
 attempts that the benchmark takes:
@@ -194,7 +227,7 @@ shuffled real answers score. Real language models are not guaranteed to do
 better. On HEXACO, the six models in `hexaco_llm` often fall below 0 because
 their respondents bunch together; see [the benchmark](benchmark.html).
 
-## 8. A report
+## 9. A report
 
 `write_report()` puts the results in one file: The plots, the tables, the
 plain-language summaries and the settings needed to repeat the run. HTML (the

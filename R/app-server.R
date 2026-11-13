@@ -523,17 +523,57 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
                               "100 is as close as a second sample of real people; 0 is no better than",
                               "shuffled columns of the real data."))
     })
+    # persona check on the run's data: do the personas change the answers?
+    fidelity <- shiny::reactive({
+      d <- rv$run_data
+      if (is.null(d) || !nrow(d) || !"persona_id" %in% names(d) || length(unique(d$persona_id)) < 2L)
+        return(NULL)
+      ins <- instrument_ok()
+      if (inherits(ins, "error") || !"scale" %in% names(ins$items)) return(NULL)
+      per <- tryCatch(persona_table(), error = function(e) NULL)
+      tryCatch(persona_fidelity(d, ins, per, n_perm = 200), error = function(e) e)
+    })
+    output$fid_summary <- shiny::renderUI({
+      f <- fidelity()
+      if (is.null(f))
+        return(shiny::p(class = "text-muted",
+                        "Generate data with two or more personas and an instrument with scales to check",
+                        "whether the personas change the answers. Add columns such as target_C (1 = high,",
+                        "-1 = low) to the persona table to check the direction too."))
+      if (inherits(f, "error")) return(shiny::div(class = "text-danger", conditionMessage(f)))
+      shiny::tagList(lapply(strsplit(fid_sentence(f), "\n", fixed = TRUE)[[1]], shiny::p),
+                     shiny::p(class = "small text-muted",
+                              "Each scale is compared with the same data after shuffling the persona labels.",
+                              "It shows whether the model follows its personas, not whether they answer like",
+                              "real people."))
+    })
+    output$fid_plot_ui <- shiny::renderUI({
+      f <- fidelity()
+      if (is.null(f) || inherits(f, "error")) return(NULL)
+      n <- length(unique(f$profiles$persona))
+      shiny::plotOutput("fid_plot", height = sprintf("%dpx", 170 + 45 * n))
+    })
+    output$fid_plot <- shiny::renderPlot({
+      f <- fidelity()
+      shiny::req(f, !inherits(f, "error"))
+      gg_persona_fidelity(f)
+    }, res = 96)
     output$bm_plot <- shiny::renderPlot({
       shiny::req(rv$benchmark); gg_benchmark(rv$benchmark)
-    }, res = 96)
+    }, res = 96, height = function() 170 + 46 * max(1L, nrow(rv$benchmark$table %||% data.frame(x = 1))))
     output$bm_behaviour <- shiny::renderPlot({
       shiny::req(rv$benchmark); gg_behaviour(rv$benchmark$behaviour)
     }, res = 96)
     output$bm_table <- shiny::renderTable({
       shiny::req(rv$benchmark)
       t <- as.data.frame(rv$benchmark$table)
-      t <- t[c("model", "attempts", "score", "weakest", "overlap", "structure", "behaviour")]
-      names(t) <- c("Model", "Attempts", "Score", "Weakest", "Overlap", "Structure", "Behaviour")
+      ci <- if (all(c("score_lower", "score_upper") %in% names(t)))
+        paste(bm_num(t$score_lower), "to", bm_num(t$score_upper)) else rep("", nrow(t))
+      t <- data.frame(t[c("model", "attempts", "score")], ci, t[c("weakest", "overlap", "structure", "behaviour")],
+                      stringsAsFactors = FALSE)
+      names(t) <- c("Model", "Attempts", "Score",
+                    sprintf("Score, %.0f%% interval", 100 * (rv$benchmark$settings$conf %||% 0.95)),
+                    "Weakest", "Overlap", "Structure", "Behaviour")
       t
     }, digits = 0)
 
