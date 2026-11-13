@@ -1,7 +1,7 @@
 # Define an instrument for synthetic respondents
 
-**Experimental.** `sc_instrument()` describes the survey that synthetic
-respondents take: The items, the response scale and the instructions.
+`sc_instrument()` describes the survey that synthetic respondents take:
+The items, the response scale and the instructions.
 [`generate_synthetic()`](https://www.okanbulut.com/synthcheck/reference/generate_synthetic.md)
 turns it into a prompt, and the item table works as `items` in
 [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md).

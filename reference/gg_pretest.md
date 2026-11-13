@@ -1,15 +1,14 @@
 # Draw the pretest
 
-**Experimental.** With `what = "items"`, one row per flagged item and
-one column per condition. Red tiles are items with too little signal
-(they barely vary, link weakly to their scale, run against it or sit
-closer to another scale), blue tiles are near-duplicates of another
-item, pale tiles have no flag. The letters name the flags, and the row
-label gives the number of conditions that flag the item. With
-`what = "scales"`, one row per condition and one tile per scale:
-Cronbach's alpha, red below 0.7, pale around 0.8, blue at 0.95 or more
-(often a sign of tidy synthetic respondents), with the number of
-dimensions parallel analysis finds.
+With `what = "items"`, one row per flagged item and one column per
+condition. Red tiles are items with too little signal (they barely vary,
+link weakly to their scale, run against it or sit closer to another
+scale), blue tiles are near-duplicates of another item, pale tiles have
+no flag. The letters name the flags, and the row label gives the number
+of conditions that flag the item. With `what = "scales"`, one row per
+condition and one tile per scale: Cronbach's alpha, red below 0.7, pale
+around 0.8, blue at 0.95 or more (often a sign of tidy synthetic
+respondents), with the number of dimensions parallel analysis finds.
 
 ## Usage
 

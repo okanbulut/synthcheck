@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">synthcheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,11 +78,11 @@
 
     
     
-<p><strong>Experimental.</strong> This tutorial walks through
-<code><a href="../reference/synthetic_coverage.html">synthetic_coverage()</a></code>, <code><a href="../reference/gg_coverage.html">gg_coverage()</a></code> and
-<code><a href="../reference/blend_llms.html">blend_llms()</a></code>: Where synthetic respondents land compared
-with real people (Overlap), and whether the items relate to each other
-as they do in real people (Structure).</p>
+<p>This tutorial walks through <code><a href="../reference/synthetic_coverage.html">synthetic_coverage()</a></code>,
+<code><a href="../reference/gg_coverage.html">gg_coverage()</a></code> and <code><a href="../reference/blend_llms.html">blend_llms()</a></code>: Where
+synthetic respondents land compared with real people (Overlap), and
+whether the items relate to each other as they do in real people
+(Structure).</p>
 <div class="section level2">
 <h2 id="keyed-data-in-the-shape-synthcheck-expects">Keyed data in the shape synthcheck expects<a class="anchor" aria-label="anchor" href="#keyed-data-in-the-shape-synthcheck-expects"></a>
 </h2>
@@ -116,7 +116,7 @@ personas, so the spread over attempts shows how stable a model is.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cov</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synthetic_coverage.html">synthetic_coverage</a></span><span class="op">(</span><span class="va">synthetic</span>, <span class="va">real</span>, cor <span class="op">=</span> <span class="st">"pearson"</span><span class="op">)</span></span>
 <span><span class="va">cov</span></span>
-<span><span class="co">#&gt; &lt;sc_coverage&gt; 6 model(s), 40 item(s), coverage of real total-score slices (EXPERIMENTAL)</span></span>
+<span><span class="co">#&gt; &lt;sc_coverage&gt; 6 model(s), 40 item(s), coverage of real total-score slices</span></span>
 <span><span class="co">#&gt;             model attempts overlap_overall overlap_lowest overlap_highest</span></span>
 <span><span class="co">#&gt;       Gemma 4 26B        4             45%            41%             46%</span></span>
 <span><span class="co">#&gt;      GPT-OSS-120B        4             44%            41%             48%</span></span>

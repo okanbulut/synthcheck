@@ -1,7 +1,7 @@
 # Describe the benchmark in plain language
 
-**Experimental.** `summarise_benchmark()` writes a few sentences per
-model from a result of
+`summarise_benchmark()` writes a few sentences per model from a result
+of
 [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md):
 The score and its weakest column, how close each anchored column is to
 real people, the behaviour features that differ most from real people
@@ -36,9 +36,8 @@ The anchored values read as follows: 100 is as close as a second sample
 of real people, 0 is no better than shuffling the real answers within
 each item, and below 0 is worse than that.
 
-Synthetic respondents are experimental: The benchmark compares models
-and supports decisions about them. It does not show that synthetic data
-can replace a field test.
+The benchmark compares models and supports decisions about them. It does
+not show that synthetic data can replace a field test.
 
 ## See also
 
@@ -53,7 +52,7 @@ ca <- hexaco_llm[hexaco_llm$country == "Canada" & hexaco_llm$attempt <= 2, ]
 bm <- authenticity_benchmark(as_synthetic_list(ca), real, h, fit_scales = character(0),
                              n_splits = 5, n_floor = 5)
 summarise_benchmark(bm)
-#> Synthetic authenticity benchmark in plain language (experimental)
+#> Synthetic authenticity benchmark in plain language
 #> 
 #> GPT-OSS-120B scores -46 on the benchmark (1st of 6), set by its weakest
 #> column, Overlap. Overlap is -46 (worse than shuffled columns);

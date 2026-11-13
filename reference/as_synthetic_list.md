@@ -1,6 +1,5 @@
 # Turn a table of synthetic respondents into benchmark input
 
-**Experimental.**
 [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md),
 [`synthetic_behaviour()`](https://www.okanbulut.com/synthcheck/reference/synthetic_behaviour.md)
 and

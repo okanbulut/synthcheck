@@ -1,9 +1,9 @@
 # Run cognitive interviews with language models playing personas
 
-**Experimental.** `cognitive_interview()` asks one or more language
-models to take part in a cognitive interview about each survey item, as
-each persona. It is meant for screening items when there are no real
-respondents yet, for example after a
+`cognitive_interview()` asks one or more language models to take part in
+a cognitive interview about each survey item, as each persona. It is
+meant for screening items when there are no real respondents yet, for
+example after a
 [`synthetic_pretest()`](https://www.okanbulut.com/synthcheck/reference/synthetic_pretest.md):
 It points to wording to look at. It is not a substitute for cognitive
 interviews with real people or for a field test.

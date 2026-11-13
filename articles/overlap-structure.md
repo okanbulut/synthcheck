@@ -1,6 +1,6 @@
 # Overlap and Structure: The coverage strip
 
-**Experimental.** This tutorial walks through
+This tutorial walks through
 [`synthetic_coverage()`](https://www.okanbulut.com/synthcheck/reference/synthetic_coverage.md),
 [`gg_coverage()`](https://www.okanbulut.com/synthcheck/reference/gg_coverage.md)
 and
@@ -46,7 +46,7 @@ personas, so the spread over attempts shows how stable a model is.
 
 cov <- synthetic_coverage(synthetic, real, cor = "pearson")
 cov
-#> <sc_coverage> 6 model(s), 40 item(s), coverage of real total-score slices (EXPERIMENTAL)
+#> <sc_coverage> 6 model(s), 40 item(s), coverage of real total-score slices
 #>             model attempts overlap_overall overlap_lowest overlap_highest
 #>       Gemma 4 26B        4             45%            41%             46%
 #>      GPT-OSS-120B        4             44%            41%             48%

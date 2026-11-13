@@ -1,7 +1,6 @@
 # Pretesting a scale without real data
 
-**Experimental.** Most people who write a new scale have no real data
-yet.
+Most people who write a new scale have no real data yet.
 [`synthetic_pretest()`](https://www.okanbulut.com/synthcheck/reference/synthetic_pretest.md)
 is for that stage. It runs a standard item analysis on synthetic
 respondents and flags items worth a second look. It also asks two
@@ -48,7 +47,7 @@ Those columns are the structure the pretest checks.
 
 pt <- synthetic_pretest(synthetic, items, by = "model", irt = FALSE)
 pt
-#> Pretest without real data (experimental): Pilot screening, not validation
+#> Pretest without real data: Pilot screening, not validation
 #> 80 items in 2 scales, 6 conditions.
 #> 
 #>         condition attempts    n items flagged alpha scales n_factors own_scale
@@ -222,7 +221,7 @@ give.
 ``` r
 
 summarise_pretest(pt)
-#> Pretest without real data, in plain language (experimental)
+#> Pretest without real data, in plain language
 #> 
 #> This is pilot screening on synthetic respondents only. It flags items
 #> worth a second look; it does not show that the scale works in people.

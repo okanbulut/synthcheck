@@ -1,7 +1,7 @@
 # Construct structure of synthetic respondents
 
-**Experimental.** `synthetic_construct()` checks the scales rather than
-the items. Structure in
+`synthetic_construct()` checks the scales rather than the items.
+Structure in
 [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md)
 averages over every pair of items, so a model can score well there and
 still blur the traits together or make every scale too coherent. Three
@@ -136,7 +136,7 @@ ca <- hexaco_llm[hexaco_llm$country == "Canada" & hexaco_llm$attempt <= 2, ]
 syn <- lapply(split(ca, ca$model, drop = TRUE), function(m) split(m, m$attempt))
 cs <- synthetic_construct(syn, real, h, n_perm = 50, n_splits = 5)
 cs
-#> Construct structure (experimental)
+#> Construct structure
 #> 120 items in 3 scales, 1708 real respondents.
 #> 
 #>                 model attempts trait_cor_gap alpha_gap  phi phi_null rejects

@@ -1,9 +1,9 @@
 # Behaviour: How synthetic respondents answer
 
-**Experimental.** Two sets of answers can land in the same score deciles
-and still be given in very different ways. Behaviour compares how
-synthetic and real respondents answer, with eight features per
-respondent. This tutorial covers
+Two sets of answers can land in the same score deciles and still be
+given in very different ways. Behaviour compares how synthetic and real
+respondents answer, with eight features per respondent. This tutorial
+covers
 [`behaviour_features()`](https://www.okanbulut.com/synthcheck/reference/behaviour_features.md),
 [`flag_careless()`](https://www.okanbulut.com/synthcheck/reference/flag_careless.md),
 [`synthetic_behaviour()`](https://www.okanbulut.com/synthcheck/reference/synthetic_behaviour.md)
@@ -106,7 +106,7 @@ Behaviour is the mean over the eight features.
 
 beh <- synthetic_behaviour(as_synthetic_list(ca), real, h)
 beh
-#> Behaviour of synthetic respondents (experimental)
+#> Behaviour of synthetic respondents
 #> 40 items, 1708 real respondents; person fit on H.
 #> 
 #>             model attempts Behaviour Lowest Highest lz < P5 (%) lz > P95 (%)

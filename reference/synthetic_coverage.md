@@ -1,9 +1,9 @@
 # How well do synthetic respondents cover the real population?
 
-**Experimental.** `synthetic_coverage()` compares synthetic respondents
-from one or more language models (each run several times) with real
-responses to the same items, and finds the blend of models that matches
-the real population best.
+`synthetic_coverage()` compares synthetic respondents from one or more
+language models (each run several times) with real responses to the same
+items, and finds the blend of models that matches the real population
+best.
 [`gg_coverage()`](https://www.okanbulut.com/synthcheck/reference/gg_coverage.md)
 draws the result as a *coverage strip*: One row per model and attempt,
 one column per slice of the real population, coloured by whether the
@@ -167,9 +167,8 @@ recipe's weights. See
 [`blend_llms()`](https://www.okanbulut.com/synthcheck/reference/blend_llms.md)
 to search again with other settings.
 
-Synthetic respondents are experimental: Use the coverage strip to
-compare models and to decide how to combine them, not to replace a field
-test.
+Use the coverage strip to compare models and to decide how to combine
+them, not to replace a field test.
 
 ## See also
 
@@ -191,7 +190,7 @@ llm <- function(mu, s) lapply(1:5, function(i) as.data.frame(
 cov <- synthetic_coverage(list("LLM A" = llm(0.8, 0.7), "LLM B" = llm(0, 0.4),
                                "LLM C" = llm(-0.6, 0.9)), real)
 cov
-#> <sc_coverage> 3 model(s), 12 item(s), coverage of real total-score slices (EXPERIMENTAL)
+#> <sc_coverage> 3 model(s), 12 item(s), coverage of real total-score slices
 #>       model attempts overlap_overall overlap_lowest overlap_highest
 #>       LLM A        5             67%            65%             69%
 #>       LLM B        5             74%            70%             77%

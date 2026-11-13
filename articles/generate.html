@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">synthcheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,12 +78,12 @@
 
     
     
-<p><strong>Experimental.</strong> This tutorial makes synthetic
-respondents from your own instrument, personas and models, in R code.
-The <a href="app-tour.html">app</a> does the same steps on screen, with
-or without real data. Synthetic respondents are for comparing models
-with the benchmark, or for pretesting a scale before real data exist,
-not for replacing a field test.</p>
+<p>This tutorial makes synthetic respondents from your own instrument,
+personas and models, in R code. The <a href="app-tour.html">app</a> does
+the same steps on screen, with or without real data. Synthetic
+respondents are for comparing models with the benchmark, or for
+pretesting a scale before real data exist, not for replacing a field
+test.</p>
 <p>Everything below runs with the <strong>mock</strong> provider, which
 gives random answers without calling an API. Swap in
 <code>sc_model("anthropic")</code>, <code>sc_model("openai")</code> or
@@ -279,7 +279,7 @@ of models and attempts that the benchmark takes:</p>
 <span><span class="va">bm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/authenticity_benchmark.html">authenticity_benchmark</a></span><span class="op">(</span><span class="fu"><a href="../reference/as_synthetic_list.html">as_synthetic_list</a></span><span class="op">(</span><span class="va">syn</span>, items <span class="op">=</span> <span class="va">ins</span><span class="op">$</span><span class="va">items</span><span class="op">$</span><span class="va">item</span><span class="op">)</span>, <span class="va">real</span>, <span class="va">ins</span><span class="op">$</span><span class="va">items</span>,</span>
 <span>                             fit_scales <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>, n_splits <span class="op">=</span> <span class="fl">5</span>, n_floor <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="va">bm</span></span>
-<span><span class="co">#&gt; Synthetic authenticity benchmark (experimental)</span></span>
+<span><span class="co">#&gt; Synthetic authenticity benchmark</span></span>
 <span><span class="co">#&gt; 40 items, 1708 real respondents. Score: weakest.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   model attempts Overlap Structure Behaviour Score   Weakest</span></span>
@@ -289,7 +289,7 @@ of models and attempts that the benchmark takes:</p>
 <span><span class="co">#&gt; Anchors (raw, floor to ceiling, samples of 120): Overlap 51.5 to 85.0, Structure 79.0 to 89.5, Behaviour 66.4 to 85.1.</span></span>
 <span><span class="co">#&gt; 0 = shuffled real columns, 100 = a second sample of real people.</span></span>
 <span><span class="fu"><a href="../reference/summarise_benchmark.html">summarise_benchmark</a></span><span class="op">(</span><span class="va">bm</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Synthetic authenticity benchmark in plain language (experimental)</span></span>
+<span><span class="co">#&gt; Synthetic authenticity benchmark in plain language</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Mock B scores -3 on the benchmark (1st of 2), set by its weakest</span></span>
 <span><span class="co">#&gt; column, Behaviour. Overlap is 2 (barely better than shuffled columns);</span></span>

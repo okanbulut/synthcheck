@@ -1,7 +1,7 @@
 # Flag careless real respondents
 
-**Experimental.** `flag_careless()` marks real respondents whose answers
-look careless, using the eight
+`flag_careless()` marks real respondents whose answers look careless,
+using the eight
 [`behaviour_features()`](https://www.okanbulut.com/synthcheck/reference/behaviour_features.md).
 By default a respondent is careless when at least two features fall in
 the real data's most extreme 2.5% on the careless side: The highest 2.5%

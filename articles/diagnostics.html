@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">synthcheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,10 +78,10 @@
 
     
     
-<p><strong>Experimental.</strong> The benchmark scores each model on
-Overlap, Structure and Behaviour. Three diagnostics look at failures
-those columns can miss. They come from recent studies of synthetic
-survey respondents, and they do not change the benchmark score:</p>
+<p>The benchmark scores each model on Overlap, Structure and Behaviour.
+Three diagnostics look at failures those columns can miss. They come
+from recent studies of synthetic survey respondents, and they do not
+change the benchmark score:</p>
 <ul>
 <li>
 <code><a href="../reference/synthetic_construct.html">synthetic_construct()</a></code>: Do the scales hold together and
@@ -137,7 +137,7 @@ above chance.</li>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synthetic_construct.html">synthetic_construct</a></span><span class="op">(</span><span class="va">synthetic</span>, <span class="va">real</span>, <span class="va">hexaco_items</span>, n_perm <span class="op">=</span> <span class="fl">100</span>, n_splits <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">cs</span></span>
-<span><span class="co">#&gt; Construct structure (experimental)</span></span>
+<span><span class="co">#&gt; Construct structure</span></span>
 <span><span class="co">#&gt; 240 items in 6 scales, 1708 real respondents.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                 model attempts trait_cor_gap alpha_gap  phi phi_null rejects</span></span>
@@ -184,7 +184,7 @@ second sample of real people gives about 1 on both.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/respondent_coverage.html">respondent_coverage</a></span><span class="op">(</span><span class="va">synthetic</span>, <span class="va">real</span>, <span class="va">hexaco_items</span>, n_draws <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="va">rc</span></span>
-<span><span class="co">#&gt; Respondent coverage (experimental)</span></span>
+<span><span class="co">#&gt; Respondent coverage</span></span>
 <span><span class="co">#&gt; 240 items, 1708 real respondents, 3 real samples per attempt.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                 model  RCG  OSR     pattern</span></span>

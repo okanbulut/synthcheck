@@ -1,10 +1,10 @@
 # Draw the behaviour strip
 
-**Experimental.** One row per model (or per attempt), one column per
-behaviour feature. Each tile is coloured by the direction of the gap
-(red: Synthetic respondents lower than real people, blue: Higher) with a
-strength of `100 - B_f`, so a pale tile is a match. The number in the
-tile is \\B_f\\, and the row label gives Behaviour.
+One row per model (or per attempt), one column per behaviour feature.
+Each tile is coloured by the direction of the gap (red: Synthetic
+respondents lower than real people, blue: Higher) with a strength of
+`100 - B_f`, so a pale tile is a match. The number in the tile is
+\\B_f\\, and the row label gives Behaviour.
 
 ## Usage
 

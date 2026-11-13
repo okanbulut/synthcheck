@@ -1,6 +1,6 @@
 # Show the prompts of a cognitive interview
 
-**Experimental.** Shows exactly what
+Shows exactly what
 [`cognitive_interview()`](https://www.okanbulut.com/synthcheck/reference/cognitive_interview.md)
 sends for one item and persona: The persona's system prompt, the
 think-aloud request, the probes and the coder's instructions.

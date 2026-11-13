@@ -1,8 +1,8 @@
 # The eight behaviour features of each respondent
 
-**Experimental.** `behaviour_features()` describes how each respondent
-answers, apart from what they answer. The eight features are the
-building blocks of the Behaviour index in
+`behaviour_features()` describes how each respondent answers, apart from
+what they answer. The eight features are the building blocks of the
+Behaviour index in
 [`synthetic_behaviour()`](https://www.okanbulut.com/synthcheck/reference/synthetic_behaviour.md)
 and of the careless flags in
 [`flag_careless()`](https://www.okanbulut.com/synthcheck/reference/flag_careless.md).

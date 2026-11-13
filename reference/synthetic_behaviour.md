@@ -1,7 +1,7 @@
 # Behaviour: Do synthetic respondents answer the way real people do?
 
-**Experimental.** `synthetic_behaviour()` compares how synthetic and
-real respondents answer, using the eight
+`synthetic_behaviour()` compares how synthetic and real respondents
+answer, using the eight
 [`behaviour_features()`](https://www.okanbulut.com/synthcheck/reference/behaviour_features.md).
 For each feature, the real values are cut at their deciles and the share
 of synthetic respondents in each decile is counted, as Overlap does for
@@ -94,8 +94,7 @@ below the real 5th percentile of \\l_z\\ (careless-like) and above the
 real 95th percentile (too coherent); real data have 5% in each by
 construction.
 
-Synthetic respondents are experimental: Use Behaviour to compare models,
-not to replace a field test.
+Use Behaviour to compare models, not to replace a field test.
 
 ## See also
 
@@ -112,7 +111,7 @@ ca <- hexaco_llm[hexaco_llm$country == "Canada" & hexaco_llm$attempt <= 2, ]
 syn <- lapply(split(ca, ca$model, drop = TRUE), function(m) split(m, m$attempt))
 beh <- synthetic_behaviour(syn, real, h, fit_scales = character(0))
 beh
-#> Behaviour of synthetic respondents (experimental)
+#> Behaviour of synthetic respondents
 #> 40 items, 1708 real respondents; person fit on no scales.
 #> 
 #>             model attempts Behaviour Lowest Highest lz < P5 (%) lz > P95 (%)

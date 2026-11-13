@@ -1,8 +1,8 @@
 # Plot cognitive interview problems per item
 
-**Experimental.** `gg_interview()` draws one heatmap of items (rows) by
-stage (columns), coloured by the share of interviews in which the coder
-found a problem: Pale is none, red is most. Flagged items (see
+`gg_interview()` draws one heatmap of items (rows) by stage (columns),
+coloured by the share of interviews in which the coder found a problem:
+Pale is none, red is most. Flagged items (see
 [`summarise_interviews()`](https://www.okanbulut.com/synthcheck/reference/summarise_interviews.md))
 are marked with an asterisk after their name, and the items are sorted
 with the most problems at the top.

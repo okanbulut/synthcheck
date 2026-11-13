@@ -1,6 +1,5 @@
 # A tour of the synthcheck app
 
-**Experimental.**
 [`run_synthcheck_app()`](https://www.okanbulut.com/synthcheck/reference/run_synthcheck_app.md)
 opens an app that does the whole synthcheck workflow without code. It
 starts with one question: **Do you already have real responses to this
@@ -337,7 +336,7 @@ tutorial](https://www.okanbulut.com/synthcheck/articles/cognitive-interviews.md)
 explains the probes and the coding. It is a screening aid, not a
 substitute for cognitive interviews with real people.
 
-## Export (5 with real data, 6 without)
+## Export
 
 ![The Export tab with downloads and the R
 script.](figures/app-export.png)

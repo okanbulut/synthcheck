@@ -1,6 +1,6 @@
 # Summarise cognitive interviews per item
 
-**Experimental.** `summarise_interviews()` rolls the coded interviews of
+`summarise_interviews()` rolls the coded interviews of
 [`cognitive_interview()`](https://www.okanbulut.com/synthcheck/reference/cognitive_interview.md)
 up to one row per item: The share of interviews with a problem at each
 stage and at any stage, how many personas and models raised a problem,

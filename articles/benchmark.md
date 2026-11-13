@@ -1,6 +1,5 @@
 # The synthetic authenticity benchmark
 
-**Experimental.**
 [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md)
 compares several language models on Overlap, Structure and Behaviour,
 and puts them in one table with a single score per model. The benchmark
@@ -29,7 +28,7 @@ synthetic <- as_synthetic_list(ca, items = items$item)
 
 bm <- authenticity_benchmark(synthetic, real, items, n_splits = 10, n_floor = 10)
 bm
-#> Synthetic authenticity benchmark (experimental)
+#> Synthetic authenticity benchmark
 #> 80 items, 1708 real respondents. Score: weakest.
 #> 
 #>             model attempts Overlap Structure Behaviour Score   Weakest
@@ -118,7 +117,7 @@ score.
 ``` r
 
 summarise_benchmark(bm)
-#> Synthetic authenticity benchmark in plain language (experimental)
+#> Synthetic authenticity benchmark in plain language
 #> 
 #> GPT-OSS-120B scores -49 on the benchmark (1st of 6), set by its weakest
 #> column, Overlap. Overlap is -49 (worse than shuffled columns);

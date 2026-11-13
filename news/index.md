@@ -1,6 +1,10 @@
 # Changelog
 
-## synthcheck (development version)
+## synthcheck 0.2.0
+
+Adds a path for scales without real data (a synthetic pretest and
+cognitive interviews with language models), a redesigned app and updated
+documentation.
 
 - New
   [`synthetic_pretest()`](https://www.okanbulut.com/synthcheck/reference/synthetic_pretest.md)
@@ -25,7 +29,7 @@
 
 - New article: “Pretesting a scale without real data”.
 
-- New cognitive interviews for items without real data (experimental):
+- New cognitive interviews for items without real data:
   [`cognitive_interview()`](https://www.okanbulut.com/synthcheck/reference/cognitive_interview.md)
   has language models play each persona, think aloud while answering an
   item and answer scripted verbal probes
@@ -75,11 +79,19 @@
 - The README, `citation("synthcheck")` and `CITATION.cff` give the
   Zenodo DOI that covers all versions (10.5281/zenodo.24173113).
 
+- Figure captions on the website are italic and muted, so they read
+  apart from the text.
+
+- synthcheck is no longer labelled experimental in the README, the help
+  pages, the articles, the printed results or the app. The caveat stays:
+  The benchmark compares models and supports decisions about them, and
+  it does not show that synthetic data can replace a field test.
+
 ## synthcheck 0.1.0
 
-First release, archived on Zenodo. synthcheck is experimental: The
-benchmark compares models and supports decisions about them. It does not
-show that synthetic respondents can replace a field test.
+First release, archived on Zenodo. The benchmark compares models and
+supports decisions about them. It does not show that synthetic
+respondents can replace a field test.
 
 ### The synthetic authenticity benchmark
 

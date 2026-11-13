@@ -1,6 +1,6 @@
 # Build the prompts for one synthetic respondent
 
-**Experimental.** Shows exactly what
+Shows exactly what
 [`generate_synthetic()`](https://www.okanbulut.com/synthcheck/reference/generate_synthetic.md)
 sends: The persona as the system prompt, and the instructions, response
 scale and items as the user prompt.

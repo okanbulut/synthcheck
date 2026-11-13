@@ -1,7 +1,7 @@
 # Define personas for synthetic respondents
 
-**Experimental.** A persona describes the person a synthetic respondent
-plays. It becomes the system prompt of each call in
+A persona describes the person a synthetic respondent plays. It becomes
+the system prompt of each call in
 [`generate_synthetic()`](https://www.okanbulut.com/synthcheck/reference/generate_synthetic.md).
 `sc_personas()` takes the descriptions directly, and `sc_persona_grid()`
 builds them from every combination of a few attributes.

@@ -1,8 +1,7 @@
 # The synthetic authenticity benchmark
 
-**Experimental.** `authenticity_benchmark()` scores several language
-models on three indices and puts them in one table, with one row per
-model:
+`authenticity_benchmark()` scores several language models on three
+indices and puts them in one table, with one row per model:
 
 ## Usage
 
@@ -167,9 +166,8 @@ table), not a competitor. For the same reason, its Overlap and Structure
 can be above 100: It reproduces the full real sample more closely than a
 second, smaller sample of real people does.
 
-Synthetic respondents are experimental: The benchmark compares models
-and supports decisions about them. It does not show that synthetic data
-can replace a field test.
+The benchmark compares models and supports decisions about them. It does
+not show that synthetic data can replace a field test.
 
 ## See also
 
@@ -187,7 +185,7 @@ syn <- lapply(split(ca, ca$model, drop = TRUE), function(m) split(m, m$attempt))
 bm <- authenticity_benchmark(syn, real, h, fit_scales = character(0),
                              n_splits = 5, n_floor = 5)
 bm
-#> Synthetic authenticity benchmark (experimental)
+#> Synthetic authenticity benchmark
 #> 80 items, 1708 real respondents. Score: weakest.
 #> 
 #>             model attempts Overlap Structure Behaviour Score   Weakest
@@ -208,7 +206,7 @@ ca <- hexaco_llm[hexaco_llm$country == "Canada", ]
 syn <- lapply(split(ca, ca$model, drop = TRUE), function(m) split(m, m$attempt))
 bm <- authenticity_benchmark(syn, real, hexaco_items)
 bm
-#> Synthetic authenticity benchmark (experimental)
+#> Synthetic authenticity benchmark
 #> 240 items, 1708 real respondents. Score: weakest.
 #> 
 #>             model attempts Overlap Structure Behaviour Score   Weakest

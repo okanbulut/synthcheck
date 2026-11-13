@@ -1,9 +1,9 @@
 # Pretest a scale on synthetic respondents, without real data
 
-**Experimental.** `synthetic_pretest()` is for the stage before any real
-data exist. It runs a standard item analysis on synthetic respondents
-and flags items worth a second look. It is **pilot screening, not
-validation**: Language models answer more tidily than people (see
+`synthetic_pretest()` is for the stage before any real data exist. It
+runs a standard item analysis on synthetic respondents and flags items
+worth a second look. It is **pilot screening, not validation**: Language
+models answer more tidily than people (see
 [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md)
 on the HEXACO data), so a clean result here does not show that a scale
 works in people. Items that fail even with tidy respondents are the ones
@@ -170,7 +170,7 @@ h <- hexaco_items[hexaco_items$trait %in% c("H", "C"), ]
 ca <- hexaco_llm[hexaco_llm$country == "Canada" & hexaco_llm$attempt <= 3, ]
 pt <- synthetic_pretest(ca, h, irt = FALSE, n_pa = 5)
 pt
-#> Pretest without real data (experimental): Pilot screening, not validation
+#> Pretest without real data: Pilot screening, not validation
 #> 80 items in 2 scales, 6 conditions.
 #> 
 #>         condition attempts    n items flagged alpha scales n_factors own_scale
@@ -217,7 +217,7 @@ pt
 #> reverse_ok: Share of reverse-keyed items whose key comes through; 
 #> n_factors: Dimensions by parallel analysis over all items (designed: `scales`).
 summarise_pretest(pt)
-#> Pretest without real data, in plain language (experimental)
+#> Pretest without real data, in plain language
 #> 
 #> This is pilot screening on synthetic respondents only. It flags items
 #> worth a second look; it does not show that the scale works in people.

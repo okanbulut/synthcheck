@@ -1,11 +1,11 @@
 # App demos: Four ways to use the app
 
-**Experimental.** These demos walk through the app from start to finish.
-The first three use real data to benchmark the models: Demos 1 and 2
-need no API key, so you can try them right away, and Demo 3 is a real
-run with your own questionnaire. Demo 4 takes the path without real
-data: A pretest and cognitive interviews, also without an API key. For
-what every control does, see [the tour of the
+These demos walk through the app from start to finish. The first three
+use real data to benchmark the models: Demos 1 and 2 need no API key, so
+you can try them right away, and Demo 3 is a real run with your own
+questionnaire. Demo 4 takes the path without real data: A pretest and
+cognitive interviews, also without an API key. For what every control
+does, see [the tour of the
 app](https://www.okanbulut.com/synthcheck/articles/app-tour.md).
 
 ``` r

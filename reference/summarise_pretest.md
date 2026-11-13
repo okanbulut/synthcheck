@@ -1,7 +1,6 @@
 # Describe the pretest in plain language
 
-**Experimental.** `summarise_pretest()` writes a few sentences from a
-result of
+`summarise_pretest()` writes a few sentences from a result of
 [`synthetic_pretest()`](https://www.okanbulut.com/synthcheck/reference/synthetic_pretest.md):
 Which items are flagged by most conditions and why, how well the
 conditions agree, whether the designed structure comes back, and whether

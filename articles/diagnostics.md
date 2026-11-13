@@ -1,9 +1,9 @@
 # Diagnostics beside the benchmark
 
-**Experimental.** The benchmark scores each model on Overlap, Structure
-and Behaviour. Three diagnostics look at failures those columns can
-miss. They come from recent studies of synthetic survey respondents, and
-they do not change the benchmark score:
+The benchmark scores each model on Overlap, Structure and Behaviour.
+Three diagnostics look at failures those columns can miss. They come
+from recent studies of synthetic survey respondents, and they do not
+change the benchmark score:
 
 - [`synthetic_construct()`](https://www.okanbulut.com/synthcheck/reference/synthetic_construct.md):
   Do the scales hold together and relate to each other as they do in
@@ -56,7 +56,7 @@ makes three checks for each scale and model:
 
 cs <- synthetic_construct(synthetic, real, hexaco_items, n_perm = 100, n_splits = 10)
 cs
-#> Construct structure (experimental)
+#> Construct structure
 #> 240 items in 6 scales, 1708 real respondents.
 #> 
 #>                 model attempts trait_cor_gap alpha_gap  phi phi_null rejects
@@ -109,7 +109,7 @@ sample of real people gives about 1 on both.
 
 rc <- respondent_coverage(synthetic, real, hexaco_items, n_draws = 3)
 rc
-#> Respondent coverage (experimental)
+#> Respondent coverage
 #> 240 items, 1708 real respondents, 3 real samples per attempt.
 #> 
 #>                 model  RCG  OSR     pattern

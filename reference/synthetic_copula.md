@@ -1,11 +1,11 @@
 # Respondents drawn from a Gaussian copula of the real data
 
-**Experimental.** `synthetic_copula()` makes synthetic respondents with
-no language model. It keeps each item's answer distribution and the rank
-correlations between items, and nothing else. It is a reference
-generator: A language model that does no better than the copula adds
-nothing beyond the real data's item distributions and correlations
-(Lukauskas & Šarkauskaitė, 2026; Kumagae & Kaneko, 2026).
+`synthetic_copula()` makes synthetic respondents with no language model.
+It keeps each item's answer distribution and the rank correlations
+between items, and nothing else. It is a reference generator: A language
+model that does no better than the copula adds nothing beyond the real
+data's item distributions and correlations (Lukauskas & Šarkauskaitė,
+2026; Kumagae & Kaneko, 2026).
 
 ## Usage
 

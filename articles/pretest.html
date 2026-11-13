@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">synthcheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,12 +78,12 @@
 
     
     
-<p><strong>Experimental.</strong> Most people who write a new scale have
-no real data yet. <code><a href="../reference/synthetic_pretest.html">synthetic_pretest()</a></code> is for that stage. It
-runs a standard item analysis on synthetic respondents and flags items
-worth a second look. It also asks two questions that stand in for real
-data: Do the flags hold across models, temperatures, prompt wordings and
-persona sets? And do the synthetic answers recover the structure you
+<p>Most people who write a new scale have no real data yet.
+<code><a href="../reference/synthetic_pretest.html">synthetic_pretest()</a></code> is for that stage. It runs a standard
+item analysis on synthetic respondents and flags items worth a second
+look. It also asks two questions that stand in for real data: Do the
+flags hold across models, temperatures, prompt wordings and persona
+sets? And do the synthetic answers recover the structure you
 designed?</p>
 <p>This is <strong>pilot screening, not validation</strong>. Language
 models answer more tidily than people do (see the <a href="benchmark.html">benchmark article</a>), so a clean pretest does
@@ -119,7 +119,7 @@ structure the pretest checks.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synthetic_pretest.html">synthetic_pretest</a></span><span class="op">(</span><span class="va">synthetic</span>, <span class="va">items</span>, by <span class="op">=</span> <span class="st">"model"</span>, irt <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">pt</span></span>
-<span><span class="co">#&gt; Pretest without real data (experimental): Pilot screening, not validation</span></span>
+<span><span class="co">#&gt; Pretest without real data: Pilot screening, not validation</span></span>
 <span><span class="co">#&gt; 80 items in 2 scales, 6 conditions.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;         condition attempts    n items flagged alpha scales n_factors own_scale</span></span>
@@ -277,7 +277,7 @@ people give.</p>
 </h2>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summarise_pretest.html">summarise_pretest</a></span><span class="op">(</span><span class="va">pt</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Pretest without real data, in plain language (experimental)</span></span>
+<span><span class="co">#&gt; Pretest without real data, in plain language</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; This is pilot screening on synthetic respondents only. It flags items</span></span>
 <span><span class="co">#&gt; worth a second look; it does not show that the scale works in people.</span></span>

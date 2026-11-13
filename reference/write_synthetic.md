@@ -1,7 +1,7 @@
 # Save and read synthetic respondents
 
-**Experimental.** `write_synthetic()` saves a data frame of synthetic
-respondents (for example from
+`write_synthetic()` saves a data frame of synthetic respondents (for
+example from
 [`generate_synthetic()`](https://www.okanbulut.com/synthcheck/reference/generate_synthetic.md))
 as CSV, JSON, RDS or Excel. `read_synthetic()` reads one file, or every
 data file in a folder written by

@@ -1,7 +1,7 @@
 # Respondent coverage of synthetic respondents
 
-**Experimental.** `respondent_coverage()` compares whole answer
-profiles. Overlap and Structure in
+`respondent_coverage()` compares whole answer profiles. Overlap and
+Structure in
 [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md)
 look at scale scores and item pairs, so a model can match both while its
 respondents give combinations of answers that no real person gives, or
@@ -128,7 +128,7 @@ ca <- hexaco_llm[hexaco_llm$country == "Canada" & hexaco_llm$attempt <= 2, ]
 syn <- lapply(split(ca, ca$model, drop = TRUE), function(m) split(m, m$attempt))
 rc <- respondent_coverage(syn, real, hexaco_items, n_draws = 2)
 rc
-#> Respondent coverage (experimental)
+#> Respondent coverage
 #> 240 items, 1708 real respondents, 2 real samples per attempt.
 #> 
 #>                 model  RCG  OSR     pattern

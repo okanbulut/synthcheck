@@ -1,12 +1,11 @@
 # Cognitive interviews with language models
 
-**Experimental.** This tutorial runs simulated cognitive interviews: A
-language model plays each persona you define, thinks aloud while it
-answers a survey item, and then answers the verbal probes a cognitive
-interviewer would ask. A second call codes each transcript for problems.
-The result is a list of items and wording worth a closer look, most
-useful when you have no real respondents yet, for example right after a
-synthetic pretest.
+This tutorial runs simulated cognitive interviews: A language model
+plays each persona you define, thinks aloud while it answers a survey
+item, and then answers the verbal probes a cognitive interviewer would
+ask. A second call codes each transcript for problems. The result is a
+list of items and wording worth a closer look, most useful when you have
+no real respondents yet, for example right after a synthetic pretest.
 
 It is a **screening aid**. A model does not remember its own life or
 feel uncomfortable, so it cannot stand in for cognitive interviews with

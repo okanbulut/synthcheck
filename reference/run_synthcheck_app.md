@@ -1,11 +1,11 @@
 # Generate and benchmark synthetic data in a Shiny app
 
-**Experimental.** `run_synthcheck_app()` opens an app that walks through
-the whole workflow without code. It opens on an **About** tab that
-explains the purpose of the app, lists what it can do and produce, shows
-an animated picture of a language model answering survey items and
-starts a guided tour (the tour needs the cicerone package). The tour
-follows the path chosen in the first step.
+`run_synthcheck_app()` opens an app that walks through the whole
+workflow without code. It opens on an **About** tab that explains the
+purpose of the app, lists what it can do and produce, shows an animated
+picture of a language model answering survey items and starts a guided
+tour (the tour needs the cicerone package). The tour follows the path
+chosen in the first step.
 
 ## Usage
 
@@ -119,9 +119,9 @@ The tabs, in order (with real data: 1 to 4 and 5. Export; without: 1 to
   and the transcripts. A screening aid, not a substitute for cognitive
   interviews with real people.
 
-- **Export** (5 with real data, 6 without): Download the synthetic data
-  (CSV, JSON, RDS or Excel), the benchmark or the pretest and
-  interviews, and an R script that repeats the analysis.
+- **Export:** Download the synthetic data (CSV, JSON, RDS or Excel), the
+  benchmark or the pretest and interviews, and an R script that repeats
+  the analysis.
 
 **API keys** typed into the app stay in memory for that session only:
 They are never written to the saved data, the run settings or the R
@@ -133,9 +133,8 @@ Runs go to a background R process when callr is installed, so the app
 stays responsive and the Stop button works. Every attempt is written to
 the output folder as soon as it is done.
 
-Synthetic respondents are experimental: The benchmark compares models
-and supports decisions about them. It does not show that synthetic data
-can replace a field test.
+The benchmark compares models and supports decisions about them. It does
+not show that synthetic data can replace a field test.
 
 ## See also
 

@@ -1,6 +1,6 @@
 # Probes for cognitive interviews
 
-**Experimental.** `sc_probes()` returns the scripted verbal probes that
+`sc_probes()` returns the scripted verbal probes that
 [`cognitive_interview()`](https://www.okanbulut.com/synthcheck/reference/cognitive_interview.md)
 asks after the think-aloud, one row per probe. With no arguments it
 gives the default protocol: Two comprehension probes (paraphrase and

@@ -1,6 +1,6 @@
 # Choose a language model for synthetic respondents
 
-**Experimental.** `sc_model()` names a model and its settings for
+`sc_model()` names a model and its settings for
 [`generate_synthetic()`](https://www.okanbulut.com/synthcheck/reference/generate_synthetic.md).
 Anthropic, OpenAI and Ollama models are called through the ellmer
 package. `provider = "mock"` gives random answers without calling any

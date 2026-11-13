@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">synthcheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,11 +78,10 @@
 
     
     
-<p><strong>Experimental.</strong> synthcheck checks whether synthetic
-survey respondents made by large language models resemble the real
-people they stand in for. It compares models and supports decisions
-about them. It does not show that synthetic data can replace a field
-test.</p>
+<p>synthcheck checks whether synthetic survey respondents made by large
+language models resemble the real people they stand in for. It compares
+models and supports decisions about them. It does not show that
+synthetic data can replace a field test.</p>
 <p>This article runs the whole workflow once, on a small slice of the
 data that ships with the package. The other tutorials take each step in
 turn.</p>
@@ -168,7 +167,7 @@ builds that list from a long table with <code>model</code> and
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/authenticity_benchmark.html">authenticity_benchmark</a></span><span class="op">(</span><span class="va">synthetic</span>, <span class="va">real</span>, <span class="va">h</span>, n_splits <span class="op">=</span> <span class="fl">10</span>, n_floor <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">bm</span></span>
-<span><span class="co">#&gt; Synthetic authenticity benchmark (experimental)</span></span>
+<span><span class="co">#&gt; Synthetic authenticity benchmark</span></span>
 <span><span class="co">#&gt; 40 items, 1708 real respondents. Score: weakest.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;             model attempts Overlap Structure Behaviour Score   Weakest</span></span>
@@ -199,7 +198,7 @@ sentences per model, written by fixed rules from the values in the
 table:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summarise_benchmark.html">summarise_benchmark</a></span><span class="op">(</span><span class="va">bm</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Synthetic authenticity benchmark in plain language (experimental)</span></span>
+<span><span class="co">#&gt; Synthetic authenticity benchmark in plain language</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; GPT-OSS-120B scores -22 on the benchmark (1st of 6), set by its weakest</span></span>
 <span><span class="co">#&gt; column, Overlap. Overlap is -22 (worse than shuffled columns);</span></span>
@@ -268,7 +267,7 @@ before a field test, and do not show that a scale works in people.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synthetic_pretest.html">synthetic_pretest</a></span><span class="op">(</span><span class="va">synthetic</span>, <span class="va">h</span>, irt <span class="op">=</span> <span class="cn">FALSE</span>, n_pa <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/summarise_pretest.html">summarise_pretest</a></span><span class="op">(</span><span class="va">pt</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Pretest without real data, in plain language (experimental)</span></span>
+<span><span class="co">#&gt; Pretest without real data, in plain language</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; This is pilot screening on synthetic respondents only. It flags items</span></span>
 <span><span class="co">#&gt; worth a second look; it does not show that the scale works in people.</span></span>

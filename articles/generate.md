@@ -1,7 +1,7 @@
 # Generating synthetic respondents in R
 
-**Experimental.** This tutorial makes synthetic respondents from your
-own instrument, personas and models, in R code. The
+This tutorial makes synthetic respondents from your own instrument,
+personas and models, in R code. The
 [app](https://www.okanbulut.com/synthcheck/articles/app-tour.md) does
 the same steps on screen, with or without real data. Synthetic
 respondents are for comparing models with the benchmark, or for
@@ -223,7 +223,7 @@ real <- hexaco_real[hexaco_real$country == "Canada", ]
 bm <- authenticity_benchmark(as_synthetic_list(syn, items = ins$items$item), real, ins$items,
                              fit_scales = character(0), n_splits = 5, n_floor = 5)
 bm
-#> Synthetic authenticity benchmark (experimental)
+#> Synthetic authenticity benchmark
 #> 40 items, 1708 real respondents. Score: weakest.
 #> 
 #>   model attempts Overlap Structure Behaviour Score   Weakest
@@ -233,7 +233,7 @@ bm
 #> Anchors (raw, floor to ceiling, samples of 120): Overlap 51.5 to 85.0, Structure 79.0 to 89.5, Behaviour 66.4 to 85.1.
 #> 0 = shuffled real columns, 100 = a second sample of real people.
 summarise_benchmark(bm)
-#> Synthetic authenticity benchmark in plain language (experimental)
+#> Synthetic authenticity benchmark in plain language
 #> 
 #> Mock B scores -3 on the benchmark (1st of 2), set by its weakest
 #> column, Behaviour. Overlap is 2 (barely better than shuffled columns);

@@ -1,9 +1,9 @@
 # Get started
 
-**Experimental.** synthcheck checks whether synthetic survey respondents
-made by large language models resemble the real people they stand in
-for. It compares models and supports decisions about them. It does not
-show that synthetic data can replace a field test.
+synthcheck checks whether synthetic survey respondents made by large
+language models resemble the real people they stand in for. It compares
+models and supports decisions about them. It does not show that
+synthetic data can replace a field test.
 
 This article runs the whole workflow once, on a small slice of the data
 that ships with the package. The other tutorials take each step in turn.
@@ -88,7 +88,7 @@ lengths(synthetic)
 
 bm <- authenticity_benchmark(synthetic, real, h, n_splits = 10, n_floor = 10)
 bm
-#> Synthetic authenticity benchmark (experimental)
+#> Synthetic authenticity benchmark
 #> 40 items, 1708 real respondents. Score: weakest.
 #> 
 #>             model attempts Overlap Structure Behaviour Score   Weakest
@@ -128,7 +128,7 @@ from the values in the table:
 ``` r
 
 summarise_benchmark(bm)
-#> Synthetic authenticity benchmark in plain language (experimental)
+#> Synthetic authenticity benchmark in plain language
 #> 
 #> GPT-OSS-120B scores -22 on the benchmark (1st of 6), set by its weakest
 #> column, Overlap. Overlap is -22 (worse than shuffled columns);
@@ -198,7 +198,7 @@ a field test, and do not show that a scale works in people.
 
 pt <- synthetic_pretest(synthetic, h, irt = FALSE, n_pa = 10)
 summarise_pretest(pt)
-#> Pretest without real data, in plain language (experimental)
+#> Pretest without real data, in plain language
 #> 
 #> This is pilot screening on synthetic respondents only. It flags items
 #> worth a second look; it does not show that the scale works in people.

@@ -1,10 +1,10 @@
 # Draw the respondent coverage
 
-**Experimental.** One point per model at its RCG (across) and OSR (up),
-with the second sample of real people and the shuffled real columns as
-grey references. Real-like models sit near the bottom left corner (both
-ratios near 1). Far to the right and up means off-support, far to the
-right but low means contraction (see
+One point per model at its RCG (across) and OSR (up), with the second
+sample of real people and the shuffled real columns as grey references.
+Real-like models sit near the bottom left corner (both ratios near 1).
+Far to the right and up means off-support, far to the right but low
+means contraction (see
 [`respondent_coverage()`](https://www.okanbulut.com/synthcheck/reference/respondent_coverage.md)).
 
 ## Usage

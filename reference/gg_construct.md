@@ -1,12 +1,12 @@
 # Draw the construct structure
 
-**Experimental.** One row per model and one tile per scale
-(`what = "alpha"`) or per pair of scales (`what = "cor"`), averaged over
-attempts. Red means lower than in real people, blue means higher, pale
-means a match. With `"alpha"`, the tile is the synthetic minus the real
-alpha and the number is the synthetic alpha (the real alpha is in the
-column label). With `"cor"`, the tile and the number are the synthetic
-minus the real correlation between two scales.
+One row per model and one tile per scale (`what = "alpha"`) or per pair
+of scales (`what = "cor"`), averaged over attempts. Red means lower than
+in real people, blue means higher, pale means a match. With `"alpha"`,
+the tile is the synthetic minus the real alpha and the number is the
+synthetic alpha (the real alpha is in the column label). With `"cor"`,
+the tile and the number are the synthetic minus the real correlation
+between two scales.
 
 ## Usage
 
