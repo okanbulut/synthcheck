@@ -43,6 +43,10 @@
   on your own computer is unchanged. A new article, “Hosting the app on
   Posit Connect Cloud”, walks through it.
 
+- In the app’s Interviews tab, the default probes keep their default
+  names (paraphrase, terms and so on) in the transcripts. Before, the
+  second comprehension probe showed as “Comprehension_1”.
+
 - The tutorial on generating synthetic respondents has a new section on
   the persona check, the benchmark article explains the intervals, and
   the tour of the app and the app demos show both, with new screenshots.
