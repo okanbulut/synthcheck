@@ -19,7 +19,7 @@ problems).}
 A ggplot.
 }
 \description{
-\strong{Experimental.} \code{gg_interview()} draws one heatmap of items (rows) by
+\code{gg_interview()} draws one heatmap of items (rows) by
 stage (columns), coloured by the share of interviews in which the coder
 found a problem: Pale is none, red is most. Flagged items (see
 \code{\link[=summarise_interviews]{summarise_interviews()}}) are marked with an asterisk after their name, and the

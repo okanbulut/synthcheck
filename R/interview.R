@@ -8,7 +8,7 @@ sc_iv_stage_names <- c(comprehension = "Comprehension", retrieval = "Retrieval",
 
 #' Probes for cognitive interviews
 #'
-#' **Experimental.** `sc_probes()` returns the scripted verbal probes that
+#' `sc_probes()` returns the scripted verbal probes that
 #' [cognitive_interview()] asks after the think-aloud, one row per probe.
 #' With no arguments it gives the default protocol: Two comprehension probes
 #' (paraphrase and terms), then one probe each for retrieval, judgement,
@@ -88,7 +88,7 @@ sc_probes <- function(stage = NULL, probe = NULL, probe_id = NULL) {
 
 #' Run cognitive interviews with language models playing personas
 #'
-#' **Experimental.** `cognitive_interview()` asks one or more language
+#' `cognitive_interview()` asks one or more language
 #' models to take part in a cognitive interview about each survey item, as
 #' each persona. It is meant for screening items when there are no real
 #' respondents yet, for example after a [synthetic_pretest()]: It points to
@@ -325,7 +325,7 @@ cognitive_interview <- function(instrument, models, personas = NULL, items = NUL
 
 #' Show the prompts of a cognitive interview
 #'
-#' **Experimental.** Shows exactly what [cognitive_interview()] sends for one
+#' Shows exactly what [cognitive_interview()] sends for one
 #' item and persona: The persona's system prompt, the think-aloud request,
 #' the probes and the coder's instructions.
 #'
@@ -355,7 +355,7 @@ sc_interview_prompts <- function(instrument, item, persona = NULL, probes = sc_p
 
 #' Summarise cognitive interviews per item
 #'
-#' **Experimental.** `summarise_interviews()` rolls the coded interviews of
+#' `summarise_interviews()` rolls the coded interviews of
 #' [cognitive_interview()] up to one row per item: The share of interviews
 #' with a problem at each stage and at any stage, how many personas and
 #' models raised a problem, the coder's most common notes and the suggested
@@ -451,7 +451,7 @@ print.sc_interview_summary <- function(x, ...) {
 
 #' Plot cognitive interview problems per item
 #'
-#' **Experimental.** `gg_interview()` draws one heatmap of items (rows) by
+#' `gg_interview()` draws one heatmap of items (rows) by
 #' stage (columns), coloured by the share of interviews in which the coder
 #' found a problem: Pale is none, red is most. Flagged items (see
 #' [summarise_interviews()]) are marked with an asterisk after their name, and the

@@ -2,7 +2,7 @@
 
 #' Define an instrument for synthetic respondents
 #'
-#' **Experimental.** `sc_instrument()` describes the survey that synthetic
+#' `sc_instrument()` describes the survey that synthetic
 #' respondents take: The items, the response scale and the instructions.
 #' [generate_synthetic()] turns it into a prompt, and the item table works
 #' as `items` in [authenticity_benchmark()].
@@ -94,7 +94,7 @@ sc_default_labels <- function(k) {
 
 #' Define personas for synthetic respondents
 #'
-#' **Experimental.** A persona describes the person a synthetic respondent
+#' A persona describes the person a synthetic respondent
 #' plays. It becomes the system prompt of each call in
 #' [generate_synthetic()]. `sc_personas()` takes the descriptions directly,
 #' and `sc_persona_grid()` builds them from every combination of a few
@@ -157,7 +157,7 @@ sc_persona_grid <- function(..., template) {
 
 #' Choose a language model for synthetic respondents
 #'
-#' **Experimental.** `sc_model()` names a model and its settings for
+#' `sc_model()` names a model and its settings for
 #' [generate_synthetic()]. Anthropic, OpenAI and Ollama models are called
 #' through the ellmer package. `provider = "mock"` gives random answers
 #' without calling any model, for trying the workflow and the app.
@@ -221,7 +221,7 @@ sc_default_models <- list(anthropic = "claude-haiku-5-5", openai = "gpt-4.1-nano
 
 #' Build the prompts for one synthetic respondent
 #'
-#' **Experimental.** Shows exactly what [generate_synthetic()] sends: The
+#' Shows exactly what [generate_synthetic()] sends: The
 #' persona as the system prompt, and the instructions, response scale and
 #' items as the user prompt.
 #'

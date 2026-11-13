@@ -15,7 +15,7 @@ summarise_pretest(x, n_items = 5)
 A tibble with \code{topic} and \code{text}. Printing it shows the text.
 }
 \description{
-\strong{Experimental.} \code{summarise_pretest()} writes a few sentences from a
+\code{summarise_pretest()} writes a few sentences from a
 result of \code{\link[=synthetic_pretest]{synthetic_pretest()}}: Which items are flagged by most
 conditions and why, how well the conditions agree, whether the designed
 structure comes back, and whether the scales look too tidy. The text

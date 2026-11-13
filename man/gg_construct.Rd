@@ -17,7 +17,7 @@ gg_construct(x, what = c("alpha", "cor"), title = NULL, subtitle = NULL)
 A ggplot object.
 }
 \description{
-\strong{Experimental.} One row per model and one tile per scale (\code{what = "alpha"}) or per pair of scales (\code{what = "cor"}), averaged over attempts.
+One row per model and one tile per scale (\code{what = "alpha"}) or per pair of scales (\code{what = "cor"}), averaged over attempts.
 Red means lower than in real people, blue means higher, pale means a
 match. With \code{"alpha"}, the tile is the synthetic minus the real alpha and
 the number is the synthetic alpha (the real alpha is in the column

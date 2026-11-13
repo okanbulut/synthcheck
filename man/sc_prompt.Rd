@@ -20,7 +20,7 @@ in \code{\link[=generate_synthetic]{generate_synthetic()}}).}
 A list with \code{system} and \code{user}.
 }
 \description{
-\strong{Experimental.} Shows exactly what \code{\link[=generate_synthetic]{generate_synthetic()}} sends: The
+Shows exactly what \code{\link[=generate_synthetic]{generate_synthetic()}} sends: The
 persona as the system prompt, and the instructions, response scale and
 items as the user prompt.
 }

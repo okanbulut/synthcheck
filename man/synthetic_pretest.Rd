@@ -55,7 +55,7 @@ has \code{print()}, \code{tidy()} and \code{autoplot()} methods, and
 \code{\link[=summarise_pretest]{summarise_pretest()}} describes it in plain language.
 }
 \description{
-\strong{Experimental.} \code{synthetic_pretest()} is for the stage before any real
+\code{synthetic_pretest()} is for the stage before any real
 data exist. It runs a standard item analysis on synthetic respondents and
 flags items worth a second look. It is \strong{pilot screening, not
 validation}: Language models answer more tidily than people (see

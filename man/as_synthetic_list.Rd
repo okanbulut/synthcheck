@@ -17,7 +17,7 @@ as_synthetic_list(data, model = "model", attempt = "attempt", items = NULL)
 A named list of lists of data frames.
 }
 \description{
-\strong{Experimental.} \code{\link[=authenticity_benchmark]{authenticity_benchmark()}}, \code{\link[=synthetic_behaviour]{synthetic_behaviour()}}
+\code{\link[=authenticity_benchmark]{authenticity_benchmark()}}, \code{\link[=synthetic_behaviour]{synthetic_behaviour()}}
 and \code{\link[=synthetic_coverage]{synthetic_coverage()}} take a named list with one element per model,
 each a list of attempts. \code{as_synthetic_list()} splits a long table, such
 as the result of \code{\link[=generate_synthetic]{generate_synthetic()}} or \link{hexaco_llm}, into that list.

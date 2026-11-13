@@ -24,6 +24,6 @@ any work.
   `\donttest{}` or behind `skip_on_cran()`.
 - **Data:** HEXACO answers are raw 1 to 7. Reverse-keyed items (`hexaco_items$reverse`) are keyed
   with `8 - x`. Missing values are `NA`.
-- The experimental status must be clear in the README and the help pages: The benchmark compares
-  models and supports decisions about them. It does not show that synthetic data can replace a field
-  test.
+- Do not call the package experimental (Okan, 2026-11-13). The caveat must stay clear in the README
+  and the help pages: The benchmark compares models and supports decisions about them. It does not
+  show that synthetic data can replace a field test.

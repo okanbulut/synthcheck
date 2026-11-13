@@ -29,7 +29,7 @@ A list with \code{system}, \code{think_aloud}, \code{probes} and \code{coder} (t
 coder's system prompt).
 }
 \description{
-\strong{Experimental.} Shows exactly what \code{\link[=cognitive_interview]{cognitive_interview()}} sends for one
+Shows exactly what \code{\link[=cognitive_interview]{cognitive_interview()}} sends for one
 item and persona: The persona's system prompt, the think-aloud request,
 the probes and the coder's instructions.
 }

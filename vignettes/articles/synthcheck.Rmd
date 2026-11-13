@@ -7,7 +7,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 8, fig.height
                       dpi = 96, out.width = "100%")
 ```
 
-**Experimental.** synthcheck checks whether synthetic survey respondents made
+synthcheck checks whether synthetic survey respondents made
 by large language models resemble the real people they stand in for. It
 compares models and supports decisions about them. It does not show that
 synthetic data can replace a field test.

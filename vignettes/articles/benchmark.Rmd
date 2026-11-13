@@ -7,7 +7,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 8, fig.height
                       dpi = 96, out.width = "100%")
 ```
 
-**Experimental.** `authenticity_benchmark()` compares several language models
+`authenticity_benchmark()` compares several language models
 on Overlap, Structure and Behaviour, and puts them in one table with a single
 score per model. The benchmark compares models and supports decisions about
 them. It does not show that synthetic data can replace a field test.

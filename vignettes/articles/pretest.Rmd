@@ -7,7 +7,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 8, fig.height
                       dpi = 96, out.width = "100%")
 ```
 
-**Experimental.** Most people who write a new scale have no real data yet.
+Most people who write a new scale have no real data yet.
 `synthetic_pretest()` is for that stage. It runs a standard item analysis on
 synthetic respondents and flags items worth a second look. It also asks two
 questions that stand in for real data: Do the flags hold across models,

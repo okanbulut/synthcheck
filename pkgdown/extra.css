@@ -35,6 +35,16 @@ h1, h2, h3, h4 { color: var(--sc-navy); }
 /* figures and screenshots: a soft frame */
 .contents img:not(.logo) { border: 1px solid #e3e1db; border-radius: .5rem; }
 
+/* figure captions: italic and muted, so they read apart from the text */
+.contents figcaption, .contents .figure .caption, .contents p.caption {
+  font-style: italic;
+  color: #5b6475;
+  font-size: .9rem;
+  text-align: center;
+  margin-top: .4rem;
+  margin-bottom: 1.5rem;
+}
+
 /* code: a pale background and a blue left rule */
 pre { background-color: #f7f6f3; border-left: 3px solid var(--sc-lightblue); }
 

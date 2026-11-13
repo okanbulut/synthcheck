@@ -18,7 +18,7 @@ or per \code{"attempt"}.}
 A ggplot object.
 }
 \description{
-\strong{Experimental.} One row per model (or per attempt), one column per
+One row per model (or per attempt), one column per
 behaviour feature. Each tile is coloured by the direction of the gap
 (red: Synthetic respondents lower than real people, blue: Higher) with a
 strength of \code{100 - B_f}, so a pale tile is a match. The number in the

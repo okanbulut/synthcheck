@@ -26,7 +26,7 @@ A tibble with one row per respondent of \code{real}: \code{row} (the row in
 careless 2.5\%, or \code{NA} with a user \code{rule}) and \code{careless}.
 }
 \description{
-\strong{Experimental.} \code{flag_careless()} marks real respondents whose answers
+\code{flag_careless()} marks real respondents whose answers
 look careless, using the eight \code{\link[=behaviour_features]{behaviour_features()}}. By default a
 respondent is careless when at least two features fall in the real data's
 most extreme 2.5\% on the careless side: The highest 2.5\% for \code{extreme},

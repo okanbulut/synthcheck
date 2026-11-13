@@ -3,7 +3,7 @@
 
 #' Generate and benchmark synthetic data in a Shiny app
 #'
-#' **Experimental.** `run_synthcheck_app()` opens an app that walks through
+#' `run_synthcheck_app()` opens an app that walks through
 #' the whole workflow without code. It opens on an **About** tab that
 #' explains the purpose of the app, lists what it can do and produce, shows
 #' an animated picture of a language model answering survey items and starts
@@ -48,7 +48,7 @@
 #'   summary ([summarise_interviews()]), the plot ([gg_interview()]) and the
 #'   transcripts. A screening aid, not a substitute for cognitive
 #'   interviews with real people.
-#' * **Export** (5 with real data, 6 without): Download the synthetic data
+#' * **Export:** Download the synthetic data
 #'   (CSV, JSON, RDS or Excel), the benchmark or the pretest and interviews,
 #'   and an R script that repeats the analysis.
 #'
@@ -62,7 +62,7 @@
 #' stays responsive and the Stop button works. Every attempt is written to
 #' the output folder as soon as it is done.
 #'
-#' Synthetic respondents are experimental: The benchmark compares models and
+#' The benchmark compares models and
 #' supports decisions about them. It does not show that synthetic data can
 #' replace a field test.
 #'
@@ -123,7 +123,6 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
   }
   notice <- shiny::div(
     class = "alert alert-warning py-2 mb-3",
-    shiny::strong("Experimental. "),
     "The benchmark compares models and supports decisions about them. ",
     "It does not show that synthetic data can replace a field test.")
 

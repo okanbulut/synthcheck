@@ -7,7 +7,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 8, fig.height
                       dpi = 96, out.width = "100%")
 ```
 
-**Experimental.** This tutorial makes synthetic respondents from your own
+This tutorial makes synthetic respondents from your own
 instrument, personas and models, in R code. The
 [app](app-tour.html) does the same steps on screen, with or without real
 data. Synthetic respondents are for comparing models with the benchmark, or

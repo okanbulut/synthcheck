@@ -2,7 +2,7 @@
 
 #' Generate synthetic respondents with language models
 #'
-#' **Experimental.** `generate_synthetic()` asks one or more language models
+#' `generate_synthetic()` asks one or more language models
 #' to take an instrument as each persona and returns one row per synthetic
 #' respondent. Each call makes one respondent: The persona is the system
 #' prompt, and the instructions, the response scale and the items are the
@@ -20,7 +20,7 @@
 #' `prompts.json` (every prompt sent) beside it, so a stopped run keeps the
 #' finished attempts. Read the folder back with [read_synthetic()].
 #'
-#' Synthetic respondents are experimental: Use them to compare models with
+#' Use them to compare models with
 #' [authenticity_benchmark()], not to replace a field test.
 #'
 #' @param instrument an [sc_instrument()].

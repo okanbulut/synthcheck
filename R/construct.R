@@ -2,7 +2,7 @@
 
 #' Construct structure of synthetic respondents
 #'
-#' **Experimental.** `synthetic_construct()` checks the scales rather than
+#' `synthetic_construct()` checks the scales rather than
 #' the items. Structure in [authenticity_benchmark()] averages over every
 #' pair of items, so a model can score well there and still blur the traits
 #' together or make every scale too coherent. Three checks, for each model
@@ -113,7 +113,7 @@ synthetic_construct <- function(synthetic, real, items, clean_real = FALSE, care
 
 #' Draw the construct structure
 #'
-#' **Experimental.** One row per model and one tile per scale (`what =
+#' One row per model and one tile per scale (`what =
 #' "alpha"`) or per pair of scales (`what = "cor"`), averaged over attempts.
 #' Red means lower than in real people, blue means higher, pale means a
 #' match. With `"alpha"`, the tile is the synthetic minus the real alpha and
@@ -176,7 +176,7 @@ gg_construct <- function(x, what = c("alpha", "cor"), title = NULL, subtitle = N
 #' @export
 print.sc_construct <- function(x, digits = 2, ...) {
   s <- x$settings
-  cat("Construct structure (experimental)\n")
+  cat("Construct structure\n")
   cat(sprintf("%d items in %d scales, %d real respondents.\n\n", length(s$items), length(s$scales),
               s$n_real))
   t <- rbind(as.data.frame(x$summary), as.data.frame(x$reference))
