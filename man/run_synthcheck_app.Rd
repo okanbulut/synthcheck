@@ -69,7 +69,11 @@ offer a template to fill in. The templates are also in the package:
 \item \strong{3. Models:} Add Anthropic, OpenAI or local Ollama models with their
 temperature (or several temperatures, one model each), enter API keys,
 choose the number of attempts and respondents, and run
-\code{\link[=generate_synthetic]{generate_synthetic()}} with a progress bar and the time left.
+\code{\link[=generate_synthetic]{generate_synthetic()}} with a progress bar and the time left. Before a
+run with paid models, the app shows its estimated cost
+(\code{\link[=estimate_cost]{estimate_cost()}}) and asks you to confirm. Answers are kept in the
+response cache (\code{\link[=sc_cache]{sc_cache()}}), so the same run again is repeatable and
+free; choose to reuse, refresh or skip saved answers, or clear them.
 \item \strong{4. Compare} (with real data): Load real data and run
 \code{\link[=authenticity_benchmark]{authenticity_benchmark()}}, with \code{\link[=gg_benchmark]{gg_benchmark()}}, \code{\link[=gg_behaviour]{gg_behaviour()}}
 and a plain-language summary per model (\code{\link[=summarise_benchmark]{summarise_benchmark()}}).

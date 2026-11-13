@@ -118,6 +118,44 @@ syn <- generate_synthetic(ins, list(sc_model("anthropic"), sc_model("openai")), 
                           output = "hexaco_run")
 ```
 
+### What a run costs
+
+`estimate_cost()` takes the same arguments and tells you what the run is
+likely to cost before you start it. It counts the calls, guesses their
+tokens from the prompts and multiplies them by the list prices in
+`sc_prices`. Ollama models are free, and so are calls already in the
+cache.
+
+```{r}
+estimate_cost(ins, list(sc_model("anthropic"), sc_model("openai")), per,
+              attempts = 5, respondents = 10, cache = FALSE)
+```
+
+It is an estimate: Retries add to it, and reasoning models also bill their
+hidden reasoning. Prices change, so check them before a large run and pass
+your own table as `prices` when they differ (`sc_prices` has the date of
+each price in `checked`).
+
+### The response cache
+
+Every answer is saved on disk, under a key made of the provider, the model,
+the temperature, the prompts, the respondent, the attempt and the `seed`.
+Running the same settings again reads the answers back instead of calling
+the models: The run is repeatable and costs nothing. More attempts or
+respondents call the models only for the new ones. A new `seed` asks again.
+
+```{r, eval = FALSE}
+sc_cache_info()                       # what is saved, per model
+syn <- generate_synthetic(..., cache = sc_cache(mode = "refresh"))   # ask again
+syn <- generate_synthetic(..., cache = FALSE)                        # no cache
+sc_cache_clear(model = "gpt-4.1-nano")                               # delete some
+```
+
+The cache lives in `tools::R_user_dir("synthcheck", "cache")`; give
+`sc_cache("my_folder")` to keep it with a project. It holds answers only,
+never API keys. `cognitive_interview()` uses it too, and
+`estimate_interview_cost()` estimates its cost.
+
 ## 6. Save and read
 
 ```{r}

@@ -127,6 +127,11 @@ res <- run_synthcheck_app(real = my_real_data)
 res$benchmark
 ```
 
+Before a run with paid models, the app shows what it is likely to cost and
+asks you to confirm. Every answer is kept in a response cache on disk, so the
+same run again is repeatable and free (`estimate_cost()` and `sc_cache()` do
+the same in code).
+
 API keys typed into the app stay in memory for that session only. Keys set
 as `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` in `.Renviron` are used without
 being shown. The same steps work in code:

@@ -36,7 +36,11 @@
 #' * **3. Models:** Add Anthropic, OpenAI or local Ollama models with their
 #'   temperature (or several temperatures, one model each), enter API keys,
 #'   choose the number of attempts and respondents, and run
-#'   [generate_synthetic()] with a progress bar and the time left.
+#'   [generate_synthetic()] with a progress bar and the time left. Before a
+#'   run with paid models, the app shows its estimated cost
+#'   ([estimate_cost()]) and asks you to confirm. Answers are kept in the
+#'   response cache ([sc_cache()]), so the same run again is repeatable and
+#'   free; choose to reuse, refresh or skip saved answers, or clear them.
 #' * **4. Compare** (with real data): Load real data and run
 #'   [authenticity_benchmark()], with [gg_benchmark()], [gg_behaviour()]
 #'   and a plain-language summary per model ([summarise_benchmark()]).
@@ -257,6 +261,15 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
                           "More than one respondent per call is cheaper, but respondents in the same",
                           "call may depend on each other: The model sees its own earlier answers.",
                           "Keep 1 for independent respondents.")),
+             row(
+               shiny::selectInput("run_cache", "Saved answers (cache)",
+                                  c("Reuse saved answers" = "reuse",
+                                    "Ask again and replace them" = "refresh",
+                                    "Do not save or reuse" = "off")),
+               shiny::div(class = "pt-4",
+                          shiny::actionButton("cache_clear", "Clear the cache",
+                                              class = "btn-sm btn-outline-secondary"))),
+             shiny::uiOutput("cache_status"),
              shiny::uiOutput("run_plan"),
              shiny::div(
                shiny::actionButton("run_test", "Estimate run time", class = "btn-outline-primary"),
@@ -396,6 +409,7 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
                                   sc_probe_text(sc_probes()), rows = 7),
              shiny::textInput("iv_output", "Save to folder",
                               file.path(getwd(), paste0("synthcheck-interviews-", format(Sys.Date())))),
+             shiny::helpText("Saved answers follow the cache setting on the Models tab."),
              shiny::uiOutput("iv_plan"),
              shiny::div(shiny::actionButton("iv_run", "Run the interviews", class = "btn-primary"),
                         shiny::actionButton("iv_stop", "Stop", class = "btn-outline-danger")),

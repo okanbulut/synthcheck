@@ -6,7 +6,8 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
     rv <- shiny::reactiveValues(models = list(), proc = NULL, run_dir = NULL, run_data = NULL,
                                 run_status = NULL, timing = NULL, benchmark = NULL, log = NULL,
                                 pretest = NULL, iv_proc = NULL, iv_dir = NULL, iv_status = NULL,
-                                interviews = NULL)
+                                interviews = NULL, cache_tick = 0L, pending_run = NULL,
+                                pending_iv = NULL)
 
     # ---- About ----------------------------------------------------------------
     shiny::observeEvent(input$about_start, bslib::nav_select("sc_nav", "instrument", session = session))
@@ -176,6 +177,36 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
     keys <- shiny::reactive(c(ANTHROPIC_API_KEY = input$key_anthropic %||% "",
                               OPENAI_API_KEY = input$key_openai %||% ""))
 
+    # ---- response cache ---------------------------------------------------------
+    run_cache <- shiny::reactive(sc_cache(mode = input$run_cache %||% "reuse"))
+    output$cache_status <- shiny::renderUI({
+      rv$cache_tick
+      cache <- run_cache()
+      info <- tryCatch(sc_cache_info(cache), error = function(e) NULL)
+      n <- if (is.null(info)) 0L else sum(info$answers)
+      shiny::helpText(sprintf("%s saved answer%s in %s. %s", format(n, big.mark = ","),
+                              if (n == 1L) "" else "s", cache$dir,
+                              switch(cache$mode,
+                                     reuse = "The same calls again use them and cost nothing.",
+                                     refresh = "This run asks the models again and replaces them.",
+                                     off = "This run neither uses nor saves them.")))
+    })
+    shiny::observeEvent(input$cache_clear, {
+      shiny::showModal(shiny::modalDialog(
+        title = "Clear the cache?",
+        "This deletes every saved answer. Runs after that call the models again and cost money again.",
+        footer = shiny::tagList(shiny::modalButton("Keep them"),
+                                shiny::actionButton("cache_clear_ok", "Delete saved answers",
+                                                    class = "btn-danger"))))
+    })
+    shiny::observeEvent(input$cache_clear_ok, {
+      n <- sc_cache_clear(run_cache())
+      shiny::removeModal()
+      rv$cache_tick <- rv$cache_tick + 1L
+      shiny::showNotification(sprintf("Deleted %s saved answer%s.", format(n, big.mark = ","),
+                                      if (n == 1L) "" else "s"))
+    })
+
     shiny::observeEvent(input$mod_add, {
       temps <- sc_parse_temps(input$mod_temps)
       if (inherits(temps, "error")) return(shiny::showNotification(conditionMessage(temps), type = "error"))
@@ -231,10 +262,24 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
       # with batches, the test call times one batch
       b <- max(1, input$run_batch %||% 1)
       calls <- if (b > 1) sprintf(" in about %s calls", format(ceiling(n / b), big.mark = ",")) else ""
-      shiny::p(sprintf("%s synthetic respondents%s: %d model%s, %s per model.", format(n, big.mark = ","),
-                       calls, length(rv$models), if (length(rv$models) > 1) "s" else "",
-                       format(per, big.mark = ",")), est)
+      shiny::tagList(
+        shiny::p(sprintf("%s synthetic respondents%s: %d model%s, %s per model.", format(n, big.mark = ","),
+                         calls, length(rv$models), if (length(rv$models) > 1) "s" else "",
+                         format(per, big.mark = ",")), est),
+        sc_cost_line(run_cost()))
     })
+    run_cost_raw <- shiny::reactive({
+      rv$cache_tick
+      if (!length(rv$models)) return(NULL)
+      tryCatch(estimate_cost(instrument(), rv$models, persona_table(),
+                             attempts = max(1L, as.integer(input$run_attempts %||% 1L)),
+                             respondents = max(1L, as.integer(input$run_respondents %||% 1L)),
+                             batch_size = max(1L, as.integer(input$run_batch %||% 1L)),
+                             block_size = if (isTRUE(input$run_block > 0)) as.integer(input$run_block) else NULL,
+                             shuffle = isTRUE(input$run_shuffle), cache = run_cache()),
+               error = function(e) NULL)
+    })
+    run_cost <- shiny::debounce(run_cost_raw, 600)
 
     shiny::observeEvent(input$run_test, {
       ins <- instrument_ok()
@@ -273,7 +318,7 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
            parallel = as.integer(input$run_parallel), output = input$run_output,
            format = input$run_format, progress = FALSE,
            progress_file = file.path(input$run_output, "progress.json"),
-           stop_file = file.path(input$run_output, "STOP"))
+           stop_file = file.path(input$run_output, "STOP"), cache = run_cache())
     }
 
     shiny::observeEvent(input$run_start, {
@@ -287,6 +332,22 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
                                                     c("progress.json", "STOP"))))
         return(shiny::showNotification("The output folder already holds files. Choose a new folder.",
                                        type = "warning", duration = 10))
+      cost <- tryCatch(estimate_cost(args$instrument, args$models, args$personas, args$attempts,
+                                     args$respondents, args$batch_size, args$block_size,
+                                     args$shuffle, cache = args$cache), error = function(e) NULL)
+      if (sc_cost_paid(cost)) {
+        rv$pending_run <- args
+        return(shiny::showModal(sc_cost_modal(cost, "run_confirm", "Generate data")))
+      }
+      start_run(args)
+    })
+    shiny::observeEvent(input$run_confirm, {
+      shiny::removeModal()
+      args <- rv$pending_run
+      rv$pending_run <- NULL
+      if (!is.null(args)) start_run(args)
+    })
+    start_run <- function(args) {
       dir.create(args$output, showWarnings = FALSE, recursive = TRUE)
       unlink(args$stop_file)
       rv$run_dir <- args$output; rv$run_data <- NULL; rv$run_status <- NULL; rv$log <- NULL
@@ -311,9 +372,10 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
           shiny::showNotification(conditionMessage(res), type = "error", duration = NULL)
         } else {
           rv$run_data <- res; rv$log <- attr(res, "log")
+          rv$cache_tick <- rv$cache_tick + 1L
         }
       }
-    })
+    }
     shiny::observeEvent(input$run_stop, {
       if (!is.null(rv$run_dir)) writeLines("stop", file.path(rv$run_dir, "STOP"))
       shiny::showNotification("Stopping after the calls in progress. Finished attempts are kept.")
@@ -337,7 +399,9 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
           shiny::showNotification(paste("The run failed:", msg), type = "error", duration = NULL)
         } else {
           rv$run_data <- res; rv$log <- attr(res, "log")
-          shiny::showNotification(sprintf("Done: %d synthetic respondents in %s.", nrow(res), rv$run_dir),
+          rv$cache_tick <- rv$cache_tick + 1L
+          shiny::showNotification(sprintf("Done: %d synthetic respondents in %s.%s", nrow(res), rv$run_dir,
+                                          sc_cache_note(attr(res, "cache"))),
                                   type = "message", duration = 10)
         }
       }
@@ -572,9 +636,18 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
     output$iv_plan <- shiny::renderUI({
       if (!length(rv$models)) return(shiny::p(class = "text-muted", "Add at least one model in the Models tab."))
       n <- iv_n_interviews()
-      shiny::p(sprintf("%s interviews, %s requests (think-aloud, probes and coding for each).",
-                       format(n, big.mark = ","), format(3 * n, big.mark = ",")))
+      shiny::tagList(
+        shiny::p(sprintf("%s interviews, %s requests (think-aloud, probes and coding for each).",
+                         format(n, big.mark = ","), format(3 * n, big.mark = ","))),
+        sc_cost_line(iv_cost()))
     })
+    iv_cost_raw <- shiny::reactive({
+      rv$cache_tick
+      args <- tryCatch(iv_args(), error = function(e) NULL)
+      if (is.null(args)) return(NULL)
+      tryCatch(sc_iv_cost(args), error = function(e) NULL)
+    })
+    iv_cost <- shiny::debounce(iv_cost_raw, 600)
     iv_args <- function() {
       items <- iv_items()
       if (!length(items)) stop(if (identical(input$iv_items_from, "pretest"))
@@ -588,7 +661,7 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
            interviews = as.integer(input$iv_n %||% 1), parallel = as.integer(input$iv_parallel %||% 1),
            output = input$iv_output, progress = FALSE,
            progress_file = file.path(input$iv_output, "progress.json"),
-           stop_file = file.path(input$iv_output, "STOP"))
+           stop_file = file.path(input$iv_output, "STOP"), cache = run_cache())
     }
     shiny::observeEvent(input$iv_run, {
       if (!is.null(rv$iv_proc) && rv$iv_proc$is_alive())
@@ -599,6 +672,20 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
       if (dir.exists(args$output) && length(setdiff(list.files(args$output), c("progress.json", "STOP"))))
         return(shiny::showNotification("The output folder already holds files. Choose a new folder.",
                                        type = "warning", duration = 10))
+      cost <- tryCatch(sc_iv_cost(args), error = function(e) NULL)
+      if (sc_cost_paid(cost)) {
+        rv$pending_iv <- args
+        return(shiny::showModal(sc_cost_modal(cost, "iv_confirm", "Run the interviews")))
+      }
+      start_iv(args)
+    })
+    shiny::observeEvent(input$iv_confirm, {
+      shiny::removeModal()
+      args <- rv$pending_iv
+      rv$pending_iv <- NULL
+      if (!is.null(args)) start_iv(args)
+    })
+    start_iv <- function(args) {
       dir.create(args$output, showWarnings = FALSE, recursive = TRUE)
       unlink(args$stop_file)
       rv$iv_dir <- args$output; rv$iv_status <- NULL
@@ -620,9 +707,12 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
                         error = function(e) e)
         if (inherits(res, "error")) {
           shiny::showNotification(conditionMessage(res), type = "error", duration = NULL)
-        } else rv$interviews <- res
+        } else {
+          rv$interviews <- res
+          rv$cache_tick <- rv$cache_tick + 1L
+        }
       }
-    })
+    }
     shiny::observeEvent(input$iv_stop, {
       if (!is.null(rv$iv_dir)) writeLines("stop", file.path(rv$iv_dir, "STOP"))
       shiny::showNotification("Stopping after the interviews in progress.")
@@ -644,7 +734,9 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
           shiny::showNotification(paste("The interviews failed:", msg), type = "error", duration = NULL)
         } else {
           rv$interviews <- res
-          shiny::showNotification(sprintf("Done: %d interviews in %s.", nrow(res), rv$iv_dir),
+          rv$cache_tick <- rv$cache_tick + 1L
+          shiny::showNotification(sprintf("Done: %d interviews in %s.%s", nrow(res), rv$iv_dir,
+                                          sc_cache_note(attr(res, "cache"))),
                                   type = "message", duration = 10)
         }
       }
@@ -997,4 +1089,63 @@ sc_app_script <- function(run_dir, syn_source, real_source, country, score, clea
             if (fit) "NULL" else "character(0)", as.integer(splits), as.integer(splits)),
     "bm", "gg_benchmark(bm)", "gg_behaviour(bm$behaviour)", "summarise_benchmark(bm)"),
     collapse = "\n")
+}
+
+# ---- cost estimates in the app --------------------------------------------
+
+sc_iv_cost <- function(args) {
+  estimate_interview_cost(args$instrument, args$models, args$personas, items = args$items,
+                          probes = args$probes, coder = args$coder, pretest = args$pretest,
+                          interviews = args$interviews, cache = args$cache)
+}
+
+# a run costs money when a model is not free, or its price is unknown
+sc_cost_paid <- function(cost) {
+  !is.null(cost) && any(cost$calls > cost$cached & !(cost$provider %in% c("ollama", "mock")))
+}
+
+sc_cost_line <- function(cost) {
+  if (is.null(cost)) return(NULL)
+  calls <- sum(cost$calls); cached <- sum(cost$cached)
+  from_cache <- if (cached) sprintf(" %s of the %s calls come from the cache, free.",
+                                    format(cached, big.mark = ","), format(calls, big.mark = ",")) else ""
+  if (!sc_cost_paid(cost))
+    return(shiny::p(class = "text-success", paste0("No cost: These models are free to call.", from_cache)))
+  dates <- unique(stats::na.omit(cost$checked))
+  shiny::p(shiny::strong(sprintf("Estimated cost: %s.", sc_dollars(attr(cost, "total")))),
+           from_cache,
+           if (anyNA(cost$cost)) sprintf(" No price is known for %s.",
+                                         paste(cost$model[is.na(cost$cost)], collapse = ", ")),
+           shiny::span(class = "text-muted small",
+                       sprintf(" An estimate from guessed tokens and list prices of %s; retries add to it.",
+                               if (length(dates)) paste(sort(dates), collapse = " and ") else "unknown date")))
+}
+
+sc_cost_modal <- function(cost, confirm_id, label) {
+  tab <- data.frame(Model = cost$model, Calls = format(cost$calls, big.mark = ","),
+                    `From cache` = format(cost$cached, big.mark = ","),
+                    `Tokens in` = format(cost$input_tokens, big.mark = ","),
+                    `Tokens out` = format(cost$output_tokens, big.mark = ","),
+                    `Price in / out per million` = ifelse(is.na(cost$input_price), "unknown",
+                                                          sprintf("$%s / $%s", format(cost$input_price),
+                                                                  format(cost$output_price))),
+                    Cost = vapply(cost$cost, sc_dollars, character(1)),
+                    check.names = FALSE, stringsAsFactors = FALSE)
+  shiny::modalDialog(
+    title = sprintf("This run will cost about %s", sc_dollars(attr(cost, "total"))),
+    shiny::renderTable(tab),
+    shiny::p(class = "small text-muted",
+             "An estimate: Tokens are guessed from the prompts and typical answers, at the list",
+             "prices in sc_prices (dated in the table's checked column). Retries for invalid",
+             "answers add to it, and reasoning models bill hidden reasoning too. Calls answered",
+             "from the cache are free."),
+    footer = shiny::tagList(shiny::modalButton("Cancel"),
+                            shiny::actionButton(confirm_id, label, class = "btn-primary")),
+    size = "l", easyClose = TRUE)
+}
+
+sc_cache_note <- function(stats) {
+  if (is.null(stats) || !isTRUE(stats$hits > 0)) return("")
+  sprintf(" %s answer%s came from the cache.", format(stats$hits, big.mark = ","),
+          if (stats$hits == 1L) "" else "s")
 }
