@@ -18,6 +18,10 @@
 
 * New article: "Short instruments with known item problems".
 
+* The Designer card on the app's About tab has the full contact details,
+  links to the designer's website, blog, ORCID and GitHub, and how to cite
+  synthcheck with its Zenodo DOI. It no longer ends in a large blank space.
+
 * New response cache: `generate_synthetic()` and `cognitive_interview()`
   save every answer on disk (`sc_cache()`), under a key made of the
   provider, model, temperature, prompts, respondent, attempt, retry and
