@@ -4,7 +4,8 @@
 #'
 #' `summarise_benchmark()` writes a few sentences per model
 #' from a result of [authenticity_benchmark()]: The score and its weakest
-#' column, how close each anchored column is to real people, the behaviour
+#' column, its interval and whether it overlaps with the next model's, how
+#' close each anchored column is to real people, the behaviour
 #' features that differ most from real people and in which direction, and
 #' the person fit tails. The text follows fixed rules, so it is the same
 #' every time and states only values in the table.
@@ -61,7 +62,15 @@ summarise_benchmark <- function(x, n_features = 2) {
       sprintf("%s of its respondents fit the response model worse than 95%% of real people, as careless respondents do.",
               sc_pct(tl$lz_low))
     } else ""
-    paste(c(s1, s2, s3, s4)[nzchar(c(s1, s2, s3, s4))], collapse = " ")
+    s0 <- ""
+    if (all(c("score_lower", "score_upper") %in% names(tab)) && !is.na(r$score_lower)) {
+      s0 <- sprintf("Its %.0f%% interval runs from %s to %s.", 100 * (x$settings$conf %||% 0.95),
+                    sc_num(r$score_lower), sc_num(r$score_upper))
+      if (i < n && bm_overlapping(r, tab[i + 1L, ]))
+        s0 <- paste(s0, sprintf("It overlaps with that of %s, so the data do not clearly separate the two.",
+                                tab$model[i + 1L]))
+    }
+    paste(c(s1, s0, s2, s3, s4)[nzchar(c(s1, s0, s2, s3, s4))], collapse = " ")
   }, character(1))
   out <- as_tbl(data.frame(model = tab$model, score = tab$score, weakest = tab$weakest,
                            summary = txt, stringsAsFactors = FALSE))

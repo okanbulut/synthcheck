@@ -54,6 +54,16 @@
 #' can be above 100: It reproduces the full real sample more closely than
 #' a second, smaller sample of real people does.
 #'
+#' **Uncertainty.** Each anchored value and the score come with an interval
+#' (`*_lower`, `*_upper`), so two models whose intervals overlap are not
+#' clearly apart. The interval is a bootstrap (`n_boot` draws) that resamples
+#' the model's attempts and, separately, the floor and ceiling draws, and
+#' recomputes the anchored values and the score each time. With a single
+#' attempt, the spread between attempts is unknown, so it is approximated by
+#' the spread of the ceiling (two samples of real people of the same size),
+#' divided by the square root of 2. With two to four attempts the interval
+#' is rough; five or more give a steadier one.
+#'
 #' The benchmark compares models and
 #' supports decisions about them. It does not show that synthetic data can
 #' replace a field test.
@@ -69,12 +79,15 @@
 #' @param cor correlations for Structure: `"pearson"` (the default, fast on
 #'   many items) or `"polychoric"` (needs the polycor package; slow).
 #' @param copula add the Gaussian copula reference row (see Details).
+#' @param conf confidence level of the intervals.
+#' @param n_boot number of bootstrap draws for the intervals.
 #' @return An object of class `sc_benchmark`: A list with `table` (a tibble
 #'   with one row per model, sorted by score: `model`, `reference` (`TRUE`
 #'   for the copula row), `attempts`, `score`,
 #'   `weakest`, the anchored `overlap`, `structure` and `behaviour`, their
-#'   raw values (`*_raw`), and the lowest and highest anchored values over
-#'   the attempts), `attempts` (raw and anchored values per attempt),
+#'   raw values (`*_raw`), the lowest and highest anchored values over
+#'   the attempts (`*_lowest`, `*_highest`), and the interval of each
+#'   anchored value and of the score (`*_lower`, `*_upper`; see Details)), `attempts` (raw and anchored values per attempt),
 #'   `anchors` (floor and ceiling of each index), `behaviour` (the
 #'   [synthetic_behaviour()] result), `careless` (the flags, with
 #'   `clean_real = TRUE`) and `settings`. It has `print()`, `tidy()` and
@@ -102,8 +115,12 @@ authenticity_benchmark <- function(synthetic, real, items, score = "weakest", we
                                    clean_real = FALSE, careless_rule = NULL, n_splits = 20,
                                    n_floor = 20, ceiling_n = c("attempt", "half"),
                                    fit_scales = NULL, cor = c("pearson", "polychoric"),
-                                   copula = FALSE, seed = 1) {
+                                   copula = FALSE, conf = 0.95, n_boot = 1000, seed = 1) {
   ceiling_n <- match.arg(ceiling_n)
+  if (!is.numeric(conf) || length(conf) != 1L || conf <= 0 || conf >= 1)
+    stop("`conf` must be a single number between 0 and 1.", call. = FALSE)
+  n_boot <- as.integer(n_boot)
+  if (is.na(n_boot) || n_boot < 100L) stop("`n_boot` must be at least 100.", call. = FALSE)
   cor <- match.arg(cor)
   if (cor == "polychoric" && !requireNamespace("polycor", quietly = TRUE))
     stop("cor = \"polychoric\" needs the polycor package.", call. = FALSE)
@@ -196,6 +213,8 @@ authenticity_benchmark <- function(synthetic, real, items, score = "weakest", we
     }
     out
   }))
+  iv <- bm_intervals(att, fl, ce, names(syn), score, w, n_boot, conf, seed + 2L)
+  tab <- merge(tab, iv, by = "model", sort = FALSE)
   tab <- tab[order(-tab$score, tab$model), ]
   rownames(tab) <- NULL
 
@@ -213,6 +232,7 @@ authenticity_benchmark <- function(synthetic, real, items, score = "weakest", we
     settings = list(score = if (is.function(score)) "custom" else score, weights = w,
                     clean_real = clean_real, n_splits = n_splits, n_floor = n_floor,
                     ceiling_n = ceiling_n, anchor_n = m, cor = cor, n_real = n_real, copula = isTRUE(copula),
+                    conf = conf, n_boot = n_boot,
                     items = it$item, fit_scales = ref$fit_scales, seed = seed)),
     class = "sc_benchmark")
 }
@@ -226,42 +246,57 @@ authenticity_benchmark <- function(synthetic, real, items, score = "weakest", we
 #' (100, as close as a second sample of real people). The number in each
 #' tile is the unclamped value. The column that sets the score is
 #' outlined when `score = "weakest"`. The score is printed at the right.
+#' Under each number, in small print, is its interval (see
+#' [authenticity_benchmark()]): Models whose score intervals overlap are not
+#' clearly apart.
 #'
 #' @param x a result of [authenticity_benchmark()].
+#' @param intervals print the intervals under the values?
 #' @param title,subtitle plot titles. `NULL` uses the defaults.
 #' @return A ggplot object.
 #' @seealso [authenticity_benchmark()]
 #' @examples
 #' # see authenticity_benchmark()
 #' @export
-gg_benchmark <- function(x, title = NULL, subtitle = NULL) {
+gg_benchmark <- function(x, intervals = TRUE, title = NULL, subtitle = NULL) {
   if (!inherits(x, "sc_benchmark")) stop("`x` must be a result of authenticity_benchmark().", call. = FALSE)
   tab <- as.data.frame(x$table)
   idx <- c("overlap", "structure", "behaviour")
   lev <- c("Overlap", "Structure", "Behaviour", "Score")
   d <- do.call(rbind, lapply(idx, function(k) data.frame(
     model = tab$model, column = tools::toTitleCase(k), value = tab[[k]],
+    lower = if (is.null(tab[[paste0(k, "_lower")]])) NA_real_ else tab[[paste0(k, "_lower")]],
+    upper = if (is.null(tab[[paste0(k, "_upper")]])) NA_real_ else tab[[paste0(k, "_upper")]],
     weakest = x$settings$score == "weakest" & tab$weakest == k, stringsAsFactors = FALSE)))
+  intervals <- isTRUE(intervals) && any(!is.na(d$lower))
   d$fill <- pmax(-100, pmin(100, d$value))
   d$text <- bm_num(d$value)
   d$ink <- ifelse(abs(d$fill) > 75, "white", "grey15")
-  sc <- data.frame(model = tab$model, column = "Score", value = tab$score, stringsAsFactors = FALSE)
+  sc <- data.frame(model = tab$model, column = "Score", value = tab$score,
+                   lower = if (is.null(tab$score_lower)) NA_real_ else tab$score_lower,
+                   upper = if (is.null(tab$score_upper)) NA_real_ else tab$score_upper,
+                   stringsAsFactors = FALSE)
   sc$text <- bm_num(sc$value)
+  ci_text <- function(lo, hi) ifelse(is.na(lo) | is.na(hi), "", paste(bm_num(lo), "to", bm_num(hi)))
+  d$ci <- ci_text(d$lower, d$upper); sc$ci <- ci_text(sc$lower, sc$upper)
+  up <- if (intervals) 0.12 else 0
   d$model <- factor(d$model, levels = rev(tab$model)); sc$model <- factor(sc$model, levels = rev(tab$model))
   d$column <- factor(d$column, levels = lev); sc$column <- factor(sc$column, levels = lev)
   if (is.null(title)) title <- "Synthetic authenticity benchmark"
   if (is.null(subtitle))
     subtitle <- paste0("0 = shuffled real columns, 100 = a second sample of real people.\n",
                        if (x$settings$score == "weakest") "Outlined: The weakest column, which sets the score." else
-                         paste0("Score: ", x$settings$score, "."))
-  ggplot2::ggplot(d, ggplot2::aes(x = .data$column, y = .data$model)) +
+                         paste0("Score: ", x$settings$score, "."),
+                       if (intervals) sprintf(" Small print: %.0f%% interval.", 100 * (x$settings$conf %||% 0.95)))
+  p <- ggplot2::ggplot(d, ggplot2::aes(x = .data$column, y = .data$model)) +
     ggplot2::geom_tile(ggplot2::aes(fill = .data$fill), colour = "white", linewidth = 1) +
     ggplot2::geom_tile(data = d[d$weakest, , drop = FALSE], fill = NA, colour = "grey15",
                        linewidth = 0.9, width = 0.92, height = 0.88) +
-    ggplot2::geom_text(ggplot2::aes(label = .data$text, colour = .data$ink), size = 3.8) +
+    ggplot2::geom_text(ggplot2::aes(label = .data$text, colour = .data$ink), size = 3.8,
+                       position = ggplot2::position_nudge(y = up)) +
     ggplot2::scale_colour_identity() +
     ggplot2::geom_text(data = sc, ggplot2::aes(label = .data$text), size = 4.2, fontface = "bold",
-                       colour = "grey15") +
+                       colour = "grey15", position = ggplot2::position_nudge(y = up)) +
     ggplot2::scale_fill_gradientn(colours = sc_palette, limits = c(-100, 100),
                                   breaks = c(-100, 0, 100),
                                   labels = c("-100 or less", "0: Shuffled", "100: Real"),
@@ -271,6 +306,14 @@ gg_benchmark <- function(x, title = NULL, subtitle = NULL) {
     theme_synthcheck() +
     ggplot2::theme(panel.grid = ggplot2::element_blank(),
                    legend.key.width = ggplot2::unit(2.5, "lines"))
+  if (intervals) {
+    p <- p +
+      ggplot2::geom_text(ggplot2::aes(label = .data$ci, colour = .data$ink), size = 2.6,
+                         position = ggplot2::position_nudge(y = -0.22)) +
+      ggplot2::geom_text(data = sc, ggplot2::aes(label = .data$ci), size = 2.6, colour = "grey35",
+                         position = ggplot2::position_nudge(y = -0.22))
+  }
+  p
 }
 
 #' @export
@@ -284,6 +327,11 @@ print.sc_benchmark <- function(x, digits = 0, ...) {
   t$Weakest <- tools::toTitleCase(t$Weakest)
   num <- vapply(t, is.numeric, logical(1))
   t[num] <- lapply(t[num], round, digits)
+  if (all(c("score_lower", "score_upper") %in% names(x$table))) {
+    ci <- sprintf("%s to %s", bm_num(x$table$score_lower), bm_num(x$table$score_upper))
+    t <- data.frame(t[seq_len(6)], ci, t["Weakest"], check.names = FALSE, stringsAsFactors = FALSE)
+    names(t)[7] <- sprintf("Score %.0f%%", 100 * (s$conf %||% 0.95))
+  }
   print(t, row.names = FALSE)
   a <- as.data.frame(x$anchors)
   cat(sprintf("\nAnchors (raw, floor to ceiling, samples of %d): %s.\n", s$anchor_n,
@@ -302,6 +350,41 @@ autoplot.sc_benchmark <- function(object, ...) gg_benchmark(object, ...)
 # ---- internal -------------------------------------------------------------
 
 copula_name <- "Gaussian copula (reference)"
+
+# bootstrap intervals for the anchored columns and the score of each model
+bm_intervals <- function(att, fl, ce, models, score, w, n_boot, conf, seed) {
+  idx <- c("overlap", "structure", "behaviour")
+  q <- c((1 - conf) / 2, 1 - (1 - conf) / 2)
+  noise <- apply(ce, 2, stats::sd, na.rm = TRUE) / sqrt(2)
+  noise[!is.finite(noise)] <- 0
+  with_seed(seed, {
+    pick <- function(M) vapply(seq_len(n_boot), function(b)
+      colMeans(M[sample.int(nrow(M), replace = TRUE), , drop = FALSE], na.rm = TRUE), numeric(3))
+    flb <- pick(fl); ceb <- pick(ce)
+    do.call(rbind, lapply(models, function(mo) {
+      raw <- as.matrix(att[att$model == mo, paste0(idx, "_raw"), drop = FALSE])
+      k <- nrow(raw)
+      draws <- vapply(seq_len(n_boot), function(b) {
+        r <- if (k >= 2L) colMeans(raw[sample.int(k, replace = TRUE), , drop = FALSE], na.rm = TRUE) else
+          raw[1, ] + stats::rnorm(3, 0, noise)
+        v <- 100 * (r - flb[, b]) / (ceb[, b] - flb[, b])
+        c(v, suppressWarnings(bm_score(v, score, w)$score))
+      }, numeric(4))
+      lim <- apply(draws, 1, stats::quantile, probs = q, na.rm = TRUE, names = FALSE)
+      out <- data.frame(model = mo, stringsAsFactors = FALSE)
+      for (j in seq_along(c(idx, "score"))) {
+        k2 <- c(idx, "score")[j]
+        out[[paste0(k2, "_lower")]] <- lim[1, j]
+        out[[paste0(k2, "_upper")]] <- lim[2, j]
+      }
+      out
+    }))
+  })
+}
+
+# do the score intervals of two models overlap?
+bm_overlapping <- function(a, b) !is.na(a$score_lower) && !is.na(b$score_upper) &&
+  a$score_lower <= b$score_upper && b$score_lower <= a$score_upper
 
 bm_weights <- function(weights) {
   w <- c(overlap = 1, structure = 1, behaviour = 1)

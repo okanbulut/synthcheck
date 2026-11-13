@@ -4,10 +4,12 @@
 \alias{gg_benchmark}
 \title{Draw the synthetic authenticity benchmark}
 \usage{
-gg_benchmark(x, title = NULL, subtitle = NULL)
+gg_benchmark(x, intervals = TRUE, title = NULL, subtitle = NULL)
 }
 \arguments{
 \item{x}{a result of \code{\link[=authenticity_benchmark]{authenticity_benchmark()}}.}
+
+\item{intervals}{print the intervals under the values?}
 
 \item{title, subtitle}{plot titles. \code{NULL} uses the defaults.}
 }
@@ -22,6 +24,9 @@ columns) through pale (around 0, no better than shuffled columns) to blue
 (100, as close as a second sample of real people). The number in each
 tile is the unclamped value. The column that sets the score is
 outlined when \code{score = "weakest"}. The score is printed at the right.
+Under each number, in small print, is its interval (see
+\code{\link[=authenticity_benchmark]{authenticity_benchmark()}}): Models whose score intervals overlap are not
+clearly apart.
 }
 \examples{
 # see authenticity_benchmark()

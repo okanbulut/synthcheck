@@ -111,6 +111,8 @@ reference:
   - sc_instrument
   - sc_builtin_instrument
   - sc_personas
+  - persona_fidelity
+  - gg_persona_fidelity
   - sc_model
   - sc_default_models
   - sc_prompt

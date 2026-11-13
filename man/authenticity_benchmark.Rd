@@ -18,6 +18,8 @@ authenticity_benchmark(
   fit_scales = NULL,
   cor = c("pearson", "polychoric"),
   copula = FALSE,
+  conf = 0.95,
+  n_boot = 1000,
   seed = 1
 )
 }
@@ -57,6 +59,10 @@ many items) or \code{"polychoric"} (needs the polycor package; slow).}
 
 \item{copula}{add the Gaussian copula reference row (see Details).}
 
+\item{conf}{confidence level of the intervals.}
+
+\item{n_boot}{number of bootstrap draws for the intervals.}
+
 \item{seed}{random seed for breaking ties.}
 }
 \value{
@@ -64,8 +70,9 @@ An object of class \code{sc_benchmark}: A list with \code{table} (a tibble
 with one row per model, sorted by score: \code{model}, \code{reference} (\code{TRUE}
 for the copula row), \code{attempts}, \code{score},
 \code{weakest}, the anchored \code{overlap}, \code{structure} and \code{behaviour}, their
-raw values (\verb{*_raw}), and the lowest and highest anchored values over
-the attempts), \code{attempts} (raw and anchored values per attempt),
+raw values (\verb{*_raw}), the lowest and highest anchored values over
+the attempts (\verb{*_lowest}, \verb{*_highest}), and the interval of each
+anchored value and of the score (\verb{*_lower}, \verb{*_upper}; see Details)), \code{attempts} (raw and anchored values per attempt),
 \code{anchors} (floor and ceiling of each index), \code{behaviour} (the
 \code{\link[=synthetic_behaviour]{synthetic_behaviour()}} result), \code{careless} (the flags, with
 \code{clean_real = TRUE}) and \code{settings}. It has \code{print()}, \code{tidy()} and
@@ -125,6 +132,16 @@ target, so it is an in-sample reference (\code{reference = TRUE} in the
 table), not a competitor. For the same reason, its Overlap and Structure
 can be above 100: It reproduces the full real sample more closely than
 a second, smaller sample of real people does.
+
+\strong{Uncertainty.} Each anchored value and the score come with an interval
+(\verb{*_lower}, \verb{*_upper}), so two models whose intervals overlap are not
+clearly apart. The interval is a bootstrap (\code{n_boot} draws) that resamples
+the model's attempts and, separately, the floor and ceiling draws, and
+recomputes the anchored values and the score each time. With a single
+attempt, the spread between attempts is unknown, so it is approximated by
+the spread of the ceiling (two samples of real people of the same size),
+divided by the square root of 2. With two to four attempts the interval
+is rough; five or more give a steadier one.
 
 The benchmark compares models and
 supports decisions about them. It does not show that synthetic data can

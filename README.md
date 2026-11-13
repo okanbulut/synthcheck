@@ -20,6 +20,8 @@ It looks at three things:
 Each index is anchored between a shuffled baseline (0) and a second sample
 of real people (100). The **synthetic authenticity benchmark** compares
 several models in one table, scored by their weakest column by default.
+Every value comes with a bootstrap interval, so models whose intervals
+overlap are not clearly apart.
 
 Three diagnostics sit beside the benchmark and do not change its score:
 `synthetic_construct()` checks whether the scales hold together and relate
@@ -45,6 +47,12 @@ separate call codes the transcripts for comprehension, retrieval,
 judgement, response-mapping and sensitivity problems. It is a screening aid
 that points to wording to look at. It is not a substitute for cognitive
 interviews with real people.
+
+Before trusting a persona-based run, `persona_fidelity()` checks whether
+the personas change the answers at all: How much of each scale score lies
+between personas compared with shuffled persona labels, and, when you give
+targets such as "high in Conscientiousness", whether each persona moves in
+that direction.
 
 The package compares models and supports decisions about them. It does not
 show that synthetic respondents can replace a field test.
@@ -151,6 +159,7 @@ syn <- generate_synthetic(ins, list(sc_model("anthropic"), sc_model("openai")), 
                           attempts = 5, respondents = 10, parallel = 8, output = "my_run")
 
 real <- hexaco_real[hexaco_real$country == "Canada", ]
+persona_fidelity(syn, ins, per, real = real)   # do the personas matter?
 bm <- authenticity_benchmark(as_synthetic_list(syn), real, ins$items)
 summarise_benchmark(bm)
 ```
