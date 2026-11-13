@@ -152,7 +152,10 @@ sc_probes <- function(stage = NULL, probe = NULL, probe_id = NULL) {
 #'   interview (used by [run_synthcheck_app()]).
 #' @param stop_file optional path: When this file appears, the run stops
 #'   after the interviews in progress.
-#' @param seed random seed for the mock provider.
+#' @param seed random seed for the mock provider, also part of the cache key.
+#' @param cache the response cache, as in [generate_synthetic()]: An
+#'   [sc_cache()], a folder, `TRUE` or `FALSE`. The respondent's two answers
+#'   and the coding are saved, so the same interviews again cost nothing.
 #' @return A tibble of class `sc_interview`, one row per model, persona,
 #'   item and interview, with `model`, `provider`, `model_id`, `coder`,
 #'   `persona_id`, any persona attributes, `item`, `statement`, `pretest`
@@ -178,7 +181,7 @@ sc_probes <- function(stage = NULL, probe = NULL, probe_id = NULL) {
 #'   Willis, G. B., & Lessler, J. T. (1999). *Question Appraisal System
 #'   QAS-99.* Research Triangle Institute.
 #' @seealso [sc_probes()], [summarise_interviews()], [gg_interview()],
-#'   [sc_interview_prompts()]
+#'   [sc_interview_prompts()], [estimate_interview_cost()], [sc_cache()]
 #' @examples
 #' items <- data.frame(
 #'   item = c("q1", "q2", "q3"),
@@ -200,7 +203,8 @@ cognitive_interview <- function(instrument, models, personas = NULL, items = NUL
                                 probes = sc_probes(), coder = NULL, pretest = NULL,
                                 interviews = 1, max_retries = 2, parallel = 1, output = NULL,
                                 format = c("csv", "json", "rds"), progress = interactive(),
-                                progress_file = NULL, stop_file = NULL, seed = 1) {
+                                progress_file = NULL, stop_file = NULL, seed = 1,
+                                cache = sc_cache()) {
   if (!inherits(instrument, "sc_instrument"))
     stop("`instrument` must be made with sc_instrument().", call. = FALSE)
   format <- match.arg(format)
@@ -211,42 +215,13 @@ cognitive_interview <- function(instrument, models, personas = NULL, items = NUL
   if (anyDuplicated(labels))
     stop("Every model needs its own `name`: ", paste(unique(labels[duplicated(labels)]),
                                                       collapse = ", "), ".", call. = FALSE)
-  if (!is.null(coder) && !inherits(coder, "sc_model"))
-    stop("`coder` must be an sc_model() or NULL.", call. = FALSE)
-  if (!inherits(probes, "sc_probes")) {
-    if (!is.data.frame(probes) || !all(c("stage", "probe") %in% names(probes)))
-      stop("`probes` must be made with sc_probes().", call. = FALSE)
-    probes <- sc_probes(probes$stage, probes$probe, probes$probe_id)
-  }
-  all_models <- c(models, if (!is.null(coder)) list(coder))
-  if (any(vapply(all_models, function(m) m$provider != "mock", logical(1))))
-    sc_need("ellmer", "to call language models")
-  personas <- if (is.null(personas)) NULL else sc_personas(personas)
-  interviews <- as.integer(interviews)
-  if (length(interviews) != 1L || is.na(interviews) || interviews < 1L)
-    stop("`interviews` must be at least 1.", call. = FALSE)
+  st <- sc_iv_setup(instrument, models, personas, items, probes, coder, pretest, interviews)
+  probes <- st$probes; personas <- st$personas; interviews <- st$interviews
+  flags <- st$flags; items <- st$items; pers <- st$pers; jobs <- st$jobs
+  if (st$from_flags)
+    message(sprintf("Interviewing about the %d item%s flagged by the pretest.", nrow(flags),
+                    if (nrow(flags) == 1L) "" else "s"))
   parallel <- max(1L, as.integer(parallel))
-
-  it <- as.data.frame(instrument$items, stringsAsFactors = FALSE)
-  flags <- sc_iv_pretest(pretest, it$item)
-  if (is.null(items)) {
-    items <- if (nrow(flags)) flags$item else it$item
-    if (nrow(flags))
-      message(sprintf("Interviewing about the %d item%s flagged by the pretest.", nrow(flags),
-                      if (nrow(flags) == 1L) "" else "s"))
-  }
-  items <- unique(as.character(items))
-  bad <- setdiff(items, it$item)
-  if (length(bad)) stop("Not in the instrument: ", paste(bad, collapse = ", "), ".", call. = FALSE)
-  if (!length(items)) stop("No items to interview about.", call. = FALSE)
-  # flagged items first, in the order of the flags, then the rest in instrument order
-  items <- c(intersect(flags$item, items), setdiff(it$item[it$item %in% items], flags$item))
-
-  pers <- if (is.null(personas)) data.frame(persona_id = "none", description = NA_character_,
-                                            stringsAsFactors = FALSE) else as.data.frame(personas)
-  jobs <- expand.grid(r = seq_len(interviews), i = seq_along(items), p = seq_len(nrow(pers)),
-                      KEEP.OUT.ATTRS = FALSE)
-  jobs <- jobs[c("p", "i", "r")]
   n_job <- nrow(jobs)
   total <- length(models) * n_job
   message(sprintf("%d interview%s (%d model%s x %d persona%s x %d item%s%s): %d requests.",
@@ -267,6 +242,7 @@ cognitive_interview <- function(instrument, models, personas = NULL, items = NUL
   report <- sc_reporter(progress, progress_file, state, labels, n_job)
   report()
 
+  cache <- sc_cache_run(cache)
   rows <- list(); log <- list(); stopped <- FALSE
   with_seed(seed, {
     for (mi in seq_along(models)) {
@@ -274,17 +250,12 @@ cognitive_interview <- function(instrument, models, personas = NULL, items = NUL
       cd <- sc_iv_coder(if (is.null(coder)) m else coder)
       state$model <- m$name
       seeds <- sample.int(.Machine$integer.max, n_job)
-      specs <- lapply(seq_len(n_job), function(j) {
-        item <- items[jobs$i[j]]
-        row <- it[it$item == item, , drop = FALSE]
-        fl <- flags$flag[match(item, flags$item)]
-        list(item = row, persona = pers$description[jobs$p[j]],
-             probes = sc_iv_probes_for(probes, row, fl), flag = fl, seed = seeds[j])
-      })
+      specs <- sc_iv_specs(st, seeds, seed)
       res <- vector("list", n_job)
       for (chunk in split(seq_len(n_job), ceiling(seq_len(n_job) / parallel))) {
         if (!is.null(stop_file) && file.exists(stop_file)) { stopped <- TRUE; break }
-        out <- sc_iv_run_chunk(m, cd, instrument, specs[chunk], max_retries, on_done = function(r) {
+        out <- sc_iv_run_chunk(m, cd, instrument, specs[chunk], max_retries, cache = cache,
+                               on_done = function(r) {
           state$done <- state$done + 1L
           state$per_model[mi] <- state$per_model[mi] + 1L
           state$retries <- state$retries + r$retries
@@ -317,10 +288,63 @@ cognitive_interview <- function(instrument, models, personas = NULL, items = NUL
   attr(out, "stopped") <- stopped
   attr(out, "probes") <- probes
   attr(out, "instrument") <- instrument$name
+  attr(out, "cache") <- sc_cache_stats(cache)
   class(out) <- c("sc_interview", class(out))
   if (!is.null(output)) sc_iv_write(out, output, format, instrument, models, coder, personas,
                                     probes, flags, interviews, seed)
   out
+}
+
+# the checked settings of a set of interviews, shared with the cost estimate
+sc_iv_setup <- function(instrument, models, personas, items, probes, coder, pretest, interviews) {
+  if (!is.null(coder) && !inherits(coder, "sc_model"))
+    stop("`coder` must be an sc_model() or NULL.", call. = FALSE)
+  if (!inherits(probes, "sc_probes")) {
+    if (!is.data.frame(probes) || !all(c("stage", "probe") %in% names(probes)))
+      stop("`probes` must be made with sc_probes().", call. = FALSE)
+    probes <- sc_probes(probes$stage, probes$probe, probes$probe_id)
+  }
+  all_models <- c(models, if (!is.null(coder)) list(coder))
+  if (any(vapply(all_models, function(m) m$provider != "mock", logical(1))))
+    sc_need("ellmer", "to call language models")
+  personas <- if (is.null(personas)) NULL else sc_personas(personas)
+  interviews <- as.integer(interviews)
+  if (length(interviews) != 1L || is.na(interviews) || interviews < 1L)
+    stop("`interviews` must be at least 1.", call. = FALSE)
+
+  it <- as.data.frame(instrument$items, stringsAsFactors = FALSE)
+  flags <- sc_iv_pretest(pretest, it$item)
+  from_flags <- is.null(items) && nrow(flags) > 0L
+  if (is.null(items)) {
+    items <- if (nrow(flags)) flags$item else it$item
+  }
+  items <- unique(as.character(items))
+  bad <- setdiff(items, it$item)
+  if (length(bad)) stop("Not in the instrument: ", paste(bad, collapse = ", "), ".", call. = FALSE)
+  if (!length(items)) stop("No items to interview about.", call. = FALSE)
+  # flagged items first, in the order of the flags, then the rest in instrument order
+  items <- c(intersect(flags$item, items), setdiff(it$item[it$item %in% items], flags$item))
+
+  pers <- if (is.null(personas)) data.frame(persona_id = "none", description = NA_character_,
+                                            stringsAsFactors = FALSE) else as.data.frame(personas)
+  jobs <- expand.grid(r = seq_len(interviews), i = seq_along(items), p = seq_len(nrow(pers)),
+                      KEEP.OUT.ATTRS = FALSE)
+  jobs <- jobs[c("p", "i", "r")]
+  list(probes = probes, personas = personas, interviews = interviews, it = it, flags = flags,
+       items = items, pers = pers, jobs = jobs, from_flags = from_flags)
+}
+
+# the interview specifications of one model
+sc_iv_specs <- function(st, seeds, seed) {
+  lapply(seq_len(nrow(st$jobs)), function(j) {
+    item <- st$items[st$jobs$i[j]]
+    row <- st$it[st$it$item == item, , drop = FALSE]
+    fl <- st$flags$flag[match(item, st$flags$item)]
+    list(item = row, persona = st$pers$description[st$jobs$p[j]],
+         probes = sc_iv_probes_for(st$probes, row, fl), flag = fl, seed = seeds[j],
+         slot = sprintf("seed=%s|persona=%s|item=%s|interview=%d", format(seed),
+                        st$pers$persona_id[st$jobs$p[j]], item, st$jobs$r[j]))
+  })
 }
 
 #' Show the prompts of a cognitive interview
@@ -740,13 +764,13 @@ sc_iv_empty <- function(spec, instrument, retries, errors) {
   sc_iv_result(spec, instrument, list(), list(), list(), retries, errors)
 }
 
-sc_iv_run_chunk <- function(m, cd, instrument, specs, max_retries, on_done) {
+sc_iv_run_chunk <- function(m, cd, instrument, specs, max_retries, on_done, cache = NULL) {
   n <- length(specs)
   mock <- m$provider == "mock" && cd$provider == "mock"
   if (mock || n == 1L || !requireNamespace("promises", quietly = TRUE) ||
       !requireNamespace("later", quietly = TRUE)) {
     return(lapply(specs, function(s) {
-      r <- sc_iv_one(m, cd, instrument, s, max_retries)
+      r <- sc_iv_one(m, cd, instrument, s, max_retries, cache)
       on_done(r)
       r
     }))
@@ -755,7 +779,7 @@ sc_iv_run_chunk <- function(m, cd, instrument, specs, max_retries, on_done) {
   pending <- n
   for (j in seq_len(n)) local({
     jj <- j
-    sc_iv_one_async(m, cd, instrument, specs[[jj]], max_retries, done = function(r) {
+    sc_iv_one_async(m, cd, instrument, specs[[jj]], max_retries, cache = cache, done = function(r) {
       out[[jj]] <<- r
       pending <<- pending - 1L
       on_done(r)
@@ -765,25 +789,48 @@ sc_iv_run_chunk <- function(m, cd, instrument, specs, max_retries, on_done) {
   out
 }
 
+# the cache keys of an interview: The respondent's conversation (think-aloud
+# and probes), and the coding of its transcript
+sc_iv_key_answers <- function(m, spec, instrument, try)
+  sc_cache_key(m, "interview", sc_iv_system(spec$persona), sc_iv_think_prompt(instrument, spec$item),
+               sc_iv_probe_prompt(spec$probes), spec$slot, try)
+
+sc_iv_coder_input <- function(instrument, spec, a1, a2) {
+  tr <- sc_iv_transcript(spec$item$statement, a1$think_aloud, a1$answer, spec$probes, a2)
+  sc_iv_coder_prompt(instrument, spec$item, tr)
+}
+
+sc_iv_key_code <- function(cd, prompt, try) sc_cache_key(cd, "coder", sc_iv_coder_system, prompt, try)
+
 # one interview, one request after another
-sc_iv_one <- function(m, cd, instrument, spec, max_retries) {
+sc_iv_one <- function(m, cd, instrument, spec, max_retries, cache = NULL) {
   if (m$provider == "mock" && cd$provider == "mock") return(sc_iv_mock(instrument, spec))
+  if (is.null(spec$slot)) cache <- NULL
   errors <- character(0)
   for (try in 0:max_retries) {
     r <- tryCatch({
       a12 <- if (m$provider == "mock") sc_iv_mock_answers(instrument, spec) else {
-        ty <- sc_iv_types(instrument, spec$probes)
-        chat <- sc_chat(m, sc_iv_system(spec$persona))
-        a1 <- chat$chat_structured(sc_iv_think_prompt(instrument, spec$item), type = ty$think)
-        a2 <- chat$chat_structured(sc_iv_probe_prompt(spec$probes), type = ty$probes)
-        list(a1 = a1, a2 = a2)
+        key <- if (!is.null(cache)) sc_iv_key_answers(m, spec, instrument, try)
+        hit <- if (!is.null(cache)) sc_cache_get(cache, m, key)
+        if (!is.null(hit)) hit else {
+          ty <- sc_iv_types(instrument, spec$probes)
+          chat <- sc_chat(m, sc_iv_system(spec$persona))
+          a1 <- chat$chat_structured(sc_iv_think_prompt(instrument, spec$item), type = ty$think)
+          a2 <- chat$chat_structured(sc_iv_probe_prompt(spec$probes), type = ty$probes)
+          if (!is.null(cache)) sc_cache_put(cache, m, key, list(a1 = a1, a2 = a2))
+          list(a1 = a1, a2 = a2)
+        }
       }
       a3 <- if (cd$provider == "mock") sc_iv_mock_code(spec) else {
-        ty <- sc_iv_types(instrument, spec$probes)
-        tr <- sc_iv_transcript(spec$item$statement, a12$a1$think_aloud, a12$a1$answer,
-                               spec$probes, a12$a2)
-        sc_chat(cd, sc_iv_coder_system)$chat_structured(
-          sc_iv_coder_prompt(instrument, spec$item, tr), type = ty$coder)
+        prompt <- sc_iv_coder_input(instrument, spec, a12$a1, a12$a2)
+        key <- if (!is.null(cache)) sc_iv_key_code(cd, prompt, try)
+        hit <- if (!is.null(cache)) sc_cache_get(cache, cd, key)
+        if (!is.null(hit)) hit else {
+          ty <- sc_iv_types(instrument, spec$probes)
+          x <- sc_chat(cd, sc_iv_coder_system)$chat_structured(prompt, type = ty$coder)
+          if (!is.null(cache)) sc_cache_put(cache, cd, key, x)
+          x
+        }
       }
       sc_iv_result(spec, instrument, a12$a1, a12$a2, a3, try, errors)
     }, error = function(e) { errors <<- c(errors, conditionMessage(e)); NULL })
@@ -794,7 +841,8 @@ sc_iv_one <- function(m, cd, instrument, spec, max_retries) {
 }
 
 # the same without blocking, for parallel interviews
-sc_iv_one_async <- function(m, cd, instrument, spec, max_retries, done) {
+sc_iv_one_async <- function(m, cd, instrument, spec, max_retries, done, cache = NULL) {
+  if (is.null(spec$slot)) cache <- NULL
   errors <- character(0)
   fail <- function(e, try) {
     errors <<- c(errors, conditionMessage(e))
@@ -806,7 +854,10 @@ sc_iv_one_async <- function(m, cd, instrument, spec, max_retries, done) {
     if (inherits(ty, "error")) return(fail(ty, try))
     a1 <- NULL; a2 <- NULL
     p <- tryCatch({
-      p0 <- if (m$provider == "mock") promises::promise_resolve(sc_iv_mock_answers(instrument, spec)) else {
+      key <- if (!is.null(cache) && m$provider != "mock") sc_iv_key_answers(m, spec, instrument, try)
+      hit <- if (!is.null(key)) sc_cache_get(cache, m, key)
+      p0 <- if (m$provider == "mock") promises::promise_resolve(sc_iv_mock_answers(instrument, spec)) else
+        if (!is.null(hit)) promises::promise_resolve(hit) else {
         chat <- sc_chat(m, sc_iv_system(spec$persona))
         promises::then(chat$chat_structured_async(sc_iv_think_prompt(instrument, spec$item),
                                                   type = ty$think),
@@ -814,15 +865,25 @@ sc_iv_one_async <- function(m, cd, instrument, spec, max_retries, done) {
                          a1 <<- x
                          promises::then(chat$chat_structured_async(sc_iv_probe_prompt(spec$probes),
                                                                    type = ty$probes),
-                                        function(y) list(a1 = a1, a2 = y))
+                                        function(y) {
+                                          out <- list(a1 = a1, a2 = y)
+                                          if (!is.null(key)) sc_cache_put(cache, m, key, out)
+                                          out
+                                        })
                        })
       }
       promises::then(p0, function(a12) {
         a1 <<- a12$a1; a2 <<- a12$a2
         if (cd$provider == "mock") return(sc_iv_mock_code(spec))
-        tr <- sc_iv_transcript(spec$item$statement, a1$think_aloud, a1$answer, spec$probes, a2)
-        sc_chat(cd, sc_iv_coder_system)$chat_structured_async(
-          sc_iv_coder_prompt(instrument, spec$item, tr), type = ty$coder)
+        prompt <- sc_iv_coder_input(instrument, spec, a1, a2)
+        ck <- if (!is.null(cache)) sc_iv_key_code(cd, prompt, try)
+        hit <- if (!is.null(ck)) sc_cache_get(cache, cd, ck)
+        if (!is.null(hit)) return(hit)
+        promises::then(sc_chat(cd, sc_iv_coder_system)$chat_structured_async(prompt, type = ty$coder),
+                       function(x) {
+                         if (!is.null(ck)) sc_cache_put(cache, cd, ck, x)
+                         x
+                       })
       })
     }, error = function(e) e)
     if (inherits(p, "error")) return(fail(p, try))

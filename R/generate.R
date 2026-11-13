@@ -20,6 +20,11 @@
 #' `prompts.json` (every prompt sent) beside it, so a stopped run keeps the
 #' finished attempts. Read the folder back with [read_synthetic()].
 #'
+#' Answers are saved in a response cache on disk (see [sc_cache()]): A run
+#' with the same settings and `seed` reuses them instead of calling the
+#' models again, which makes it repeatable and free. See what a run will cost
+#' first with [estimate_cost()].
+#'
 #' Use them to compare models with
 #' [authenticity_benchmark()], not to replace a field test.
 #'
@@ -52,12 +57,21 @@
 #'   respondent (used by [run_synthcheck_app()]).
 #' @param stop_file optional path: When this file appears, the run stops
 #'   after the calls in progress and returns what is done.
-#' @param seed random seed for shuffling and for the mock provider.
+#' @param seed random seed for shuffling and for the mock provider. It is
+#'   also part of the cache key: The same `seed` reuses saved answers, a new
+#'   one asks the models again.
+#' @param cache the response cache: An [sc_cache()], a folder, `TRUE` (the
+#'   default folder) or `FALSE` (no cache). By default, saved answers are
+#'   reused, so the same run twice gives the same data and the second run
+#'   costs nothing. Use `sc_cache(mode = "refresh")` to ask again.
 #' @return A tibble with `model`, `provider`, `model_id`, `temperature`,
 #'   `attempt`, `persona_id`, `respondent`, any persona attributes, and one
-#'   column per item. The attribute `log` holds the failed calls.
+#'   column per item. The attribute `log` holds the failed calls, and
+#'   `cache` the number of answers taken from the cache (`hits`) and saved to
+#'   it (`saved`).
 #' @seealso [sc_instrument()], [sc_personas()], [sc_model()],
-#'   [as_synthetic_list()], [authenticity_benchmark()]
+#'   [estimate_cost()], [sc_cache()], [as_synthetic_list()],
+#'   [authenticity_benchmark()]
 #' @examples
 #' ins <- sc_instrument(hexaco_items[hexaco_items$trait == "H", ], scale = c(1, 7))
 #' per <- sc_persona_grid(age = c(25, 65), template = "You are {age} years old.")
@@ -74,7 +88,8 @@ generate_synthetic <- function(instrument, models, personas = NULL, attempts = 1
                                respondents = 1, batch_size = 1, block_size = NULL, shuffle = FALSE,
                                max_retries = 2, parallel = 1, output = NULL,
                                format = c("csv", "json", "rds", "xlsx"), progress = interactive(),
-                               progress_file = NULL, stop_file = NULL, seed = 1) {
+                               progress_file = NULL, stop_file = NULL, seed = 1,
+                               cache = sc_cache()) {
   if (!inherits(instrument, "sc_instrument"))
     stop("`instrument` must be made with sc_instrument().", call. = FALSE)
   format <- match.arg(format)
@@ -102,7 +117,7 @@ generate_synthetic <- function(instrument, models, personas = NULL, attempts = 1
   if (!is.null(output)) {
     dir.create(output, showWarnings = FALSE, recursive = TRUE)
     sc_write_run(output, instrument, models, personas, attempts, respondents, batch_size,
-                 block_size, shuffle, seed, format)
+                 block_size, shuffle, seed, format, sc_as_cache(cache)$mode)
   }
 
   pers <- if (is.null(personas)) data.frame(persona_id = "none", description = NA_character_,
@@ -116,70 +131,86 @@ generate_synthetic <- function(instrument, models, personas = NULL, attempts = 1
   report <- sc_reporter(progress, progress_file, state, labels, attempts * n_per)
   report()
 
+  plan <- sc_gen_plan(models, pers, attempts, respondents, batch_size, shuffle, instrument, seed)
+  cache <- sc_cache_run(cache)
   rows <- list(); log <- list()
   stopped <- FALSE
-  with_seed(seed, {
-    for (mi in seq_along(models)) {
-      m <- models[[mi]]
-      for (a in seq_len(attempts)) {
-        state$model <- m$name; state$attempt <- a
-        jobs <- data.frame(p = rep(seq_len(nrow(pers)), each = respondents),
-                           r = rep(seq_len(respondents), nrow(pers)))
-        # one call per unit: a respondent, or a batch of one persona's respondents
-        units <- unlist(lapply(seq_len(nrow(pers)), function(p) {
-          idx <- which(jobs$p == p)
-          split(idx, ceiling(seq_along(idx) / batch_size))
-        }), recursive = FALSE)
-        # item orders and seeds drawn up front, so results do not depend on `parallel`
-        orders <- lapply(units, function(u)
-          if (shuffle) sample(instrument$items$item) else instrument$items$item)
-        seeds <- sample.int(.Machine$integer.max, length(units))
-        res <- vector("list", nrow(jobs))
-        for (chunk in split(seq_along(units), ceiling(seq_along(units) / parallel))) {
-          if (!is.null(stop_file) && file.exists(stop_file)) { stopped <- TRUE; break }
-          out <- sc_run_chunk(m, instrument, pers$description[jobs$p[vapply(units[chunk], `[`, 1L, 1L)]],
-                              lengths(units[chunk]), orders[chunk], seeds[chunk], block_size,
-                              max_retries,
-                              on_done = function(r) {
-                                state$done <- state$done + 1L
-                                state$per_model[mi] <- state$per_model[mi] + 1L
-                                state$retries <- state$retries + r$retries
-                                if (!r$ok) state$failed <- state$failed + 1L
-                                report()
-                              })
-          for (j in seq_along(chunk)) res[units[[chunk[j]]]] <- out[[j]]
-        }
-        keep <- which(!vapply(res, is.null, logical(1)))
-        if (length(keep)) {
-          d <- sc_rows(res[keep], jobs[keep, , drop = FALSE], pers, m, a, instrument)
-          rows[[length(rows) + 1L]] <- d
-          if (!is.null(output) && !stopped) write_synthetic(d, file.path(output, sprintf(
-            "%s_attempt%02d.%s", sc_slug(m$name), a, format)), format = format)
-          for (k in keep) if (length(res[[k]]$errors))
-            log[[length(log) + 1L]] <- data.frame(model = m$name, attempt = a,
-                                                  persona_id = pers$persona_id[jobs$p[k]],
-                                                  respondent = jobs$r[k],
-                                                  error = paste(unique(res[[k]]$errors), collapse = " | "),
-                                                  stringsAsFactors = FALSE)
-        }
-        if (stopped) break
+  for (mi in seq_along(models)) {
+    m <- models[[mi]]
+    for (a in seq_len(attempts)) {
+      state$model <- m$name; state$attempt <- a
+      pl <- plan[[mi]][[a]]
+      jobs <- pl$jobs; units <- pl$units
+      res <- vector("list", nrow(jobs))
+      for (chunk in split(seq_along(units), ceiling(seq_along(units) / parallel))) {
+        if (!is.null(stop_file) && file.exists(stop_file)) { stopped <- TRUE; break }
+        out <- sc_run_chunk(m, instrument, pers$description[pl$persona[chunk]],
+                            lengths(units[chunk]), pl$orders[chunk], pl$seeds[chunk], block_size,
+                            max_retries, cache = cache, slots = pl$slots[chunk],
+                            on_done = function(r) {
+                              state$done <- state$done + 1L
+                              state$per_model[mi] <- state$per_model[mi] + 1L
+                              state$retries <- state$retries + r$retries
+                              if (!r$ok) state$failed <- state$failed + 1L
+                              report()
+                            })
+        for (j in seq_along(chunk)) res[units[[chunk[j]]]] <- out[[j]]
+      }
+      keep <- which(!vapply(res, is.null, logical(1)))
+      if (length(keep)) {
+        d <- sc_rows(res[keep], jobs[keep, , drop = FALSE], pers, m, a, instrument)
+        rows[[length(rows) + 1L]] <- d
+        if (!is.null(output) && !stopped) write_synthetic(d, file.path(output, sprintf(
+          "%s_attempt%02d.%s", sc_slug(m$name), a, format)), format = format)
+        for (k in keep) if (length(res[[k]]$errors))
+          log[[length(log) + 1L]] <- data.frame(model = m$name, attempt = a,
+                                                persona_id = pers$persona_id[jobs$p[k]],
+                                                respondent = jobs$r[k],
+                                                error = paste(unique(res[[k]]$errors), collapse = " | "),
+                                                stringsAsFactors = FALSE)
       }
       if (stopped) break
     }
-  })
+    if (stopped) break
+  }
   state$status <- if (stopped) "stopped" else "done"
   report(final = TRUE)
-  out <- if (length(rows)) do.call(rbind, rows) else sc_rows(list(), jobs[0, ], pers, models[[1]], 1L, instrument)
+  out <- if (length(rows)) do.call(rbind, rows) else
+    sc_rows(list(), plan[[1]][[1]]$jobs[0, ], pers, models[[1]], 1L, instrument)
   out <- as_tbl(out)
   log <- if (length(log)) as_tbl(do.call(rbind, log)) else NULL
   if (!is.null(output) && !is.null(log))
     utils::write.csv(log, file.path(output, "log.csv"), row.names = FALSE)
   attr(out, "log") <- log
   attr(out, "stopped") <- stopped
+  attr(out, "cache") <- sc_cache_stats(cache)
   out
 }
 
 # ---- internal -------------------------------------------------------------
+
+# every call of a run, drawn up front so that results and cache keys do not
+# depend on `parallel`: For each model and attempt, the units (a respondent,
+# or a batch of one persona's respondents), their item orders, seeds and
+# cache slots
+sc_gen_plan <- function(models, pers, attempts, respondents, batch_size, shuffle, instrument, seed) {
+  with_seed(seed, lapply(seq_along(models), function(mi) lapply(seq_len(attempts), function(a) {
+    jobs <- data.frame(p = rep(seq_len(nrow(pers)), each = respondents),
+                       r = rep(seq_len(respondents), nrow(pers)))
+    units <- unlist(lapply(seq_len(nrow(pers)), function(p) {
+      idx <- which(jobs$p == p)
+      split(idx, ceiling(seq_along(idx) / batch_size))
+    }), recursive = FALSE)
+    orders <- lapply(units, function(u)
+      if (shuffle) sample(instrument$items$item) else instrument$items$item)
+    seeds <- sample.int(.Machine$integer.max, length(units))
+    first <- vapply(units, `[`, 1L, 1L)
+    slots <- sprintf("seed=%s|attempt=%d|persona=%s|respondent=%d|n=%d", format(seed), a,
+                     pers$persona_id[jobs$p[first]], jobs$r[first], lengths(units))
+    list(jobs = jobs, units = units, orders = orders, seeds = seeds, persona = jobs$p[first],
+         slots = slots)
+  })))
+}
 
 sc_need <- function(pkg, why) {
   if (!requireNamespace(pkg, quietly = TRUE))
@@ -253,13 +284,13 @@ sc_duration <- function(s) {
 # run a chunk of calls, at the same time when there is more than one; each
 # call gives a list of respondents
 sc_run_chunk <- function(m, instrument, personas, sizes, orders, seeds, block_size, max_retries,
-                         on_done) {
+                         on_done, cache = NULL, slots = NULL) {
   n <- length(personas)
   if (m$provider == "mock" || n == 1L || !is.null(block_size) ||
       !requireNamespace("promises", quietly = TRUE) || !requireNamespace("later", quietly = TRUE)) {
     return(lapply(seq_len(n), function(j) {
       r <- sc_respondent(m, instrument, personas[j], orders[[j]], seeds[j], block_size,
-                         max_retries, k = sizes[j])
+                         max_retries, k = sizes[j], cache = cache, slot = slots[j])
       for (x in r) on_done(x)
       r
     }))
@@ -269,7 +300,7 @@ sc_run_chunk <- function(m, instrument, personas, sizes, orders, seeds, block_si
   for (j in seq_len(n)) local({
     jj <- j
     sc_respondent_async(m, instrument, personas[jj], orders[[jj]], max_retries, k = sizes[jj],
-                        done = function(r) {
+                        cache = cache, slot = slots[jj], done = function(r) {
                           out[[jj]] <<- r
                           pending <<- pending - 1L
                           for (x in r) on_done(x)
@@ -332,8 +363,39 @@ sc_blocks <- function(order, block_size) {
   split(order, ceiling(seq_along(order) / block_size))
 }
 
-# k synthetic respondents (one call, or one batch), one call after another
-sc_respondent <- function(m, instrument, persona, order, seed, block_size, max_retries, k = 1L) {
+# the prompts of one try: One per block of items still missing, or one for
+# the batch
+sc_try_prompts <- function(instrument, persona, order, block_size, vals, todo, k) {
+  if (k > 1L)
+    return(list(users = sc_prompt(instrument, persona, order, n = length(todo))$user,
+                items = list(order)))
+  v <- vals[[1]]
+  needs <- lapply(sc_blocks(order, block_size), function(b) b[is.na(v[b])])
+  needs <- needs[lengths(needs) > 0L]
+  list(users = vapply(needs, function(nd) sc_prompt(instrument, persona, nd)$user, character(1)),
+       items = needs)
+}
+
+# take the answers of one try into the respondents still missing
+sc_take <- function(vals, answers, pr, todo, instrument, k) {
+  items <- instrument$items$item
+  if (k > 1L) {
+    if (!is.null(answers[[1]])) {
+      got <- sc_unpack(answers[[1]], items, instrument$min, instrument$max, length(todo))
+      for (i in seq_along(got)) vals[[todo[i]]] <- got[[i]]
+    }
+    return(vals)
+  }
+  for (j in seq_along(answers)) if (!is.null(answers[[j]]))
+    vals[[1]][pr$items[[j]]] <- sc_check(answers[[j]], pr$items[[j]], instrument$min, instrument$max)
+  vals
+}
+
+# k synthetic respondents (one call, or one batch), one call after another.
+# One try is one conversation (the blocks of items one after another); its
+# answers are cached together, under the slot (which respondent) and the try.
+sc_respondent <- function(m, instrument, persona, order, seed, block_size, max_retries, k = 1L,
+                          cache = NULL, slot = NULL) {
   items <- instrument$items$item
   empty <- stats::setNames(rep(NA_integer_, length(items)), items)
   t0 <- Sys.time()
@@ -344,73 +406,76 @@ sc_respondent <- function(m, instrument, persona, order, seed, block_size, max_r
       sc_result(v, 0L, character(0), t0)
     })))
   }
+  if (is.null(slot)) cache <- NULL
+  system <- sc_prompt(instrument, persona)$system
   vals <- rep(list(empty), k)
   errors <- character(0); retries <- 0L
   for (try in 0:max_retries) {
     todo <- which(vapply(vals, anyNA, logical(1)))
     if (!length(todo)) break
     if (try > 0L) retries <- retries + 1L
-    chat <- sc_chat(m, sc_prompt(instrument, persona)$system)
-    if (k > 1L) {
-      ans <- tryCatch(chat$chat_structured(sc_prompt(instrument, persona, order, n = length(todo))$user,
-                                           type = sc_type(instrument, order, length(todo))),
-                      error = function(e) { errors <<- c(errors, conditionMessage(e)); NULL })
-      if (!is.null(ans)) {
-        got <- sc_unpack(ans, items, instrument$min, instrument$max, length(todo))
-        for (i in seq_along(got)) vals[[todo[i]]] <- got[[i]]
+    pr <- sc_try_prompts(instrument, persona, order, block_size, vals, todo, k)
+    key <- if (!is.null(cache)) sc_cache_key(m, "generate", system, pr$users, slot, try)
+    answers <- if (!is.null(cache)) sc_cache_get(cache, m, key)
+    if (is.null(answers)) {
+      chat <- sc_chat(m, system)
+      answers <- vector("list", length(pr$users))
+      for (j in seq_along(pr$users)) {
+        n <- if (k > 1L) length(todo) else 1L
+        it <- if (k > 1L) order else pr$items[[j]]
+        answers[j] <- list(tryCatch(chat$chat_structured(pr$users[j], type = sc_type(instrument, it, n)),
+                                    error = function(e) { errors <<- c(errors, conditionMessage(e)); NULL }))
       }
-      next
+      if (!is.null(cache) && !any(vapply(answers, is.null, logical(1))))
+        sc_cache_put(cache, m, key, answers)
     }
-    v <- vals[[1]]
-    for (b in sc_blocks(order, block_size)) {
-      need <- b[is.na(v[b])]
-      if (!length(need)) next
-      ans <- tryCatch(chat$chat_structured(sc_prompt(instrument, persona, need)$user,
-                                           type = sc_type(instrument, need)),
-                      error = function(e) { errors <<- c(errors, conditionMessage(e)); NULL })
-      if (!is.null(ans)) v[need] <- sc_check(ans, need, instrument$min, instrument$max)
-    }
-    vals[[1]] <- v
+    vals <- sc_take(vals, answers, pr, todo, instrument, k)
   }
   lapply(vals, sc_result, retries = retries, errors = errors, t0 = t0)
 }
 
 # the same without blocking, for parallel calls (no item blocks)
-sc_respondent_async <- function(m, instrument, persona, order, max_retries, k = 1L, done) {
+sc_respondent_async <- function(m, instrument, persona, order, max_retries, k = 1L, done,
+                                cache = NULL, slot = NULL) {
   items <- instrument$items$item
   empty <- stats::setNames(rep(NA_integer_, length(items)), items)
   vals <- rep(list(empty), k)
   errors <- character(0)
   t0 <- Sys.time()
+  if (is.null(slot)) cache <- NULL
+  system <- sc_prompt(instrument, persona)$system
   attempt <- function(try) {
     todo <- which(vapply(vals, anyNA, logical(1)))
     if (!length(todo) || try > max_retries)
       return(done(lapply(vals, sc_result, retries = max(0L, try - 1L), errors = errors, t0 = t0)))
     n <- length(todo)
-    chat <- sc_chat(m, sc_prompt(instrument, persona)$system)
-    pr <- tryCatch(chat$chat_structured_async(sc_prompt(instrument, persona, order, n = n)$user,
-                                              type = sc_type(instrument, order, n)),
-                   error = function(e) e)
-    take <- function(ans) {
-      if (!is.null(ans)) {
-        got <- sc_unpack(ans, items, instrument$min, instrument$max, n)
-        for (i in seq_along(got)) vals[[todo[i]]] <<- got[[i]]
-      }
+    pr <- sc_try_prompts(instrument, persona, order, NULL, vals, todo, k)
+    key <- if (!is.null(cache)) sc_cache_key(m, "generate", system, pr$users, slot, try)
+    take <- function(answers) {
+      vals <<- sc_take(vals, answers, pr, todo, instrument, k)
       attempt(try + 1L)
     }
-    if (inherits(pr, "error")) {
-      errors <<- c(errors, conditionMessage(pr))
-      return(take(NULL))
+    hit <- if (!is.null(cache)) sc_cache_get(cache, m, key)
+    if (!is.null(hit)) return(take(hit))
+    chat <- sc_chat(m, system)
+    it <- if (k > 1L) order else pr$items[[1]]
+    p <- tryCatch(chat$chat_structured_async(pr$users[1], type = sc_type(instrument, it, if (k > 1L) n else 1L)),
+                  error = function(e) e)
+    if (inherits(p, "error")) {
+      errors <<- c(errors, conditionMessage(p))
+      return(take(list(NULL)))
     }
-    promises::then(pr, onFulfilled = take,
-                   onRejected = function(e) { errors <<- c(errors, conditionMessage(e)); take(NULL) })
+    promises::then(p, onFulfilled = function(ans) {
+      if (!is.null(cache) && !is.null(ans)) sc_cache_put(cache, m, key, list(ans))
+      take(list(ans))
+    }, onRejected = function(e) { errors <<- c(errors, conditionMessage(e)); take(list(NULL)) })
     invisible(NULL)
   }
   attempt(0L)
 }
 
 sc_write_run <- function(output, instrument, models, personas, attempts, respondents,
-                         batch_size, block_size, shuffle, seed, format) {
+                         batch_size, block_size, shuffle, seed, format, cache_mode = "off") {
   run <- list(
     synthcheck = as.character(utils::packageVersion("synthcheck")),
     created = format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"),
@@ -422,7 +487,7 @@ sc_write_run <- function(output, instrument, models, personas, attempts, respond
     personas = if (is.null(personas)) NULL else as.data.frame(personas),
     attempts = attempts, respondents = respondents, batch_size = batch_size,
     block_size = block_size, shuffle = shuffle,
-    seed = seed, format = format)
+    seed = seed, format = format, cache = cache_mode)
   jsonlite::write_json(run, file.path(output, "run.json"), auto_unbox = TRUE, pretty = TRUE,
                        null = "null", na = "null", digits = NA)
   sys <- if (is.null(personas)) sc_prompt(instrument)$system else

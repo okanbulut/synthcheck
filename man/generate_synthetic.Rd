@@ -20,7 +20,8 @@ generate_synthetic(
   progress = interactive(),
   progress_file = NULL,
   stop_file = NULL,
-  seed = 1
+  seed = 1,
+  cache = sc_cache()
 )
 }
 \arguments{
@@ -68,12 +69,21 @@ respondent (used by \code{\link[=run_synthcheck_app]{run_synthcheck_app()}}).}
 \item{stop_file}{optional path: When this file appears, the run stops
 after the calls in progress and returns what is done.}
 
-\item{seed}{random seed for shuffling and for the mock provider.}
+\item{seed}{random seed for shuffling and for the mock provider. It is
+also part of the cache key: The same \code{seed} reuses saved answers, a new
+one asks the models again.}
+
+\item{cache}{the response cache: An \code{\link[=sc_cache]{sc_cache()}}, a folder, \code{TRUE} (the
+default folder) or \code{FALSE} (no cache). By default, saved answers are
+reused, so the same run twice gives the same data and the second run
+costs nothing. Use \code{sc_cache(mode = "refresh")} to ask again.}
 }
 \value{
 A tibble with \code{model}, \code{provider}, \code{model_id}, \code{temperature},
 \code{attempt}, \code{persona_id}, \code{respondent}, any persona attributes, and one
-column per item. The attribute \code{log} holds the failed calls.
+column per item. The attribute \code{log} holds the failed calls, and
+\code{cache} the number of answers taken from the cache (\code{hits}) and saved to
+it (\code{saved}).
 }
 \description{
 \code{generate_synthetic()} asks one or more language models
@@ -95,6 +105,11 @@ done, with \code{run.json} (the settings, without API keys) and
 \code{prompts.json} (every prompt sent) beside it, so a stopped run keeps the
 finished attempts. Read the folder back with \code{\link[=read_synthetic]{read_synthetic()}}.
 
+Answers are saved in a response cache on disk (see \code{\link[=sc_cache]{sc_cache()}}): A run
+with the same settings and \code{seed} reuses them instead of calling the
+models again, which makes it repeatable and free. See what a run will cost
+first with \code{\link[=estimate_cost]{estimate_cost()}}.
+
 Use them to compare models with
 \code{\link[=authenticity_benchmark]{authenticity_benchmark()}}, not to replace a field test.
 }
@@ -112,5 +127,6 @@ syn <- generate_synthetic(ins, list(sc_model("anthropic"), sc_model("openai")), 
 }
 \seealso{
 \code{\link[=sc_instrument]{sc_instrument()}}, \code{\link[=sc_personas]{sc_personas()}}, \code{\link[=sc_model]{sc_model()}},
-\code{\link[=as_synthetic_list]{as_synthetic_list()}}, \code{\link[=authenticity_benchmark]{authenticity_benchmark()}}
+\code{\link[=estimate_cost]{estimate_cost()}}, \code{\link[=sc_cache]{sc_cache()}}, \code{\link[=as_synthetic_list]{as_synthetic_list()}},
+\code{\link[=authenticity_benchmark]{authenticity_benchmark()}}
 }

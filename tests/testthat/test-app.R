@@ -191,3 +191,29 @@ test_that("the app uses a short built-in instrument and its real data", {
     expect_error(instrument(), "at least one scale")
   })
 })
+
+test_that("the app shows the estimated cost and asks before a paid run", {
+  skip_if_not_installed("shiny")
+  skip_if_not_installed("bslib")
+  skip_on_cran()
+  withr::local_options(synthcheck.foreground = TRUE)
+  out <- withr::local_tempdir()
+  shiny::testServer(sc_app_server(), {
+    session$setInputs(ins_source = "hexaco", ins_traits = "H", ins_min = 1, ins_max = 7,
+                      ins_labels = paste(sc_default_labels(7), collapse = "\n"),
+                      ins_instructions = "Answer.", ins_name = "HEXACO H",
+                      per_source = "grid", per_grid = "age: 25, 65",
+                      per_template = "You are {age} years old.")
+    session$setInputs(mod_provider = "openai", mod_model = "gpt-4.1-nano", mod_send_temp = TRUE,
+                      mod_temp = 1, mod_name = "Nano", ollama_url = "", mod_add = 1)
+    session$setInputs(run_attempts = 2, run_respondents = 5, run_block = 0, run_retries = 0,
+                      run_shuffle = FALSE, run_parallel = 1, run_batch = 1, run_cache = "reuse",
+                      run_output = file.path(out, "run"), run_format = "csv")
+    session$elapse(1000)
+    expect_match(as.character(output$run_plan$html), "Estimated cost", fixed = TRUE)
+    session$setInputs(run_start = 1)
+    expect_false(is.null(rv$pending_run))
+    expect_null(rv$run_data)
+    expect_s3_class(rv$pending_run$cache, "sc_cache")
+  })
+})

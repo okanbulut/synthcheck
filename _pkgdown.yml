@@ -112,6 +112,10 @@ reference:
   - sc_default_models
   - sc_prompt
   - generate_synthetic
+  - estimate_cost
+  - sc_prices
+  - sc_cache
+  - sc_cache_info
   - write_synthetic
   - as_synthetic_list
 - title: Cognitive interviews

@@ -20,7 +20,8 @@ cognitive_interview(
   progress = interactive(),
   progress_file = NULL,
   stop_file = NULL,
-  seed = 1
+  seed = 1,
+  cache = sc_cache()
 )
 }
 \arguments{
@@ -67,7 +68,11 @@ interview (used by \code{\link[=run_synthcheck_app]{run_synthcheck_app()}}).}
 \item{stop_file}{optional path: When this file appears, the run stops
 after the interviews in progress.}
 
-\item{seed}{random seed for the mock provider.}
+\item{seed}{random seed for the mock provider, also part of the cache key.}
+
+\item{cache}{the response cache, as in \code{\link[=generate_synthetic]{generate_synthetic()}}: An
+\code{\link[=sc_cache]{sc_cache()}}, a folder, \code{TRUE} or \code{FALSE}. The respondent's two answers
+and the coding are saved, so the same interviews again cost nothing.}
 }
 \value{
 A tibble of class \code{sc_interview}, one row per model, persona,
@@ -155,5 +160,5 @@ QAS-99.} Research Triangle Institute.
 }
 \seealso{
 \code{\link[=sc_probes]{sc_probes()}}, \code{\link[=summarise_interviews]{summarise_interviews()}}, \code{\link[=gg_interview]{gg_interview()}},
-\code{\link[=sc_interview_prompts]{sc_interview_prompts()}}
+\code{\link[=sc_interview_prompts]{sc_interview_prompts()}}, \code{\link[=estimate_interview_cost]{estimate_interview_cost()}}, \code{\link[=sc_cache]{sc_cache()}}
 }

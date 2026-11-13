@@ -1,6 +1,6 @@
 Package: synthcheck
 Title: Tests How Authentic Synthetic Survey Respondents Look
-Version: 0.2.0
+Version: 0.2.0.9000
 Authors@R: 
     person("Okan", "Bulut", , "bulut@ualberta.ca", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0001-5853-1267"))
@@ -29,6 +29,7 @@ Imports:
     methods,
     mirt (>= 1.47),
     patchwork,
+    rlang,
     stats,
     tibble,
     tools,
