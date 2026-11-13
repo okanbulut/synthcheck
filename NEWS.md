@@ -16,6 +16,14 @@
   `summarise_benchmark()` says when a model's interval overlaps with the
   next one's.
 
+* The app's Models tab has a new **Persona check** card that runs
+  `persona_fidelity()` after a run with two or more personas, and the
+  Compare tab shows the intervals in the plot and the table.
+
+* The tutorial on generating synthetic respondents has a new section on the
+  persona check, the benchmark article explains the intervals, and the tour
+  of the app and the app demos show both, with new screenshots.
+
 
 * Three short instruments with well-documented item problems, each with
   real responses from the Open-Source Psychometrics Project: The Rosenberg

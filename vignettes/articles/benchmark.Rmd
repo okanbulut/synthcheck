@@ -78,6 +78,24 @@ bm_mean$table[, c("model", "score", "overlap", "structure", "behaviour")]
 `score = "geometric"` takes the geometric mean of the clamped values, and a
 function of `overlap`, `structure` and `behaviour` gives your own score.
 
+## How sure is the ranking?
+
+Every anchored value and the score come with an interval (95% by default,
+`conf`). It is a bootstrap that resamples each model's attempts and,
+separately, the floor and ceiling draws, and recomputes the values each
+time:
+
+```{r}
+bm$table[, c("model", "score", "score_lower", "score_upper")]
+```
+
+`gg_benchmark()` prints the interval in small type under each value. Two
+models whose score intervals overlap are not clearly apart, and the
+plain-language summary below says so. More attempts give narrower intervals.
+With a single attempt the spread between attempts is unknown, so it is
+approximated by the spread between two samples of real people of the same
+size. Turn the small print off with `gg_benchmark(bm, intervals = FALSE)`.
+
 ## The plain-language summary
 
 ```{r}

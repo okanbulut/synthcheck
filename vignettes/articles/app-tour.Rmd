@@ -221,6 +221,19 @@ and **Stop** ends the run after the calls in progress. Every attempt is
 saved to the output folder as soon as it is done, so a stopped run keeps its
 finished attempts.
 
+![The persona check after a run with two personas.](figures/app-persona-check.png)
+
+**Persona check.** After a run with two or more personas, the last card
+checks whether the personas change the answers (`persona_fidelity()`). For
+each model and scale, it compares how much the scale scores differ between
+personas with the same data after shuffling the persona labels. Each tile is
+a persona's mean standardized score: Red is lower than the model's other
+respondents, blue higher. "n.s." under a scale means the personas do not
+separate on it. Add columns such as `target_C` (1 = high, -1 = low) to the
+persona table to check the direction too; the target then shows in
+brackets. The check shows whether a model follows its personas, not whether
+they answer like real people.
+
 ## 4. Compare (with real data)
 
 ![The Compare tab after a benchmark.](figures/demo-builtin.png)
@@ -236,7 +249,10 @@ synthetic authenticity benchmark with its table, and the behaviour strip.
 In the benchmark, tiles run from red (-100 or lower) through pale (0, no
 better than shuffled real answers) to blue (100, as close as a second sample
 of real people). In the behaviour strip, red means lower than real people,
-blue means higher, and pale means a match.
+blue means higher, and pale means a match. Under each value, in small type,
+is its 95% interval, and the table adds the score's interval: Two models
+whose score intervals overlap are not clearly apart, and the summary says
+so.
 
 **Benchmark settings:**
 

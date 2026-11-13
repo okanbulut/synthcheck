@@ -283,7 +283,10 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
                shiny::actionButton("run_start", "Generate data", class = "btn-primary"),
                shiny::actionButton("run_stop", "Stop", class = "btn-outline-danger")),
              shiny::uiOutput("run_progress"),
-             shiny::verbatimTextOutput("run_log"))))
+             shiny::verbatimTextOutput("run_log")),
+        card("Persona check", id = "mod_fid_card",
+             shiny::uiOutput("fid_summary"),
+             shiny::uiOutput("fid_plot_ui"))))
   )
 
   compare <- bslib::nav_panel(
@@ -332,7 +335,7 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
       bslib::layout_columns(
         col_widths = 12, row_heights = "auto", fill = FALSE,
         card("Plain-language summary", shiny::uiOutput("bm_summary")),
-        card("Synthetic authenticity benchmark", id = "cmp_plot_card", shiny::plotOutput("bm_plot", height = "320px"),
+        card("Synthetic authenticity benchmark", id = "cmp_plot_card", shiny::plotOutput("bm_plot", height = "auto"),
              shiny::tableOutput("bm_table")),
         card("Behaviour strip", shiny::plotOutput("bm_behaviour", height = "360px"))))
   )
