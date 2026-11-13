@@ -115,3 +115,226 @@
 #' table(hexaco_items$trait_label, hexaco_items$reverse)
 #' head(hexaco_items[, c("item", "facet_label", "statement", "reverse")])
 "hexaco_items"
+
+#' Rosenberg Self-Esteem Scale: Items and real responses
+#'
+#' The ten items of the Rosenberg Self-Esteem Scale (RSES; Rosenberg, 1965)
+#' and the answers of 47,974 people who took it online through the
+#' Open-Source Psychometrics Project. The RSES is short and widely used, and
+#' its items have well-documented problems, so it is a test case for the
+#' pretest, the cognitive interviews and the benchmark (see
+#' [sc_builtin_instrument()]).
+#'
+#' **Known problems.** The five negatively worded items (3, 5, 8, 9 and 10)
+#' share variance beyond self-esteem: A one-factor model fits poorly, and a
+#' second factor or a method factor for negative wording is needed (Marsh,
+#' 1996; Tomás & Oliver, 1999; DiStefano & Motl, 2006). How the negative
+#' items behave also differs across cultures (Schmitt & Allik, 2005). Item 8
+#' ("I wish I could have more respect for myself") is often the weakest
+#' item. In `rses_real` it has the lowest corrected item-total correlation
+#' (0.54; the others are 0.59 to 0.75). The `issue` column of `rses_items`
+#' gives a one-line note per item.
+#'
+#' Answers are on a 4-point scale (1 = strongly disagree, 2 = disagree,
+#' 3 = agree, 4 = strongly agree) and are stored as given: Reverse-keyed
+#' items are **not** reversed. Use `rses_items$reverse` and `5 - x` before
+#' scoring. Unanswered items (coded 0 in the original file) are `NA`.
+#'
+#' @format `rses_items`: A data frame with 10 rows and 6 columns: `item`
+#'   (`RSE1` to `RSE10`), `scale` (`SE`), `scale_label` (`Self-esteem`),
+#'   `statement`, `reverse` (`TRUE` for the five negatively worded items)
+#'   and `issue` (the reported problem, or `NA`).
+#'
+#'   `rses_real`: A data frame with 47,974 rows and 13 columns: `country`
+#'   (two-letter code from the respondent's network address, or `NA`; the
+#'   largest groups are `US` (22,451), `GB` (6,672) and `CA` (2,941)),
+#'   `gender` (factor: `Male`, `Female` or `Other`), `age` (13 to 99, other
+#'   entries `NA`) and the ten items.
+#' @source Open-Source Psychometrics Project,
+#'   <https://openpsychometrics.org/_rawdata/> (RSE data; only respondents
+#'   who confirmed that their answers were accurate and could be used for
+#'   research). The project gives no formal licence for the data. The items
+#'   are free to use; the script is `data-raw/instruments.R` in the
+#'   package's GitHub repository.
+#' @references DiStefano, C., & Motl, R. W. (2006). Further investigating
+#'   method effects associated with negatively worded items on self-report
+#'   surveys. *Structural Equation Modeling, 13*(3), 440-464.
+#'   \doi{10.1207/s15328007sem1303_6}
+#'
+#'   Marsh, H. W. (1996). Positive and negative global self-esteem: A
+#'   substantively meaningful distinction or artifactors? *Journal of
+#'   Personality and Social Psychology, 70*(4), 810-819.
+#'   \doi{10.1037/0022-3514.70.4.810}
+#'
+#'   Rosenberg, M. (1965). *Society and the adolescent self-image*.
+#'   Princeton University Press.
+#'
+#'   Schmitt, D. P., & Allik, J. (2005). Simultaneous administration of the
+#'   Rosenberg Self-Esteem Scale in 53 nations. *Journal of Personality and
+#'   Social Psychology, 89*(4), 623-642. \doi{10.1037/0022-3514.89.4.623}
+#'
+#'   Tomás, J. M., & Oliver, A. (1999). Rosenberg's self-esteem scale: Two
+#'   factors or method effects. *Structural Equation Modeling, 6*(1), 84-98.
+#'   \doi{10.1080/10705519909540120}
+#' @seealso [sc_builtin_instrument()], [dass_items], [mini_ipip_items]
+#' @examples
+#' rses_items[, c("item", "reverse", "statement")]
+#' x <- rses_real[rses_items$item]
+#' x[rses_items$reverse] <- 5 - x[rses_items$reverse]
+#' summary(rowMeans(x, na.rm = TRUE))
+#' @name rses
+#' @aliases rses_items rses_real
+NULL
+
+#' @rdname rses
+"rses_items"
+
+#' @rdname rses
+"rses_real"
+
+#' DASS-21: Items and real responses
+#'
+#' The 21 items of the short Depression Anxiety Stress Scales (DASS-21;
+#' Lovibond & Lovibond, 1995), seven per scale, and the answers of 39,775
+#' people who took the 42-item DASS online through the Open-Source
+#' Psychometrics Project from 2017 to 2019. The 21 items are taken from the
+#' 42 (the `dass42` column says which). The DASS is public domain. Its
+#' structure is disputed, so it is a test case for the expected-structure
+#' checks (see [sc_builtin_instrument()]).
+#'
+#' **Known problems.** Whether the DASS-21 measures three distinct states is
+#' disputed: A bifactor model with a general distress factor often fits
+#' better than three correlated factors, and Stress overlaps with Anxiety
+#' (Henry & Crawford, 2005; Osman et al., 2012). The somatic anxiety items
+#' (dry mouth, breathing, trembling, heart rate) can reflect physical
+#' illness and often load weakly. In `dass_real`, item 2 ("I was aware of
+#' dryness of my mouth") has the lowest corrected item-total correlation
+#' within its scale (0.46; the others are 0.53 to 0.77). The `issue` column
+#' of `dass_items` gives a one-line note per item.
+#'
+#' Answers are how much each statement applied over the past week, on a
+#' 4-point scale stored as given (1 = did not apply to me at all, 2 = to some
+#' degree, 3 = to a considerable degree, 4 = very much). The official DASS
+#' scoring uses 0 to 3, so subtract 1 (and double the DASS-21 sums to
+#' compare with DASS-42 norms). No item is reverse-keyed. The items were
+#' shown in a random order among the 42, one at a time.
+#'
+#' Over half of the respondents connected from Malaysia, so use `country`
+#' when the population matters.
+#'
+#' @format `dass_items`: A data frame with 21 rows and 7 columns: `item`
+#'   (`DASS1` to `DASS21`, in DASS-21 order), `scale` (`D`, `A` or `S`),
+#'   `scale_label` (`Depression`, `Anxiety` or `Stress`), `statement`,
+#'   `reverse` (all `FALSE`), `dass42` (the item in the 42-item DASS, for
+#'   example `Q22`) and `issue`.
+#'
+#'   `dass_real`: A data frame with 39,775 rows and 24 columns: `country`
+#'   (two-letter code from the respondent's network address, or `NA`; the
+#'   largest groups are `MY` (21,605), `US` (8,207) and `GB` (1,180)),
+#'   `gender` (factor), `age` (13 to 99, other entries `NA`) and the 21
+#'   items.
+#' @source Open-Source Psychometrics Project,
+#'   <https://openpsychometrics.org/_rawdata/> (DASS data, 2019; only
+#'   respondents who confirmed that their answers were accurate and could be
+#'   used for research). The project gives no formal licence for the data.
+#'   The DASS items are public domain
+#'   (<https://www2.psy.unsw.edu.au/dass/>). The script is
+#'   `data-raw/instruments.R` in the package's GitHub repository.
+#' @references Henry, J. D., & Crawford, J. R. (2005). The short-form
+#'   version of the Depression Anxiety Stress Scales (DASS-21): Construct
+#'   validity and normative data in a large non-clinical sample. *British
+#'   Journal of Clinical Psychology, 44*(2), 227-239.
+#'   \doi{10.1348/014466505X29657}
+#'
+#'   Lovibond, S. H., & Lovibond, P. F. (1995). *Manual for the Depression
+#'   Anxiety Stress Scales* (2nd ed.). Psychology Foundation.
+#'
+#'   Osman, A., Wong, J. L., Bagge, C. L., Freedenthal, S., Gutierrez, P. M.,
+#'   & Lozano, G. (2012). The Depression Anxiety Stress Scales-21 (DASS-21):
+#'   Further examination of dimensions, scale reliability, and correlates.
+#'   *Journal of Clinical Psychology, 68*(12), 1322-1338.
+#'   \doi{10.1002/jclp.21908}
+#' @seealso [sc_builtin_instrument()], [rses_items], [mini_ipip_items]
+#' @examples
+#' table(dass_items$scale_label)
+#' # DASS-21 scale sums on the official 0 to 3 scoring
+#' sums <- sapply(split(dass_items$item, dass_items$scale),
+#'                function(i) rowSums(dass_real[i] - 1))
+#' round(cor(sums), 2)
+#' @name dass
+#' @aliases dass_items dass_real
+NULL
+
+#' @rdname dass
+"dass_items"
+
+#' @rdname dass
+"dass_real"
+
+#' Mini-IPIP: Items and real responses
+#'
+#' The 20 items of the Mini-IPIP (Donnellan et al., 2006), four per Big Five
+#' trait, and the answers of 20,000 people drawn at random from the
+#' Open-Source Psychometrics Project's IPIP Big-Five Factor Markers data
+#' (1,015,342 respondents, 2016 to 2018). The Mini-IPIP items are part of
+#' the 50 IPIP Big-Five markers, so these people answered them among the
+#' other 30 items. The items are public domain. Its fit problems and weak
+#' scale make it a test case for the pretest (see
+#' [sc_builtin_instrument()]).
+#'
+#' **Known problems.** A five-factor model with simple structure fits
+#' poorly unless residuals are allowed to correlate, the
+#' Intellect/Imagination scale is often the least reliable and mixes
+#' imagination with interest in abstract ideas, and the reverse-keyed items
+#' share a method factor (Donnellan et al., 2006; Cooper et al., 2010;
+#' Baldasaro et al., 2013). The `issue` column of `mini_ipip_items` gives a
+#' one-line note per item.
+#'
+#' Answers are on a 5-point scale (1 = disagree, 3 = neutral, 5 = agree) and
+#' are stored as given: Reverse-keyed items are **not** reversed. Use
+#' `mini_ipip_items$reverse` and `6 - x` before scoring. The trait the items
+#' measure is Neuroticism (high is less stable), as in the Mini-IPIP. The
+#' item names are those of the IPIP Big-Five markers data (`EXT`, `AGR`,
+#' `CSN`, `EST` and `OPN` with a number), so the full file can be used too.
+#'
+#' @format `mini_ipip_items`: A data frame with 20 rows and 6 columns:
+#'   `item`, `scale` (`E`, `A`, `C`, `N` or `I`), `scale_label`,
+#'   `statement`, `reverse` (11 items are reverse-keyed) and `issue`.
+#'
+#'   `mini_ipip_real`: A data frame with 20,000 rows and 21 columns:
+#'   `country` (two-letter code from the respondent's network address, or
+#'   `NA`; the largest groups are `US` (9,918), `GB` (1,377) and `CA`
+#'   (1,269)) and the 20 items. The sample holds only people who answered
+#'   all 20 items and were the only record from their network address.
+#' @source Open-Source Psychometrics Project,
+#'   <https://openpsychometrics.org/_rawdata/> (IPIP-FFM data, November
+#'   2018). The project gives no formal licence for the data. The items are
+#'   from the International Personality Item Pool (public domain),
+#'   <https://ipip.ori.org>. The script is `data-raw/instruments.R` in the
+#'   package's GitHub repository.
+#' @references Baldasaro, R. E., Shanahan, M. J., & Bauer, D. J. (2013).
+#'   Psychometric properties of the Mini-IPIP in a large, nationally
+#'   representative sample of young adults. *Journal of Personality
+#'   Assessment, 95*(1), 74-84. \doi{10.1080/00223891.2012.700466}
+#'
+#'   Cooper, A. J., Smillie, L. D., & Corr, P. J. (2010). A confirmatory
+#'   factor analysis of the Mini-IPIP five-factor model personality scale.
+#'   *Personality and Individual Differences, 48*(5), 688-691.
+#'   \doi{10.1016/j.paid.2010.01.004}
+#'
+#'   Donnellan, M. B., Oswald, F. L., Baird, B. M., & Lucas, R. E. (2006).
+#'   The Mini-IPIP scales: Tiny-yet-effective measures of the Big Five
+#'   factors of personality. *Psychological Assessment, 18*(2), 192-203.
+#'   \doi{10.1037/1040-3590.18.2.192}
+#' @seealso [sc_builtin_instrument()], [rses_items], [dass_items]
+#' @examples
+#' mini_ipip_items[, c("item", "scale", "reverse", "statement")]
+#' @name mini_ipip
+#' @aliases mini_ipip_items mini_ipip_real
+NULL
+
+#' @rdname mini_ipip
+"mini_ipip_items"
+
+#' @rdname mini_ipip
+"mini_ipip_real"

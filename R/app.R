@@ -23,8 +23,11 @@
 #' The tabs, in order (with real data: 1 to 4 and 5. Export; without: 1 to
 #' 3, 4. Pretest, 5. Interviews and 6. Export):
 #'
-#' * **1. Instrument:** Upload an item table or use the IPIP-HEXACO items,
-#'   and set the response scale and instructions ([sc_instrument()]).
+#' * **1. Instrument:** Upload an item table or use a built-in instrument
+#'   (the IPIP-HEXACO, or one of three short scales with well-documented
+#'   item problems: The Rosenberg Self-Esteem Scale, the DASS-21 and the
+#'   Mini-IPIP; see [sc_builtin_instrument()]), and set the response scale
+#'   and instructions ([sc_instrument()]).
 #' * **2. Personas:** Type, upload or build the personas that take the
 #'   instrument ([sc_personas()], [sc_persona_grid()]). Both upload panels
 #'   offer a template to fill in. The templates are also in the package:
@@ -113,6 +116,12 @@ sc_model_choices <- list(
 sc_trait_choices <- c("Honesty-Humility" = "H", "Emotionality" = "E", "Extraversion" = "X",
                       "Agreeableness" = "A", "Conscientiousness" = "C", "Openness" = "O")
 
+sc_ins_choices <- c("IPIP-HEXACO (built in, 240 items)" = "hexaco",
+                    "Rosenberg Self-Esteem Scale (built in, 10 items)" = "rses",
+                    "DASS-21 (built in, 21 items)" = "dass21",
+                    "Mini-IPIP (built in, 20 items)" = "mini_ipip",
+                    "Upload an item table" = "upload")
+
 sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
   card <- function(title, ..., id = NULL) bslib::card(id = id, bslib::card_header(title),
                                                       bslib::card_body(fillable = FALSE, ...))
@@ -132,14 +141,16 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
     bslib::layout_columns(
       col_widths = c(5, 7), fill = FALSE,
       card("Items", id = "ins_items_card",
-           shiny::radioButtons("ins_source", NULL,
-                               c("IPIP-HEXACO (built in)" = "hexaco", "Upload an item table" = "upload"),
-                               inline = TRUE),
+           shiny::selectInput("ins_source", NULL, sc_ins_choices),
            shiny::conditionalPanel(
              "input.ins_source == 'hexaco'",
              shiny::checkboxGroupInput("ins_traits", "Traits", sc_trait_choices,
                                        selected = c("H", "C"), inline = TRUE),
              shiny::helpText("All six traits give 240 items. Two traits (80 items) make faster, cheaper runs.")),
+           shiny::conditionalPanel(
+             "['rses', 'dass21', 'mini_ipip'].indexOf(input.ins_source) >= 0",
+             shiny::checkboxGroupInput("ins_scales", "Scales", character(0), inline = TRUE),
+             shiny::uiOutput("ins_about")),
            shiny::conditionalPanel(
              "input.ins_source == 'upload'",
              shiny::fileInput("ins_file", "Item table (CSV or Excel)", accept = c(".csv", ".xlsx")),
@@ -264,9 +275,10 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
         card("Real data",
              shiny::radioButtons("real_source", NULL,
                                  c(if (has_real) c("Data given to run_synthcheck_app()" = "arg"),
-                                   "hexaco_real (built in)" = "hexaco", "Upload" = "upload")),
+                                   "Built in, for the instrument in tab 1" = "builtin",
+                                   "Upload" = "upload")),
              shiny::conditionalPanel(
-               "input.real_source == 'hexaco'",
+               "input.real_source == 'builtin'",
                shiny::selectInput("real_country", "Country",
                                   c("Canada", "Great Britain", "United States", "All"))),
              shiny::conditionalPanel(

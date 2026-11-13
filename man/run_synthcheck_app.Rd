@@ -57,8 +57,11 @@ against real people.
 The tabs, in order (with real data: 1 to 4 and 5. Export; without: 1 to
 3, 4. Pretest, 5. Interviews and 6. Export):
 \itemize{
-\item \strong{1. Instrument:} Upload an item table or use the IPIP-HEXACO items,
-and set the response scale and instructions (\code{\link[=sc_instrument]{sc_instrument()}}).
+\item \strong{1. Instrument:} Upload an item table or use a built-in instrument
+(the IPIP-HEXACO, or one of three short scales with well-documented
+item problems: The Rosenberg Self-Esteem Scale, the DASS-21 and the
+Mini-IPIP; see \code{\link[=sc_builtin_instrument]{sc_builtin_instrument()}}), and set the response scale
+and instructions (\code{\link[=sc_instrument]{sc_instrument()}}).
 \item \strong{2. Personas:} Type, upload or build the personas that take the
 instrument (\code{\link[=sc_personas]{sc_personas()}}, \code{\link[=sc_persona_grid]{sc_persona_grid()}}). Both upload panels
 offer a template to fill in. The templates are also in the package:
