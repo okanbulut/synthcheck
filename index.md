@@ -152,7 +152,12 @@ do the same in code).
 
 API keys typed into the app stay in memory for that session only. Keys
 set as `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` in `.Renviron` are used
-without being shown. New to API keys? The article [Getting an API
+without being shown. To put the app on a server for others,
+[`synthcheck_app()`](https://www.okanbulut.com/synthcheck/reference/run_synthcheck_app.md)
+and the `deploy/` folder run it in hosted mode, where visitors use their
+own keys and Ollama is left out (see [Hosting the
+app](https://www.okanbulut.com/synthcheck/articles/hosting.html)). New
+to API keys? The article [Getting an API
 key](https://www.okanbulut.com/synthcheck/articles/api-keys.html) walks
 through signing up with [OpenAI](https://openai.com/api/) or
 [Claude](https://platform.claude.com/dashboard), adding credit, keeping

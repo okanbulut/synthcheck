@@ -65,6 +65,7 @@ agreement across conditions.
 Define an instrument and personas, call language models, save the data.
 
 - [`run_synthcheck_app()`](https://www.okanbulut.com/synthcheck/reference/run_synthcheck_app.md)
+  [`synthcheck_app()`](https://www.okanbulut.com/synthcheck/reference/run_synthcheck_app.md)
   : Generate and benchmark synthetic data in a Shiny app
 - [`sc_instrument()`](https://www.okanbulut.com/synthcheck/reference/sc_instrument.md)
   : Define an instrument for synthetic respondents

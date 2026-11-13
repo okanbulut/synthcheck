@@ -152,7 +152,12 @@ do the same in code).
 
 API keys typed into the app stay in memory for that session only. Keys
 set as `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` in `.Renviron` are used
-without being shown. New to API keys? The article [Getting an API
+without being shown. To put the app on a server for others,
+[`synthcheck_app()`](https://www.okanbulut.com/synthcheck/reference/run_synthcheck_app.md)
+and the `deploy/` folder run it in hosted mode, where visitors use their
+own keys and Ollama is left out (see [Hosting the
+app](https://www.okanbulut.com/synthcheck/articles/hosting.html)). New
+to API keys? The article [Getting an API
 key](https://www.okanbulut.com/synthcheck/articles/api-keys.html) walks
 through signing up with [OpenAI](https://openai.com/api/) or
 [Claude](https://platform.claude.com/dashboard), adding credit, keeping
@@ -286,6 +291,7 @@ agreement across conditions.
 Define an instrument and personas, call language models, save the data.
 
 - [`run_synthcheck_app()`](https://www.okanbulut.com/synthcheck/reference/run_synthcheck_app.md)
+  [`synthcheck_app()`](https://www.okanbulut.com/synthcheck/reference/run_synthcheck_app.md)
   : Generate and benchmark synthetic data in a Shiny app
 - [`sc_instrument()`](https://www.okanbulut.com/synthcheck/reference/sc_instrument.md)
   : Define an instrument for synthetic respondents
@@ -410,3 +416,5 @@ to get an API key for real models.
   app](https://www.okanbulut.com/synthcheck/articles/app-demo.md):
 - [Getting an API key for OpenAI or
   Claude](https://www.okanbulut.com/synthcheck/articles/api-keys.md):
+- [Hosting the app on Posit Connect
+  Cloud](https://www.okanbulut.com/synthcheck/articles/hosting.md):

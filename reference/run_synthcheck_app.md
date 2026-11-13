@@ -17,6 +17,8 @@ run_synthcheck_app(
   port = NULL,
   launch.browser = TRUE
 )
+
+synthcheck_app(real = NULL, synthetic = NULL, hosted = sc_is_hosted())
 ```
 
 ## Arguments
@@ -44,6 +46,13 @@ run_synthcheck_app(
 
   open the app in a browser?
 
+- hosted:
+
+  run in hosted mode (see above)? The default is `TRUE` when the option
+  `synthcheck.hosted` is `TRUE`, the environment variable
+  `SYNTHCHECK_HOSTED` is `"true"`, or the app runs on shinyapps.io or
+  Posit Connect.
+
 ## Value
 
 Invisibly, when the app is closed with its Close button: A list with
@@ -54,7 +63,8 @@ result, if one was run), `pretest` (the
 result, if one was run), `interviews` (the
 [`cognitive_interview()`](https://www.okanbulut.com/synthcheck/reference/cognitive_interview.md)
 result, if one was run), `path` (`"real"`, `"pretest"` or `NULL`),
-`instrument` and `personas`.
+`instrument` and `personas`. `synthcheck_app()` returns a Shiny app
+object.
 
 ## Details
 
@@ -137,9 +147,8 @@ The tabs, in order (with real data: 1 to 4 and 5. Export; without: 1 to
 **API keys** typed into the app stay in memory for that session only:
 They are never written to the saved data, the run settings or the R
 script. Keys set as `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` (for example
-in `.Renviron`) are used without being shown. The app runs on your own
-computer; do not deploy it on a shared server with keys typed in. New to
-API keys? The article [Getting an API
+in `.Renviron`) are used without being shown. New to API keys? The
+article [Getting an API
 key](https://www.okanbulut.com/synthcheck/articles/api-keys.html) walks
 through signing up with OpenAI or Anthropic, adding credit, keeping the
 key private and setting a spending limit, and the Models tab links to it
@@ -148,6 +157,17 @@ next to the key fields.
 Runs go to a background R process when callr is installed, so the app
 stays responsive and the Stop button works. Every attempt is written to
 the output folder as soon as it is done.
+
+**Hosting the app:** `run_synthcheck_app()` always runs the full app on
+your own computer. `synthcheck_app()` returns the same app as an object
+for a server such as Posit Connect Cloud or shinyapps.io. On a server it
+runs in hosted mode: Ollama is not offered (local models need the
+package on your own computer), keys from the server's environment are
+never used, each visitor types their own keys, which stay in that
+browser session's memory, and the generated files go to a temporary
+folder that is deleted when the session ends. The article [Hosting the
+app](https://www.okanbulut.com/synthcheck/articles/hosting.html) walks
+through a deployment.
 
 The benchmark compares models and supports decisions about them. It does
 not show that synthetic data can replace a field test.
@@ -164,4 +184,6 @@ if (interactive()) {
   res <- run_synthcheck_app()
   res$benchmark
 }
+# the app object for a server, as in an app.R file
+app <- synthcheck_app(hosted = TRUE)
 ```

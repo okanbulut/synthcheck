@@ -37,3 +37,5 @@ to get an API key for real models.
   app](https://www.okanbulut.com/synthcheck/articles/app-demo.md):
 - [Getting an API key for OpenAI or
   Claude](https://www.okanbulut.com/synthcheck/articles/api-keys.md):
+- [Hosting the app on Posit Connect
+  Cloud](https://www.okanbulut.com/synthcheck/articles/hosting.md):

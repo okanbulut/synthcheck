@@ -42,6 +42,7 @@ path chosen in the first step."><meta property="og:image" content="https://www.o
   <ul class="dropdown-menu" aria-labelledby="dropdown-the-app"><li><a class="dropdown-item" href="../articles/app-tour.html">A tour of the synthcheck app</a></li>
     <li><a class="dropdown-item" href="../articles/app-demo.html">App demos: Four ways to use the app</a></li>
     <li><a class="dropdown-item" href="../articles/api-keys.html">Getting an API key for OpenAI or Claude</a></li>
+    <li><a class="dropdown-item" href="../articles/hosting.html">Hosting the app on Posit Connect Cloud</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -77,7 +78,9 @@ path chosen in the first step.</p>
 <span>  host <span class="op">=</span> <span class="st">"127.0.0.1"</span>,</span>
 <span>  port <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  launch.browser <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">synthcheck_app</span><span class="op">(</span>real <span class="op">=</span> <span class="cn">NULL</span>, synthetic <span class="op">=</span> <span class="cn">NULL</span>, hosted <span class="op">=</span> <span class="fu">sc_is_hosted</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -104,6 +107,13 @@ own computer only.</p></dd>
 <dt id="arg-launch-browser">launch.browser<a class="anchor" aria-label="anchor" href="#arg-launch-browser"></a></dt>
 <dd><p>open the app in a browser?</p></dd>
 
+
+<dt id="arg-hosted">hosted<a class="anchor" aria-label="anchor" href="#arg-hosted"></a></dt>
+<dd><p>run in hosted mode (see above)? The default is <code>TRUE</code> when
+the option <code>synthcheck.hosted</code> is <code>TRUE</code>, the environment variable
+<code>SYNTHCHECK_HOSTED</code> is <code>"true"</code>, or the app runs on shinyapps.io or
+Posit Connect.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -112,7 +122,8 @@ with <code>synthetic</code> (the generated data), <code>benchmark</code> (the
 <code><a href="authenticity_benchmark.html">authenticity_benchmark()</a></code> result, if one was run), <code>pretest</code> (the
 <code><a href="synthetic_pretest.html">synthetic_pretest()</a></code> result, if one was run), <code>interviews</code> (the
 <code><a href="cognitive_interview.html">cognitive_interview()</a></code> result, if one was run), <code>path</code> (<code>"real"</code>,
-<code>"pretest"</code> or <code>NULL</code>), <code>instrument</code> and <code>personas</code>.</p>
+<code>"pretest"</code> or <code>NULL</code>), <code>instrument</code> and <code>personas</code>.
+<code>synthcheck_app()</code> returns a Shiny app object.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -162,9 +173,7 @@ the analysis.</p></li>
 </ul><p><strong>API keys</strong> typed into the app stay in memory for that session only:
 They are never written to the saved data, the run settings or the R
 script. Keys set as <code>ANTHROPIC_API_KEY</code> or <code>OPENAI_API_KEY</code> (for example
-in <code>.Renviron</code>) are used without being shown. The app runs on your own
-computer; do not deploy it on a shared server with keys typed in. New to
-API keys? The article
+in <code>.Renviron</code>) are used without being shown. New to API keys? The article
 <a href="https://www.okanbulut.com/synthcheck/articles/api-keys.html">Getting an API key</a>
 walks through signing up with OpenAI or Anthropic, adding credit, keeping
 the key private and setting a spending limit, and the Models tab links to
@@ -172,6 +181,16 @@ it next to the key fields.</p>
 <p>Runs go to a background R process when callr is installed, so the app
 stays responsive and the Stop button works. Every attempt is written to
 the output folder as soon as it is done.</p>
+<p><strong>Hosting the app:</strong> <code>run_synthcheck_app()</code> always runs the full app on
+your own computer. <code>synthcheck_app()</code> returns the same app as an object
+for a server such as Posit Connect Cloud or shinyapps.io. On a server it
+runs in hosted mode: Ollama is not offered (local models need the package
+on your own computer), keys from the server's environment are never used,
+each visitor types their own keys, which stay in that browser session's
+memory, and the generated files go to a temporary folder that is deleted
+when the session ends. The article
+<a href="https://www.okanbulut.com/synthcheck/articles/hosting.html">Hosting the app</a>
+walks through a deployment.</p>
 <p>The benchmark compares models and
 supports decisions about them. It does not show that synthetic data can
 replace a field test.</p>
@@ -187,6 +206,8 @@ replace a field test.</p>
 <span class="r-in"><span>  <span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">run_synthcheck_app</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">res</span><span class="op">$</span><span class="va">benchmark</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="co"># the app object for a server, as in an app.R file</span></span></span>
+<span class="r-in"><span><span class="va">app</span> <span class="op">&lt;-</span> <span class="fu">synthcheck_app</span><span class="op">(</span>hosted <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
