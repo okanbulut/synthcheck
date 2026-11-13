@@ -107,3 +107,12 @@ test_that("the app's Export tab downloads a report for the chosen path", {
     expect_match(html, "Repeat it in R", fixed = TRUE)
   })
 })
+
+test_that("writing a PDF report leaves the caller's graphics device open", {
+  pt <- synthetic_pretest(rp_syn(), rp_items(), irt = FALSE, n_pa = 0)
+  grDevices::pdf(withr::local_tempfile(fileext = ".pdf"))
+  d <- grDevices::dev.cur()
+  on.exit(grDevices::dev.off(d), add = TRUE)
+  write_report(pt, withr::local_tempfile(fileext = ".pdf"))
+  expect_equal(grDevices::dev.cur(), d)
+})

@@ -500,9 +500,14 @@ sc_report_pdf_draw <- function(rep, file, cairo) {
   }
   pw <- 8.5; ph <- 11; m <- 0.75
   w <- pw - 2 * m
+  # open our own device and close only that one, so the caller's devices
+  # are left alone even when cairo_pdf() fails to open
+  before <- grDevices::dev.list()
   if (cairo) grDevices::cairo_pdf(file, width = pw, height = ph, onefile = TRUE) else
     grDevices::pdf(file, width = pw, height = ph, onefile = TRUE, title = txt(rep$title))
-  on.exit(grDevices::dev.off())
+  dev <- grDevices::dev.cur()
+  if (dev == 1L || dev %in% before) stop("Could not open the PDF device.", call. = FALSE)
+  on.exit(grDevices::dev.off(dev))
   st <- new.env()
   st$page <- 0L
   navy <- "#10213d"; blue <- "#1c5cab"; pale <- "#f0efec"; ink <- "#1d2433"; muted <- "#5b6475"
