@@ -478,7 +478,20 @@ sc_base64 <- function(raw) {
 # Letter pages drawn with grid on the PDF device that ships with R. Cairo,
 # where R has it, keeps accented letters; otherwise text is transliterated.
 sc_report_pdf <- function(rep, file) {
-  cairo <- isTRUE(capabilities("cairo"))
+  # cairo_pdf() can fail without an error where cairo is listed but cannot
+  # write (as on some macOS builds); then draw again with pdf()
+  if (isTRUE(capabilities("cairo"))) {
+    unlink(file)
+    ok <- tryCatch({
+      suppressWarnings(sc_report_pdf_draw(rep, file, cairo = TRUE))
+      file.exists(file) && isTRUE(file.size(file) > 0)
+    }, error = function(e) FALSE)
+    if (ok) return(invisible(file))
+  }
+  sc_report_pdf_draw(rep, file, cairo = FALSE)
+}
+
+sc_report_pdf_draw <- function(rep, file, cairo) {
   sans <- if (cairo) "sans" else "Helvetica"
   mono <- if (cairo) "mono" else "Courier"
   txt <- if (cairo) identity else function(s) {
