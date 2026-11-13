@@ -5,13 +5,19 @@ Behaviour). Tiles run from red (-100 or lower, far worse than shuffled
 columns) through pale (around 0, no better than shuffled columns) to blue
 (100, as close as a second sample of real people). The number in each
 tile is the unclamped value. The column that sets the score is
-outlined when score = &quot;weakest&quot;. The score is printed at the right."><meta property="og:description" content="One row per model, sorted by the benchmark score (best
+outlined when score = &quot;weakest&quot;. The score is printed at the right.
+Under each number, in small print, is its interval (see
+authenticity_benchmark()): Models whose score intervals overlap are not
+clearly apart."><meta property="og:description" content="One row per model, sorted by the benchmark score (best
 at the top), and one tile for each anchored column (Overlap, Structure,
 Behaviour). Tiles run from red (-100 or lower, far worse than shuffled
 columns) through pale (around 0, no better than shuffled columns) to blue
 (100, as close as a second sample of real people). The number in each
 tile is the unclamped value. The column that sets the score is
-outlined when score = &quot;weakest&quot;. The score is printed at the right."><meta property="og:image" content="https://www.okanbulut.com/synthcheck/logo.svg"></head><body>
+outlined when score = &quot;weakest&quot;. The score is printed at the right.
+Under each number, in small print, is its interval (see
+authenticity_benchmark()): Models whose score intervals overlap are not
+clearly apart."><meta property="og:image" content="https://www.okanbulut.com/synthcheck/logo.svg"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -19,7 +25,7 @@ outlined when score = &quot;weakest&quot;. The score is printed at the right."><
 
     <a class="navbar-brand me-2" href="../index.html">synthcheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,12 +75,15 @@ Behaviour). Tiles run from red (-100 or lower, far worse than shuffled
 columns) through pale (around 0, no better than shuffled columns) to blue
 (100, as close as a second sample of real people). The number in each
 tile is the unclamped value. The column that sets the score is
-outlined when <code>score = "weakest"</code>. The score is printed at the right.</p>
+outlined when <code>score = "weakest"</code>. The score is printed at the right.
+Under each number, in small print, is its interval (see
+<code><a href="authenticity_benchmark.html">authenticity_benchmark()</a></code>): Models whose score intervals overlap are not
+clearly apart.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gg_benchmark</span><span class="op">(</span><span class="va">x</span>, title <span class="op">=</span> <span class="cn">NULL</span>, subtitle <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gg_benchmark</span><span class="op">(</span><span class="va">x</span>, intervals <span class="op">=</span> <span class="cn">TRUE</span>, title <span class="op">=</span> <span class="cn">NULL</span>, subtitle <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -83,6 +92,10 @@ outlined when <code>score = "weakest"</code>. The score is printed at the right.
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>a result of <code><a href="authenticity_benchmark.html">authenticity_benchmark()</a></code>.</p></dd>
+
+
+<dt id="arg-intervals">intervals<a class="anchor" aria-label="anchor" href="#arg-intervals"></a></dt>
+<dd><p>print the intervals under the values?</p></dd>
 
 
 <dt id="arg-title-subtitle">title, subtitle<a class="anchor" aria-label="anchor" href="#arg-title-subtitle"></a></dt>

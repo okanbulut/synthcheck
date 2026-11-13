@@ -124,22 +124,23 @@ not the respondents. arXiv:2610.30900.
 
 ``` r
 real <- hexaco_real[hexaco_real$country == "Canada", ]
-ca <- hexaco_llm[hexaco_llm$country == "Canada" & hexaco_llm$attempt <= 2, ]
+ca <- hexaco_llm[hexaco_llm$country == "Canada" & hexaco_llm$attempt == 1, ]
 syn <- lapply(split(ca, ca$model, drop = TRUE), function(m) split(m, m$attempt))
-rc <- respondent_coverage(syn, real, hexaco_items, n_draws = 2)
+hc <- hexaco_items[hexaco_items$trait %in% c("H", "C"), ]
+rc <- respondent_coverage(syn, real, hc, n_draws = 2)
 rc
 #> Respondent coverage
-#> 240 items, 1708 real respondents, 2 real samples per attempt.
+#> 80 items, 1708 real respondents, 2 real samples per attempt.
 #> 
 #>                 model  RCG  OSR     pattern
-#>          Qwen 3.8 27B 1.08 0.74  Human-like
-#>          GPT-OSS-120B 1.11 0.67 Contraction
-#>      Claude Haiku 5.5 1.12 0.60 Contraction
-#>           Gemma 4 26B 1.14 0.61 Contraction
-#>         Qwen 3.5 122B 1.19 0.71 Contraction
-#>          GPT-4.1 mini 1.27 0.63 Contraction
-#>  Real (second sample) 1.00 1.00  Human-like
-#>      Shuffled columns 1.22 0.95 Contraction
+#>          Qwen 3.8 27B 1.11 0.67 Contraction
+#>          GPT-OSS-120B 1.16 0.66 Contraction
+#>           Gemma 4 26B 1.26 0.66 Contraction
+#>         Qwen 3.5 122B 1.26 0.70 Contraction
+#>      Claude Haiku 5.5 1.28 0.60 Contraction
+#>          GPT-4.1 mini 1.58 0.59 Contraction
+#>  Real (second sample) 1.00 0.99  Human-like
+#>      Shuffled columns 1.19 0.97 Contraction
 #> 
 #> Both ratios are near 1 for a second sample of real people.
 gg_respondent_coverage(rc)

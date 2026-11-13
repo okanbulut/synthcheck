@@ -181,27 +181,27 @@ them, not to replace a field test.
 
 ``` r
 # made-up example: three "models" whose respondents differ from the
-# real population in different ways, five attempts each
+# real population in different ways, three attempts each
 set.seed(1)
 a <- matrix(rlnorm(12, 0.2, 0.3)); d <- matrix(rnorm(12))
 real <- as.data.frame(mirt::simdata(a, d, 1000, itemtype = "dich"))
-llm <- function(mu, s) lapply(1:5, function(i) as.data.frame(
+llm <- function(mu, s) lapply(1:3, function(i) as.data.frame(
   mirt::simdata(a, d, 200, itemtype = "dich", Theta = matrix(rnorm(200, mu, s)))))
 cov <- synthetic_coverage(list("LLM A" = llm(0.8, 0.7), "LLM B" = llm(0, 0.4),
-                               "LLM C" = llm(-0.6, 0.9)), real)
+                               "LLM C" = llm(-0.6, 0.9)), real, cor = "pearson")
 cov
 #> <sc_coverage> 3 model(s), 12 item(s), coverage of real total-score slices
 #>       model attempts overlap_overall overlap_lowest overlap_highest
-#>       LLM A        5             67%            65%             69%
-#>       LLM B        5             74%            70%             77%
-#>       LLM C        5             76%            72%             81%
-#>  Best Blend        2             93%            92%             93%
+#>       LLM A        3             67%            66%             69%
+#>       LLM B        3             77%            75%             78%
+#>       LLM C        3             79%            78%             82%
+#>  Best Blend        3             94%            93%             96%
 #>  structure_overall structure_lowest structure_highest
-#>                81%              78%               86%
-#>                70%              68%               72%
-#>                89%              87%               90%
-#>                90%              90%               91%
+#>                88%              86%               90%
+#>                84%              83%               86%
+#>                92%              92%               92%
+#>                94%              94%               95%
 #> 
-#> Best Blend: 35% LLM A + 15% LLM B + 50% LLM C (chosen on attempts 1 to 3; its numbers come from attempts 4 to 5)
+#> Best Blend: 35% LLM A + 5% LLM B + 60% LLM C
 gg_coverage(cov)
 ```

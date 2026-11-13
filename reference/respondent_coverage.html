@@ -19,7 +19,7 @@ distance to the nearest neighbour:"><meta property="og:image" content="https://w
 
     <a class="navbar-brand me-2" href="../index.html">synthcheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -175,22 +175,23 @@ answers but not the respondents. arXiv:2610.30900.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">real</span> <span class="op">&lt;-</span> <span class="va">hexaco_real</span><span class="op">[</span><span class="va">hexaco_real</span><span class="op">$</span><span class="va">country</span> <span class="op">==</span> <span class="st">"Canada"</span>, <span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">ca</span> <span class="op">&lt;-</span> <span class="va">hexaco_llm</span><span class="op">[</span><span class="va">hexaco_llm</span><span class="op">$</span><span class="va">country</span> <span class="op">==</span> <span class="st">"Canada"</span> <span class="op">&amp;</span> <span class="va">hexaco_llm</span><span class="op">$</span><span class="va">attempt</span> <span class="op">&lt;=</span> <span class="fl">2</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">ca</span> <span class="op">&lt;-</span> <span class="va">hexaco_llm</span><span class="op">[</span><span class="va">hexaco_llm</span><span class="op">$</span><span class="va">country</span> <span class="op">==</span> <span class="st">"Canada"</span> <span class="op">&amp;</span> <span class="va">hexaco_llm</span><span class="op">$</span><span class="va">attempt</span> <span class="op">==</span> <span class="fl">1</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">syn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">ca</span>, <span class="va">ca</span><span class="op">$</span><span class="va">model</span>, drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">m</span><span class="op">$</span><span class="va">attempt</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">rc</span> <span class="op">&lt;-</span> <span class="fu">respondent_coverage</span><span class="op">(</span><span class="va">syn</span>, <span class="va">real</span>, <span class="va">hexaco_items</span>, n_draws <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">hc</span> <span class="op">&lt;-</span> <span class="va">hexaco_items</span><span class="op">[</span><span class="va">hexaco_items</span><span class="op">$</span><span class="va">trait</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"H"</span>, <span class="st">"C"</span><span class="op">)</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">rc</span> <span class="op">&lt;-</span> <span class="fu">respondent_coverage</span><span class="op">(</span><span class="va">syn</span>, <span class="va">real</span>, <span class="va">hc</span>, n_draws <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rc</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Respondent coverage</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 240 items, 1708 real respondents, 2 real samples per attempt.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 80 items, 1708 real respondents, 2 real samples per attempt.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 model  RCG  OSR     pattern</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          Qwen 3.8 27B 1.08 0.74  Human-like</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          GPT-OSS-120B 1.11 0.67 Contraction</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      Claude Haiku 5.5 1.12 0.60 Contraction</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           Gemma 4 26B 1.14 0.61 Contraction</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         Qwen 3.5 122B 1.19 0.71 Contraction</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          GPT-4.1 mini 1.27 0.63 Contraction</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Real (second sample) 1.00 1.00  Human-like</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      Shuffled columns 1.22 0.95 Contraction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          Qwen 3.8 27B 1.11 0.67 Contraction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          GPT-OSS-120B 1.16 0.66 Contraction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           Gemma 4 26B 1.26 0.66 Contraction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         Qwen 3.5 122B 1.26 0.70 Contraction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Claude Haiku 5.5 1.28 0.60 Contraction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          GPT-4.1 mini 1.58 0.59 Contraction</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Real (second sample) 1.00 0.99  Human-like</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Shuffled columns 1.19 0.97 Contraction</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Both ratios are near 1 for a second sample of real people.</span>
 <span class="r-in"><span><span class="fu"><a href="gg_respondent_coverage.html">gg_respondent_coverage</a></span><span class="op">(</span><span class="va">rc</span><span class="op">)</span></span></span>

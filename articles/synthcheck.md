@@ -91,13 +91,20 @@ bm
 #> Synthetic authenticity benchmark
 #> 40 items, 1708 real respondents. Score: weakest.
 #> 
-#>             model attempts Overlap Structure Behaviour Score   Weakest
-#>      GPT-OSS-120B        3     -22       -17       -13   -22   Overlap
-#>      Qwen 3.8 27B        3     -66       -20       -13   -66   Overlap
-#>      GPT-4.1 mini        3     -81        41       -73   -81   Overlap
-#>     Qwen 3.5 122B        3     -86        49       -37   -86   Overlap
-#>  Claude Haiku 5.5        3     -80        52      -113  -113 Behaviour
-#>       Gemma 4 26B        3     -20      -220       -86  -220 Structure
+#>             model attempts Overlap Structure Behaviour Score    Score 95%
+#>      GPT-OSS-120B        3     -22       -17       -13   -22   -37 to -20
+#>      Qwen 3.8 27B        3     -66       -20       -13   -66   -69 to -63
+#>      GPT-4.1 mini        3     -81        41       -73   -81   -84 to -78
+#>     Qwen 3.5 122B        3     -86        49       -37   -86   -90 to -83
+#>  Claude Haiku 5.5        3     -80        52      -113  -113 -116 to -110
+#>       Gemma 4 26B        3     -20      -220       -86  -220 -223 to -216
+#>    Weakest
+#>    Overlap
+#>    Overlap
+#>    Overlap
+#>    Overlap
+#>  Behaviour
+#>  Structure
 #> 
 #> Anchors (raw, floor to ceiling, samples of 500): Overlap 52.8 to 93.3, Structure 79.6 to 94.8, Behaviour 66.7 to 92.2.
 #> 0 = shuffled real columns, 100 = a second sample of real people.
@@ -131,47 +138,53 @@ summarise_benchmark(bm)
 #> Synthetic authenticity benchmark in plain language
 #> 
 #> GPT-OSS-120B scores -22 on the benchmark (1st of 6), set by its weakest
-#> column, Overlap. Overlap is -22 (worse than shuffled columns);
-#> Structure is -17 (worse than shuffled columns); Behaviour is -13 (worse
-#> than shuffled columns). Compared with real people, they fit the
-#> response model better (behaviour overlap 43) and they answer
-#> reverse-keyed items more consistently (behaviour overlap 47).
+#> column, Overlap. Its 95% interval runs from -37 to -20. Overlap is -22
+#> (worse than shuffled columns); Structure is -17 (worse than shuffled
+#> columns); Behaviour is -13 (worse than shuffled columns). Compared with
+#> real people, they fit the response model better (behaviour overlap 43)
+#> and they answer reverse-keyed items more consistently (behaviour
+#> overlap 47).
 #> 
 #> Qwen 3.8 27B scores -66 on the benchmark (2nd of 6), set by its weakest
-#> column, Overlap. Overlap is -66 (worse than shuffled columns);
-#> Structure is -20 (worse than shuffled columns); Behaviour is -13 (worse
-#> than shuffled columns). Compared with real people, they answer
-#> reverse-keyed items more consistently (behaviour overlap 42) and they
-#> agree less overall (behaviour overlap 42).
+#> column, Overlap. Its 95% interval runs from -69 to -63. Overlap is -66
+#> (worse than shuffled columns); Structure is -20 (worse than shuffled
+#> columns); Behaviour is -13 (worse than shuffled columns). Compared with
+#> real people, they answer reverse-keyed items more consistently
+#> (behaviour overlap 42) and they agree less overall (behaviour overlap
+#> 42).
 #> 
 #> GPT-4.1 mini scores -81 on the benchmark (3rd of 6), set by its weakest
-#> column, Overlap. Overlap is -81 (worse than shuffled columns);
-#> Structure is 41 (closer to shuffled columns than to real people);
-#> Behaviour is -73 (worse than shuffled columns). Compared with real
-#> people, their answers are more consistent within facets (behaviour
-#> overlap 30) and they fit the response model better (behaviour overlap
-#> 33).
+#> column, Overlap. Its 95% interval runs from -84 to -78. It overlaps
+#> with that of Qwen 3.5 122B, so the data do not clearly separate the
+#> two. Overlap is -81 (worse than shuffled columns); Structure is 41
+#> (closer to shuffled columns than to real people); Behaviour is -73
+#> (worse than shuffled columns). Compared with real people, their answers
+#> are more consistent within facets (behaviour overlap 30) and they fit
+#> the response model better (behaviour overlap 33).
 #> 
 #> Qwen 3.5 122B scores -86 on the benchmark (4th of 6), set by its
-#> weakest column, Overlap. Overlap is -86 (worse than shuffled columns);
-#> Structure is 49 (closer to shuffled columns than to real people);
-#> Behaviour is -37 (worse than shuffled columns). Compared with real
-#> people, they answer reverse-keyed items more consistently (behaviour
-#> overlap 31) and they agree less overall (behaviour overlap 35).
+#> weakest column, Overlap. Its 95% interval runs from -90 to -83. Overlap
+#> is -86 (worse than shuffled columns); Structure is 49 (closer to
+#> shuffled columns than to real people); Behaviour is -37 (worse than
+#> shuffled columns). Compared with real people, they answer reverse-keyed
+#> items more consistently (behaviour overlap 31) and they agree less
+#> overall (behaviour overlap 35).
 #> 
 #> Claude Haiku 5.5 scores -113 on the benchmark (5th of 6), set by its
-#> weakest column, Behaviour. Overlap is -80 (worse than shuffled
-#> columns); Structure is 52 (partly like real people); Behaviour is -113
-#> (worse than shuffled columns). Compared with real people, they fit the
-#> response model better (behaviour overlap 25) and they agree less
-#> overall (behaviour overlap 29).
+#> weakest column, Behaviour. Its 95% interval runs from -116 to -110.
+#> Overlap is -80 (worse than shuffled columns); Structure is 52 (partly
+#> like real people); Behaviour is -113 (worse than shuffled columns).
+#> Compared with real people, they fit the response model better
+#> (behaviour overlap 25) and they agree less overall (behaviour overlap
+#> 29).
 #> 
 #> Gemma 4 26B scores -220 on the benchmark (6th of 6), set by its weakest
-#> column, Structure. Overlap is -20 (worse than shuffled columns);
-#> Structure is -220 (worse than shuffled columns); Behaviour is -86
-#> (worse than shuffled columns). Compared with real people, they fit the
-#> response model better (behaviour overlap 33) and their answers are more
-#> consistent within facets (behaviour overlap 35).
+#> column, Structure. Its 95% interval runs from -223 to -216. Overlap is
+#> -20 (worse than shuffled columns); Structure is -220 (worse than
+#> shuffled columns); Behaviour is -86 (worse than shuffled columns).
+#> Compared with real people, they fit the response model better
+#> (behaviour overlap 33) and their answers are more consistent within
+#> facets (behaviour overlap 35).
 #> 
 #> 100 = as close as a second sample of real people; 0 = no better than shuffled columns.
 ```

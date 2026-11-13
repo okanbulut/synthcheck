@@ -287,9 +287,9 @@ bm
 #> Synthetic authenticity benchmark
 #> 40 items, 1708 real respondents. Score: weakest.
 #> 
-#>   model attempts Overlap Structure Behaviour Score   Weakest
-#>  Mock B        3       2         1        -3    -3 Behaviour
-#>  Mock A        3      -9        -1         8    -9   Overlap
+#>   model attempts Overlap Structure Behaviour Score Score 95%   Weakest
+#>  Mock B        3       2         1        -3    -3  -13 to 1 Behaviour
+#>  Mock A        3      -9        -1         8    -9  -25 to 1   Overlap
 #> 
 #> Anchors (raw, floor to ceiling, samples of 120): Overlap 51.5 to 85.0, Structure 79.0 to 89.5, Behaviour 66.4 to 85.1.
 #> 0 = shuffled real columns, 100 = a second sample of real people.
@@ -297,18 +297,21 @@ summarise_benchmark(bm)
 #> Synthetic authenticity benchmark in plain language
 #> 
 #> Mock B scores -3 on the benchmark (1st of 2), set by its weakest
-#> column, Behaviour. Overlap is 2 (barely better than shuffled columns);
-#> Structure is 1 (barely better than shuffled columns); Behaviour is -3
-#> (worse than shuffled columns). Compared with real people, they give
-#> more extreme answers (behaviour overlap 50) and their answers vary more
-#> across items (behaviour overlap 54).
+#> column, Behaviour. Its 95% interval runs from -13 to 1. It overlaps
+#> with that of Mock A, so the data do not clearly separate the two.
+#> Overlap is 2 (barely better than shuffled columns); Structure is 1
+#> (barely better than shuffled columns); Behaviour is -3 (worse than
+#> shuffled columns). Compared with real people, they give more extreme
+#> answers (behaviour overlap 50) and their answers vary more across items
+#> (behaviour overlap 54).
 #> 
 #> Mock A scores -9 on the benchmark (2nd of 2), set by its weakest
-#> column, Overlap. Overlap is -9 (worse than shuffled columns); Structure
-#> is -1 (worse than shuffled columns); Behaviour is 8 (barely better than
-#> shuffled columns). Compared with real people, they give more extreme
-#> answers (behaviour overlap 49) and their answers vary more across items
-#> (behaviour overlap 53).
+#> column, Overlap. Its 95% interval runs from -25 to 1. Overlap is -9
+#> (worse than shuffled columns); Structure is -1 (worse than shuffled
+#> columns); Behaviour is 8 (barely better than shuffled columns).
+#> Compared with real people, they give more extreme answers (behaviour
+#> overlap 49) and their answers vary more across items (behaviour overlap
+#> 53).
 #> 
 #> 100 = as close as a second sample of real people; 0 = no better than shuffled columns.
 ```

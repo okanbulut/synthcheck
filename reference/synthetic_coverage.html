@@ -21,7 +21,7 @@ few (red) synthetic respondents in that slice."><meta property="og:image" conten
 
     <a class="navbar-brand me-2" href="../index.html">synthcheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -235,28 +235,28 @@ models and to decide how to combine them, not to replace a field test.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># made-up example: three "models" whose respondents differ from the</span></span></span>
-<span class="r-in"><span><span class="co"># real population in different ways, five attempts each</span></span></span>
+<span class="r-in"><span><span class="co"># real population in different ways, three attempts each</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Lognormal.html" class="external-link">rlnorm</a></span><span class="op">(</span><span class="fl">12</span>, <span class="fl">0.2</span>, <span class="fl">0.3</span><span class="op">)</span><span class="op">)</span>; <span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">12</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">real</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">mirt</span><span class="fu">::</span><span class="fu"><a href="https://philchalmers.github.io/mirt/reference/simdata.html" class="external-link">simdata</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">d</span>, <span class="fl">1000</span>, itemtype <span class="op">=</span> <span class="st">"dich"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">llm</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">mu</span>, <span class="va">s</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">llm</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">mu</span>, <span class="va">s</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="fu">mirt</span><span class="fu">::</span><span class="fu"><a href="https://philchalmers.github.io/mirt/reference/simdata.html" class="external-link">simdata</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">d</span>, <span class="fl">200</span>, itemtype <span class="op">=</span> <span class="st">"dich"</span>, Theta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">200</span>, <span class="va">mu</span>, <span class="va">s</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">cov</span> <span class="op">&lt;-</span> <span class="fu">synthetic_coverage</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"LLM A"</span> <span class="op">=</span> <span class="fu">llm</span><span class="op">(</span><span class="fl">0.8</span>, <span class="fl">0.7</span><span class="op">)</span>, <span class="st">"LLM B"</span> <span class="op">=</span> <span class="fu">llm</span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.4</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                               <span class="st">"LLM C"</span> <span class="op">=</span> <span class="fu">llm</span><span class="op">(</span><span class="op">-</span><span class="fl">0.6</span>, <span class="fl">0.9</span><span class="op">)</span><span class="op">)</span>, <span class="va">real</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                               <span class="st">"LLM C"</span> <span class="op">=</span> <span class="fu">llm</span><span class="op">(</span><span class="op">-</span><span class="fl">0.6</span>, <span class="fl">0.9</span><span class="op">)</span><span class="op">)</span>, <span class="va">real</span>, cor <span class="op">=</span> <span class="st">"pearson"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">cov</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;sc_coverage&gt; 3 model(s), 12 item(s), coverage of real total-score slices</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       model attempts overlap_overall overlap_lowest overlap_highest</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       LLM A        5             67%            65%             69%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       LLM B        5             74%            70%             77%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       LLM C        5             76%            72%             81%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  Best Blend        2             93%            92%             93%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       LLM A        3             67%            66%             69%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       LLM B        3             77%            75%             78%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       LLM C        3             79%            78%             82%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Best Blend        3             94%            93%             96%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  structure_overall structure_lowest structure_highest</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                81%              78%               86%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                70%              68%               72%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                89%              87%               90%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                90%              90%               91%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                88%              86%               90%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                84%              83%               86%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                92%              92%               92%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                94%              94%               95%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Best Blend: 35% LLM A + 15% LLM B + 50% LLM C (chosen on attempts 1 to 3; its numbers come from attempts 4 to 5)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Best Blend: 35% LLM A + 5% LLM B + 60% LLM C</span>
 <span class="r-in"><span><span class="fu"><a href="gg_coverage.html">gg_coverage</a></span><span class="op">(</span><span class="va">cov</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="synthetic_coverage-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>

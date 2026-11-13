@@ -20,6 +20,8 @@ authenticity_benchmark(
   fit_scales = NULL,
   cor = c("pearson", "polychoric"),
   copula = FALSE,
+  conf = 0.95,
+  n_boot = 1000,
   seed = 1
 )
 ```
@@ -90,6 +92,14 @@ authenticity_benchmark(
 
   add the Gaussian copula reference row (see Details).
 
+- conf:
+
+  confidence level of the intervals.
+
+- n_boot:
+
+  number of bootstrap draws for the intervals.
+
 - seed:
 
   random seed for breaking ties.
@@ -99,10 +109,11 @@ authenticity_benchmark(
 An object of class `sc_benchmark`: A list with `table` (a tibble with
 one row per model, sorted by score: `model`, `reference` (`TRUE` for the
 copula row), `attempts`, `score`, `weakest`, the anchored `overlap`,
-`structure` and `behaviour`, their raw values (`*_raw`), and the lowest
-and highest anchored values over the attempts), `attempts` (raw and
-anchored values per attempt), `anchors` (floor and ceiling of each
-index), `behaviour` (the
+`structure` and `behaviour`, their raw values (`*_raw`), the lowest and
+highest anchored values over the attempts (`*_lowest`, `*_highest`), and
+the interval of each anchored value and of the score (`*_lower`,
+`*_upper`; see Details)), `attempts` (raw and anchored values per
+attempt), `anchors` (floor and ceiling of each index), `behaviour` (the
 [`synthetic_behaviour()`](https://www.okanbulut.com/synthcheck/reference/synthetic_behaviour.md)
 result), `careless` (the flags, with `clean_real = TRUE`) and
 `settings`. It has [`print()`](https://rdrr.io/r/base/print.html),
@@ -166,6 +177,16 @@ table), not a competitor. For the same reason, its Overlap and Structure
 can be above 100: It reproduces the full real sample more closely than a
 second, smaller sample of real people does.
 
+**Uncertainty.** Each anchored value and the score come with an interval
+(`*_lower`, `*_upper`), so two models whose intervals overlap are not
+clearly apart. The interval is a bootstrap (`n_boot` draws) that
+resamples the model's attempts and, separately, the floor and ceiling
+draws, and recomputes the anchored values and the score each time. With
+a single attempt, the spread between attempts is unknown, so it is
+approximated by the spread of the ceiling (two samples of real people of
+the same size), divided by the square root of 2. With two to four
+attempts the interval is rough; five or more give a steadier one.
+
 The benchmark compares models and supports decisions about them. It does
 not show that synthetic data can replace a field test.
 
@@ -188,13 +209,20 @@ bm
 #> Synthetic authenticity benchmark
 #> 80 items, 1708 real respondents. Score: weakest.
 #> 
-#>             model attempts Overlap Structure Behaviour Score   Weakest
-#>      GPT-OSS-120B        2     -46       -20       -12   -46   Overlap
-#>      Qwen 3.8 27B        2     -40       -70        11   -70 Structure
-#>  Claude Haiku 5.5        2     -50        16       -83   -83 Behaviour
-#>     Qwen 3.5 122B        2     -85        14        -1   -85   Overlap
-#>      GPT-4.1 mini        2     -91        46       -54   -91   Overlap
-#>       Gemma 4 26B        2     -46      -148       -45  -148 Structure
+#>             model attempts Overlap Structure Behaviour Score    Score 95%
+#>      GPT-OSS-120B        2     -46       -20       -12   -46   -51 to -41
+#>      Qwen 3.8 27B        2     -40       -70        11   -70   -75 to -65
+#>  Claude Haiku 5.5        2     -50        16       -83   -83   -86 to -81
+#>     Qwen 3.5 122B        2     -85        14        -1   -85   -88 to -82
+#>      GPT-4.1 mini        2     -91        46       -54   -91   -94 to -88
+#>       Gemma 4 26B        2     -46      -148       -45  -148 -151 to -145
+#>    Weakest
+#>    Overlap
+#>  Structure
+#>  Behaviour
+#>    Overlap
+#>    Overlap
+#>  Structure
 #> 
 #> Anchors (raw, floor to ceiling, samples of 500): Overlap 52.1 to 93.2, Structure 84.3 to 94.6, Behaviour 58.2 to 92.5.
 #> 0 = shuffled real columns, 100 = a second sample of real people.
@@ -209,13 +237,20 @@ bm
 #> Synthetic authenticity benchmark
 #> 240 items, 1708 real respondents. Score: weakest.
 #> 
-#>             model attempts Overlap Structure Behaviour Score   Weakest
-#>     Qwen 3.5 122B       10     -37        14        10   -37   Overlap
-#>      GPT-OSS-120B       10     -22       -45       -15   -45 Structure
-#>  Claude Haiku 5.5       10     -42        17       -54   -54 Behaviour
-#>      GPT-4.1 mini       10     -59        33       -24   -59   Overlap
-#>      Qwen 3.8 27B       10      -8       -62         0   -62 Structure
-#>       Gemma 4 26B       10     -45      -238       -51  -238 Structure
+#>             model attempts Overlap Structure Behaviour Score    Score 95%
+#>     Qwen 3.5 122B       10     -37        14        10   -37   -38 to -36
+#>      GPT-OSS-120B       10     -22       -45       -15   -45   -59 to -31
+#>  Claude Haiku 5.5       10     -42        17       -54   -54   -54 to -53
+#>      GPT-4.1 mini       10     -59        33       -24   -59   -60 to -58
+#>      Qwen 3.8 27B       10      -8       -62         0   -62   -74 to -49
+#>       Gemma 4 26B       10     -45      -238       -51  -238 -243 to -233
+#>    Weakest
+#>    Overlap
+#>  Structure
+#>  Behaviour
+#>    Overlap
+#>  Structure
+#>  Structure
 #> 
 #> Anchors (raw, floor to ceiling, samples of 500): Overlap 50.9 to 92.7, Structure 87.8 to 94.7, Behaviour 43.4 to 92.6.
 #> 0 = shuffled real columns, 100 = a second sample of real people.

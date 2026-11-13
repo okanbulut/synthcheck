@@ -69,7 +69,7 @@ and delete it with
 sc_cache()
 #> Response cache in /home/runner/.cache/R/synthcheck: reuses saved answers and saves new ones.
 sc_cache(tempfile("cache"), mode = "refresh")
-#> Response cache in /tmp/RtmpRT7KeU/cache19372d1db0ab: asks the models again and replaces saved answers.
+#> Response cache in /tmp/RtmpY9hOqp/cache19546b3f839d: asks the models again and replaces saved answers.
 if (FALSE) { # \dontrun{
 # needs ANTHROPIC_API_KEY
 ins <- sc_instrument(hexaco_items[1:10, ], scale = c(1, 7))

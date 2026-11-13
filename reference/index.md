@@ -73,6 +73,10 @@ Define an instrument and personas, call language models, save the data.
 - [`sc_personas()`](https://www.okanbulut.com/synthcheck/reference/sc_personas.md)
   [`sc_persona_grid()`](https://www.okanbulut.com/synthcheck/reference/sc_personas.md)
   : Define personas for synthetic respondents
+- [`persona_fidelity()`](https://www.okanbulut.com/synthcheck/reference/persona_fidelity.md)
+  : Check whether personas change synthetic answers
+- [`gg_persona_fidelity()`](https://www.okanbulut.com/synthcheck/reference/gg_persona_fidelity.md)
+  : Draw the persona check
 - [`sc_model()`](https://www.okanbulut.com/synthcheck/reference/sc_model.md)
   : Choose a language model for synthetic respondents
 - [`sc_default_models`](https://www.okanbulut.com/synthcheck/reference/sc_default_models.md)

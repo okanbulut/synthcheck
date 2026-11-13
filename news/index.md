@@ -1,6 +1,29 @@
 # Changelog
 
-## synthcheck (development version)
+## synthcheck 0.3.0
+
+- New
+  [`persona_fidelity()`](https://www.okanbulut.com/synthcheck/reference/persona_fidelity.md)
+  and
+  [`gg_persona_fidelity()`](https://www.okanbulut.com/synthcheck/reference/gg_persona_fidelity.md):
+  A check of whether the personas given to a language model change its
+  answers. For each model and scale it compares the variance between
+  personas (eta squared) with shuffled persona labels, and when the
+  persona table holds `target_<scale>` columns, it checks that each
+  persona’s scale scores move in the intended direction. Scores can be
+  standardized against real data.
+
+- [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md)
+  now gives an interval for every anchored value and for the score
+  (`*_lower`, `*_upper`; new arguments `conf` and `n_boot`). It is a
+  bootstrap over the model’s attempts and over the floor and ceiling
+  draws, so two models whose intervals overlap are not clearly apart.
+  [`gg_benchmark()`](https://www.okanbulut.com/synthcheck/reference/gg_benchmark.md)
+  prints the intervals under the values (`intervals = TRUE`),
+  [`print()`](https://rdrr.io/r/base/print.html) adds the score
+  interval, and
+  [`summarise_benchmark()`](https://www.okanbulut.com/synthcheck/reference/summarise_benchmark.md)
+  says when a model’s interval overlaps with the next one’s.
 
 - Three short instruments with well-documented item problems, each with
   real responses from the Open-Source Psychometrics Project: The

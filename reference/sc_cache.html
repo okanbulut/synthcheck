@@ -23,7 +23,7 @@ and costs nothing the second time."><meta property="og:image" content="https://w
 
     <a class="navbar-brand me-2" href="../index.html">synthcheck</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -128,7 +128,7 @@ with <code><a href="sc_cache_info.html">sc_cache_info()</a></code> and delete it
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">sc_cache</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Response cache in /home/runner/.cache/R/synthcheck: reuses saved answers and saves new ones.</span>
 <span class="r-in"><span><span class="fu">sc_cache</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"cache"</span><span class="op">)</span>, mode <span class="op">=</span> <span class="st">"refresh"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Response cache in /tmp/RtmpRT7KeU/cache19372d1db0ab: asks the models again and replaces saved answers.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Response cache in /tmp/RtmpY9hOqp/cache19546b3f839d: asks the models again and replaces saved answers.</span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co"># needs ANTHROPIC_API_KEY</span></span></span>
 <span class="r-in"><span><span class="va">ins</span> <span class="op">&lt;-</span> <span class="fu"><a href="sc_instrument.html">sc_instrument</a></span><span class="op">(</span><span class="va">hexaco_items</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="op">]</span>, scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">7</span><span class="op">)</span><span class="op">)</span></span></span>
