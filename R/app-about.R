@@ -4,7 +4,7 @@
 
 sc_app_www <- function() system.file("app", "www", package = "synthcheck")
 
-sc_app_about <- function(has_real = FALSE) {
+sc_app_about <- function(has_real = FALSE, hosted = FALSE) {
   li <- function(...) shiny::tags$li(...)
   card <- function(title, ..., id = NULL) {
     bslib::card(id = id, bslib::card_header(title), bslib::card_body(fillable = FALSE, ...))
@@ -41,6 +41,7 @@ sc_app_about <- function(has_real = FALSE) {
                   "The answer sets the fourth tab: Compare with real data, or Pretest and Interviews without it.",
                   "You can change it at any time, for example to benchmark the same synthetic data",
                   "once real responses come in.")),
+    if (hosted) sc_app_hosted_card(),
     bslib::layout_columns(
       col_widths = c(7, 5), fill = FALSE,
       card("How a language model answers a survey", id = "about_anim",
@@ -71,7 +72,8 @@ sc_app_about <- function(has_real = FALSE) {
              class = "sc-list",
              li("Use a built-in instrument (the IPIP-HEXACO, or three short scales with known item problems) or upload your own questionnaire"),
              li("Type, upload or build a grid of personas"),
-             li("Generate respondents with Anthropic, OpenAI or local Ollama models, side by side"),
+             li(if (hosted) "Generate respondents with Anthropic and OpenAI models, side by side (local Ollama models need the R package)" else
+                  "Generate respondents with Anthropic, OpenAI or local Ollama models, side by side"),
              li("Show the estimated cost before a paid run, and reuse saved answers so the same run again is free"),
              li("Show a progress bar with the time left, and stop a run at any time"),
              li("Benchmark several models against real data in one table"),
@@ -172,10 +174,36 @@ sc_key_help <- function() {
       "Or choose <em>Mock</em> below to try the app for free.")))
 }
 
+# In hosted mode: What runs on the server, what happens to keys and files,
+# and how to get the full app with local models.
+sc_app_hosted_card <- function() {
+  li <- function(...) shiny::tags$li(...)
+  bslib::card(
+    id = "about_hosted", class = "border-primary",
+    bslib::card_header(shiny::icon("cloud"), "You are using the hosted app"),
+    bslib::card_body(
+      fillable = FALSE,
+      shiny::tags$ul(
+        class = "sc-list mb-2",
+        li(shiny::strong("Your own API keys: "), "Paste an Anthropic or OpenAI key on the Models tab.",
+           "It stays in this browser session's memory and goes only to that provider. It is never",
+           "saved on the server, in the files or in the R script, and it is gone when you close the tab.",
+           "Runs are charged to your key."),
+        li(shiny::strong("Your files: "), "Uploads and generated data stay in a temporary folder for this",
+           "session only and are deleted when you close the tab. Download what you need from Export."),
+        li(shiny::strong("Local models: "), "Ollama is not available here. Install the R package and run",
+           shiny::code("synthcheck::run_synthcheck_app()"), "on your own computer for local models",
+           "and long runs."),
+        li(shiny::strong("No key? "), "The mock provider gives random answers at no cost, so you can try",
+           "every step.")),
+      shiny::p(class = "small text-muted mb-0",
+               shiny::code("remotes::install_github(\"okanbulut/synthcheck\")"), "installs the package.")))
+}
+
 # the guided tour, one step per main control (cicerone switches the tabs).
 # It follows the path chosen on the About tab: With real data (or no answer
 # yet) it shows Compare; without real data, Pretest and Interviews.
-sc_app_tour <- function(path = NULL) {
+sc_app_tour <- function(path = NULL, hosted = FALSE) {
   path <- if (identical(path, "pretest")) "pretest" else "real"
   fourth <- if (path == "pretest") list(
     list("pt_data_card", "4. Pretest: The data",
@@ -229,7 +257,8 @@ sc_app_tour <- function(path = NULL) {
     list("per_card", "2. Personas",
          "Give each synthetic respondent a persona: Type them, build a grid or upload a table.", "personas"),
     list("mod_keys_card", "3. Models: API keys",
-         paste("Paste an OpenAI or Anthropic key, or set it in .Renviron. Keys stay in memory and are never saved.",
+         paste(if (hosted) "Paste your own OpenAI or Anthropic key. It stays in this browser session's memory and is never saved on the server." else
+                 "Paste an OpenAI or Anthropic key, or set it in .Renviron. Keys stay in memory and are never saved.",
                "No key yet? The link in this card explains how to get one, add credit and set a spending limit."),
          "models", "right"),
     list("mod_add_card", "Add a model",

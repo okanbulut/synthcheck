@@ -63,9 +63,7 @@
 #' **API keys** typed into the app stay in memory for that session only:
 #' They are never written to the saved data, the run settings or the R
 #' script. Keys set as `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` (for example
-#' in `.Renviron`) are used without being shown. The app runs on your own
-#' computer; do not deploy it on a shared server with keys typed in. New to
-#' API keys? The article
+#' in `.Renviron`) are used without being shown. New to API keys? The article
 #' [Getting an API key](https://www.okanbulut.com/synthcheck/articles/api-keys.html)
 #' walks through signing up with OpenAI or Anthropic, adding credit, keeping
 #' the key private and setting a spending limit, and the Models tab links to
@@ -74,6 +72,17 @@
 #' Runs go to a background R process when callr is installed, so the app
 #' stays responsive and the Stop button works. Every attempt is written to
 #' the output folder as soon as it is done.
+#'
+#' **Hosting the app:** `run_synthcheck_app()` always runs the full app on
+#' your own computer. `synthcheck_app()` returns the same app as an object
+#' for a server such as Posit Connect Cloud or shinyapps.io. On a server it
+#' runs in hosted mode: Ollama is not offered (local models need the package
+#' on your own computer), keys from the server's environment are never used,
+#' each visitor types their own keys, which stay in that browser session's
+#' memory, and the generated files go to a temporary folder that is deleted
+#' when the session ends. The article
+#' [Hosting the app](https://www.okanbulut.com/synthcheck/articles/hosting.html)
+#' walks through a deployment.
 #'
 #' The benchmark compares models and
 #' supports decisions about them. It does not show that synthetic data can
@@ -88,18 +97,25 @@
 #' @param host,port where to serve the app. The default serves it on your
 #'   own computer only.
 #' @param launch.browser open the app in a browser?
+#' @param hosted run in hosted mode (see above)? The default is `TRUE` when
+#'   the option `synthcheck.hosted` is `TRUE`, the environment variable
+#'   `SYNTHCHECK_HOSTED` is `"true"`, or the app runs on shinyapps.io or
+#'   Posit Connect.
 #' @return Invisibly, when the app is closed with its Close button: A list
 #'   with `synthetic` (the generated data), `benchmark` (the
 #'   [authenticity_benchmark()] result, if one was run), `pretest` (the
 #'   [synthetic_pretest()] result, if one was run), `interviews` (the
 #'   [cognitive_interview()] result, if one was run), `path` (`"real"`,
 #'   `"pretest"` or `NULL`), `instrument` and `personas`.
+#'   `synthcheck_app()` returns a Shiny app object.
 #' @seealso [generate_synthetic()], [authenticity_benchmark()]
 #' @examples
 #' if (interactive()) {
 #'   res <- run_synthcheck_app()
 #'   res$benchmark
 #' }
+#' # the app object for a server, as in an app.R file
+#' app <- synthcheck_app(hosted = TRUE)
 #' @export
 run_synthcheck_app <- function(real = NULL, synthetic = NULL, host = "127.0.0.1", port = NULL,
                                launch.browser = TRUE) {
@@ -110,10 +126,31 @@ run_synthcheck_app <- function(real = NULL, synthetic = NULL, host = "127.0.0.1"
   invisible(res)
 }
 
-# the app object, also used by the tests
-sc_app <- function(real = NULL, synthetic = NULL) {
-  shiny::shinyApp(sc_app_ui(has_real = !is.null(real), has_syn = !is.null(synthetic)),
-                  sc_app_server(real = real, synthetic = synthetic))
+#' @rdname run_synthcheck_app
+#' @export
+synthcheck_app <- function(real = NULL, synthetic = NULL, hosted = sc_is_hosted()) {
+  sc_need("shiny", "to run the app")
+  sc_need("bslib", "to run the app")
+  sc_app(real = real, synthetic = synthetic, hosted = isTRUE(hosted))
+}
+
+# the app object, also used by the tests; run_synthcheck_app() never runs hosted
+sc_app <- function(real = NULL, synthetic = NULL, hosted = FALSE) {
+  shiny::shinyApp(sc_app_ui(has_real = !is.null(real), has_syn = !is.null(synthetic), hosted = hosted),
+                  sc_app_server(real = real, synthetic = synthetic, hosted = hosted))
+}
+
+# Is the app on a server? An explicit option or environment variable wins;
+# otherwise shinyapps.io (R_CONFIG_ACTIVE) and Posit Connect (RSTUDIO_PRODUCT)
+# are detected.
+sc_is_hosted <- function() {
+  opt <- getOption("synthcheck.hosted")
+  if (!is.null(opt)) return(isTRUE(opt))
+  env <- tolower(Sys.getenv("SYNTHCHECK_HOSTED"))
+  if (env %in% c("true", "1", "yes")) return(TRUE)
+  if (env %in% c("false", "0", "no")) return(FALSE)
+  identical(Sys.getenv("R_CONFIG_ACTIVE"), "shinyapps") ||
+    identical(toupper(Sys.getenv("RSTUDIO_PRODUCT")), "CONNECT")
 }
 
 sc_model_choices <- list(
@@ -132,7 +169,7 @@ sc_ins_choices <- c("IPIP-HEXACO (built in, 240 items)" = "hexaco",
                     "Mini-IPIP (built in, 20 items)" = "mini_ipip",
                     "Upload an item table" = "upload")
 
-sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
+sc_app_ui <- function(has_real = FALSE, has_syn = FALSE, hosted = FALSE) {
   card <- function(title, ..., id = NULL) bslib::card(id = id, bslib::card_header(title),
                                                       bslib::card_body(fillable = FALSE, ...))
   row <- function(...) {
@@ -223,13 +260,14 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
              shiny::uiOutput("key_anthropic_env"),
              shiny::passwordInput("key_openai", "OpenAI API key"),
              shiny::uiOutput("key_openai_env"),
-             shiny::textInput("ollama_url", "Ollama server", "http://localhost:11434"),
-             shiny::helpText("Keys stay in memory for this session only. They are never saved."),
+             if (hosted) NULL else shiny::textInput("ollama_url", "Ollama server", "http://localhost:11434"),
+             shiny::helpText(if (hosted) paste("Keys stay in this browser session's memory and go only to the",
+                                               "provider. They are never saved on the server.") else
+                               "Keys stay in memory for this session only. They are never saved."),
              sc_key_help()),
         card("Add a model", id = "mod_add_card",
-             shiny::selectInput("mod_provider", "Provider",
-                                c("Anthropic" = "anthropic", "OpenAI" = "openai",
-                                  "Ollama (local)" = "ollama", "Mock (random answers, no API)" = "mock")),
+             shiny::selectInput("mod_provider", "Provider", sc_provider_choices(hosted)),
+             if (hosted) sc_hosted_ollama_note(),
              shiny::selectizeInput("mod_model", "Model id", sc_model_choices$anthropic,
                                    options = list(create = TRUE)),
              shiny::actionButton("mod_refresh", "Refresh the model list", class = "btn-sm btn-outline-secondary mb-3"),
@@ -258,8 +296,9 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
                shiny::numericInput("run_retries", "Retries for invalid answers", 2, min = 0, max = 5),
                shiny::checkboxInput("run_shuffle", "Shuffle item order per respondent", FALSE)),
              row(
-               shiny::textInput("run_output", "Save to folder",
-                                file.path(getwd(), paste0("synthcheck-run-", format(Sys.Date())))),
+               if (hosted) sc_hosted_folder_note() else
+                 shiny::textInput("run_output", "Save to folder",
+                                  file.path(getwd(), paste0("synthcheck-run-", format(Sys.Date())))),
                shiny::selectInput("run_format", "File format",
                                   c("CSV" = "csv", "JSON" = "json", "RDS" = "rds", "Excel" = "xlsx"))),
              shiny::conditionalPanel(
@@ -417,8 +456,9 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
                  shiny::numericInput("iv_parallel", "Interviews at the same time", 4, min = 1, max = 32)),
              shiny::textAreaInput("iv_probes", "Probes (one per line, stage: probe)",
                                   sc_probe_text(sc_probes()), rows = 7),
-             shiny::textInput("iv_output", "Save to folder",
-                              file.path(getwd(), paste0("synthcheck-interviews-", format(Sys.Date())))),
+             if (hosted) sc_hosted_folder_note() else
+               shiny::textInput("iv_output", "Save to folder",
+                                file.path(getwd(), paste0("synthcheck-interviews-", format(Sys.Date())))),
              shiny::helpText("Saved answers follow the cache setting on the Models tab."),
              shiny::uiOutput("iv_plan"),
              shiny::div(shiny::actionButton("iv_run", "Run the interviews", class = "btn-primary"),
@@ -469,9 +509,12 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
            shiny::verbatimTextOutput("exp_script"),
            shiny::downloadButton("dl_script", "R script"),
            shiny::hr(),
-           shiny::helpText("Close the app to get the data and the benchmark back in R:",
-                           "res <- run_synthcheck_app()."),
-           shiny::actionButton("app_close", "Close the app and return to R", class = "btn-outline-primary")))
+           if (hosted) shiny::helpText("Run the script in R with the downloaded data. In R,",
+                                       "run_synthcheck_app() also returns the results when you close it.") else
+             shiny::tagList(
+               shiny::helpText("Close the app to get the data and the benchmark back in R:",
+                               "res <- run_synthcheck_app()."),
+               shiny::actionButton("app_close", "Close the app and return to R", class = "btn-outline-primary"))))
   )
 
   shiny::addResourcePath("synthcheck-www", sc_app_www())
@@ -487,7 +530,7 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
       shiny::tags$link(rel = "stylesheet", href = "synthcheck-www/synthcheck.css"),
       shiny::tags$link(rel = "icon", type = "image/png", href = "synthcheck-www/logo.png"),
       if (sc_has_tour()) cicerone::use_cicerone()),
-    sc_app_about(has_real = has_real), instrument, personas, models, compare, pretest, interviews, export
+    sc_app_about(has_real = has_real, hosted = hosted), instrument, personas, models, compare, pretest, interviews, export
   )
 }
 
@@ -496,6 +539,26 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
 sc_path_tabs <- list(real = "compare", pretest = c("pretest", "interviews"))
 
 # probes as editable text, one per line ("stage: probe"), and back
+# ---- hosted mode -------------------------------------------------------------
+
+sc_provider_choices <- function(hosted = FALSE) {
+  ch <- c("Anthropic" = "anthropic", "OpenAI" = "openai",
+          "Ollama (local)" = "ollama", "Mock (random answers, no API)" = "mock")
+  if (hosted) ch[ch != "ollama"] else ch
+}
+
+sc_hosted_ollama_note <- function() {
+  shiny::div(class = "small text-muted mb-3", id = "mod_ollama_hosted",
+             shiny::icon("laptop"), shiny::strong("Ollama (local models): "),
+             "Not available in the hosted app. To use models on your own computer, install the",
+             "R package and run", shiny::tags$code("synthcheck::run_synthcheck_app()", .noWS = "after"), ".")
+}
+
+sc_hosted_folder_note <- function() {
+  shiny::helpText("The files stay on the server for this session only and are deleted when",
+                  "you close the tab. Download what you need from the Export tab.")
+}
+
 sc_probe_text <- function(p) paste(sprintf("%s: %s", p$stage, p$probe), collapse = "\n")
 
 sc_parse_probes <- function(x) {

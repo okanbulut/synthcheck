@@ -1,8 +1,18 @@
 # Server logic of the synthcheck app (see run_synthcheck_app()).
 
-sc_app_server <- function(real = NULL, synthetic = NULL) {
-  force(real); force(synthetic)
+sc_app_server <- function(real = NULL, synthetic = NULL, hosted = FALSE) {
+  force(real); force(synthetic); force(hosted)
   function(input, output, session) {
+    # hosted mode: Each session writes to its own temporary folder, deleted when
+    # the session ends, and its own response cache, so visitors never share files
+    sess_dir <- if (hosted) file.path(tempdir(), "synthcheck-sessions",
+                                      session$token %||% basename(tempfile("s")))
+    out_dir <- function(typed, kind) {
+      if (!hosted) return(typed)
+      dir.create(sess_dir, showWarnings = FALSE, recursive = TRUE)
+      tempfile(paste0(kind, "-"), tmpdir = sess_dir)
+    }
+
     rv <- shiny::reactiveValues(models = list(), proc = NULL, run_dir = NULL, run_data = NULL,
                                 run_status = NULL, timing = NULL, benchmark = NULL, log = NULL,
                                 pretest = NULL, iv_proc = NULL, iv_dir = NULL, iv_status = NULL,
@@ -13,7 +23,7 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
     shiny::observeEvent(input$about_start, bslib::nav_select("sc_nav", "instrument", session = session))
     shiny::observeEvent(input$tour_start, {
       if (sc_has_tour()) {
-        sc_app_tour(input$sc_path)$init()$start()
+        sc_app_tour(input$sc_path, hosted = hosted)$init()$start()
       } else {
         shiny::showModal(shiny::modalDialog(
           title = "Guided tour",
@@ -155,16 +165,17 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
     })
 
     # ---- 3. Models -----------------------------------------------------------
-    output$key_anthropic_env <- shiny::renderUI(sc_key_note("ANTHROPIC_API_KEY", input$key_anthropic))
-    output$key_openai_env <- shiny::renderUI(sc_key_note("OPENAI_API_KEY", input$key_openai))
+    output$key_anthropic_env <- shiny::renderUI(sc_key_note("ANTHROPIC_API_KEY", input$key_anthropic, hosted))
+    output$key_openai_env <- shiny::renderUI(sc_key_note("OPENAI_API_KEY", input$key_openai, hosted))
 
     shiny::observeEvent(input$mod_provider, {
       ch <- sc_model_choices[[input$mod_provider]]
-      if (input$mod_provider == "ollama") ch <- sc_ollama_models(input$ollama_url)
+      if (input$mod_provider == "ollama" && !hosted) ch <- sc_ollama_models(input$ollama_url)
       shiny::updateSelectizeInput(session, "mod_model", choices = ch, selected = ch[1],
                                   options = list(create = TRUE))
     })
     shiny::observeEvent(input$mod_refresh, {
+      if (hosted && identical(input$mod_provider, "ollama")) return()
       ch <- tryCatch(sc_with_keys(keys(), sc_list_models(input$mod_provider, input$ollama_url)),
                      error = function(e) {
                        shiny::showNotification(paste("Could not list models:", conditionMessage(e)),
@@ -174,18 +185,29 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
       if (length(ch)) shiny::updateSelectizeInput(session, "mod_model", choices = ch, selected = ch[1],
                                                   options = list(create = TRUE))
     })
-    keys <- shiny::reactive(c(ANTHROPIC_API_KEY = input$key_anthropic %||% "",
-                              OPENAI_API_KEY = input$key_openai %||% ""))
+    # hosted: The server's own keys are never used, so the empty ones are kept
+    # and blank out ANTHROPIC_API_KEY and OPENAI_API_KEY while a call runs
+    keys <- shiny::reactive(structure(c(ANTHROPIC_API_KEY = input$key_anthropic %||% "",
+                                        OPENAI_API_KEY = input$key_openai %||% ""),
+                                      keep_empty = hosted))
+    bg_keys <- function() {
+      k <- keys()
+      if (hosted) return(c(k))
+      k[nzchar(k)]
+    }
 
     # ---- response cache ---------------------------------------------------------
-    run_cache <- shiny::reactive(sc_cache(mode = input$run_cache %||% "reuse"))
+    run_cache <- shiny::reactive(
+      if (hosted) sc_cache(file.path(sess_dir, "cache"), mode = input$run_cache %||% "reuse") else
+        sc_cache(mode = input$run_cache %||% "reuse"))
     output$cache_status <- shiny::renderUI({
       rv$cache_tick
       cache <- run_cache()
       info <- tryCatch(sc_cache_info(cache), error = function(e) NULL)
       n <- if (is.null(info)) 0L else sum(info$answers)
-      shiny::helpText(sprintf("%s saved answer%s in %s. %s", format(n, big.mark = ","),
-                              if (n == 1L) "" else "s", cache$dir,
+      shiny::helpText(sprintf("%s saved answer%s %s. %s", format(n, big.mark = ","),
+                              if (n == 1L) "" else "s",
+                              if (hosted) "for this session" else paste("in", cache$dir),
                               switch(cache$mode,
                                      reuse = "The same calls again use them and cost nothing.",
                                      refresh = "This run asks the models again and replaces them.",
@@ -215,6 +237,9 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
       for (tp in temps) {
         lab <- trimws(input$mod_name %||% "")
         if (several) lab <- sprintf("%s (temperature %s)", if (nzchar(lab)) lab else input$mod_model, format(tp))
+        if (hosted && identical(input$mod_provider, "ollama"))
+          return(shiny::showNotification("Ollama runs on your own computer: Install the R package for local models.",
+                                         type = "warning"))
         m <- tryCatch(sc_model(input$mod_provider, input$mod_model, temperature = tp, name = lab,
                                base_url = if (input$mod_provider == "ollama") input$ollama_url else NULL),
                       error = function(e) e)
@@ -310,15 +335,16 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
 
     run_args <- function() {
       ins <- instrument(); p <- persona_table()
+      out <- out_dir(input$run_output, "run")
       list(instrument = ins, models = rv$models, personas = p,
            attempts = as.integer(input$run_attempts), respondents = as.integer(input$run_respondents),
            batch_size = max(1L, as.integer(input$run_batch %||% 1L)),
            block_size = if (isTRUE(input$run_block > 0)) as.integer(input$run_block) else NULL,
            shuffle = isTRUE(input$run_shuffle), max_retries = as.integer(input$run_retries),
-           parallel = as.integer(input$run_parallel), output = input$run_output,
+           parallel = as.integer(input$run_parallel), output = out,
            format = input$run_format, progress = FALSE,
-           progress_file = file.path(input$run_output, "progress.json"),
-           stop_file = file.path(input$run_output, "STOP"), cache = run_cache())
+           progress_file = file.path(out, "progress.json"),
+           stop_file = file.path(out, "STOP"), cache = run_cache())
     }
 
     shiny::observeEvent(input$run_start, {
@@ -352,7 +378,7 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
       unlink(args$stop_file)
       rv$run_dir <- args$output; rv$run_data <- NULL; rv$run_status <- NULL; rv$log <- NULL
       if (sc_can_background()) {
-        k <- keys(); k <- k[nzchar(k)]
+        k <- bg_keys()
         # keys go to the child's environment, never into the argument file callr writes
         rv$proc <- callr::r_bg(function(args) do.call(synthcheck::generate_synthetic, args),
                                args = list(args = args), env = c(callr::rcmd_safe_env(), k),
@@ -400,7 +426,8 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
         } else {
           rv$run_data <- res; rv$log <- attr(res, "log")
           rv$cache_tick <- rv$cache_tick + 1L
-          shiny::showNotification(sprintf("Done: %d synthetic respondents in %s.%s", nrow(res), rv$run_dir,
+          shiny::showNotification(sprintf("Done: %d synthetic respondents %s.%s", nrow(res),
+                                          if (hosted) "(download them from Export)" else paste("in", rv$run_dir),
                                           sc_cache_note(attr(res, "cache"))),
                                   type = "message", duration = 10)
         }
@@ -693,15 +720,16 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
       if (!length(items)) stop(if (identical(input$iv_items_from, "pretest"))
         "Run the pretest first, or choose the items yourself." else "Choose at least one item.")
       if (!length(rv$models)) stop("Add at least one model in the Models tab.")
+      out <- out_dir(input$iv_output, "interviews")
       coder <- if (is.null(input$iv_coder) || input$iv_coder == "self") NULL else
         rv$models[[match(input$iv_coder, vapply(rv$models, `[[`, character(1), "name"))]]
       list(instrument = instrument(), models = rv$models, personas = persona_table(),
            items = items, probes = sc_parse_probes(input$iv_probes), coder = coder,
            pretest = rv$pretest,
            interviews = as.integer(input$iv_n %||% 1), parallel = as.integer(input$iv_parallel %||% 1),
-           output = input$iv_output, progress = FALSE,
-           progress_file = file.path(input$iv_output, "progress.json"),
-           stop_file = file.path(input$iv_output, "STOP"), cache = run_cache())
+           output = out, progress = FALSE,
+           progress_file = file.path(out, "progress.json"),
+           stop_file = file.path(out, "STOP"), cache = run_cache())
     }
     shiny::observeEvent(input$iv_run, {
       if (!is.null(rv$iv_proc) && rv$iv_proc$is_alive())
@@ -730,7 +758,7 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
       unlink(args$stop_file)
       rv$iv_dir <- args$output; rv$iv_status <- NULL
       if (sc_can_background()) {
-        k <- keys(); k <- k[nzchar(k)]
+        k <- bg_keys()
         rv$iv_proc <- callr::r_bg(function(args) suppressMessages(do.call(synthcheck::cognitive_interview, args)),
                                   args = list(args = args), env = c(callr::rcmd_safe_env(), k),
                                   supervise = TRUE)
@@ -775,7 +803,8 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
         } else {
           rv$interviews <- res
           rv$cache_tick <- rv$cache_tick + 1L
-          shiny::showNotification(sprintf("Done: %d interviews in %s.%s", nrow(res), rv$iv_dir,
+          shiny::showNotification(sprintf("Done: %d interviews %s.%s", nrow(res),
+                                          if (hosted) "(download them from Export)" else paste("in", rv$iv_dir),
                                           sc_cache_note(attr(res, "cache"))),
                                   type = "message", duration = 10)
         }
@@ -956,12 +985,12 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
         })
       })
     bm_script <- shiny::reactive(sc_app_script(
-      run_dir = rv$run_dir, syn_source = input$syn_source, real_source = input$real_source,
+      run_dir = if (!hosted) rv$run_dir, syn_source = input$syn_source, real_source = input$real_source,
       country = input$real_country, score = input$bm_score, clean = isTRUE(input$bm_clean),
       fit = isTRUE(input$bm_fit), splits = input$bm_splits,
       builtin = sc_script_builtin(input$ins_source, ins_scales())))
     pt_script <- shiny::reactive(sc_pretest_script(
-      run_dir = rv$run_dir, source = input$pt_source, country = input$pt_country,
+      run_dir = if (!hosted) rv$run_dir, source = input$pt_source, country = input$pt_country,
       attempts = input$pt_attempts, by = input$pt_by, irt = isTRUE(input$pt_irt), n_pa = input$pt_pa,
       builtin = sc_script_builtin(input$ins_source, ins_scales()),
       interviews = if (!is.null(rv$interviews)) list(models = rv$models, coder = input$iv_coder,
@@ -981,11 +1010,12 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
                               path = shiny::isolate(input$sc_path),
                               instrument = shiny::isolate(tryCatch(instrument(), error = function(e) NULL)),
                               personas = shiny::isolate(tryCatch(persona_table(), error = function(e) NULL)))
-    shiny::observeEvent(input$app_close, shiny::stopApp(result()))
+    if (!hosted) shiny::observeEvent(input$app_close, shiny::stopApp(result()))
     session$onSessionEnded(function() {
       if (!is.null(shiny::isolate(rv$proc))) shiny::isolate(rv$proc)$kill()
       if (!is.null(shiny::isolate(rv$iv_proc))) shiny::isolate(rv$iv_proc)$kill()
-      shiny::stopApp(result())
+      # on a server the app keeps serving other visitors; this session's files go
+      if (hosted) unlink(sess_dir, recursive = TRUE) else shiny::stopApp(result())
     })
   }
 }
@@ -1010,8 +1040,10 @@ sc_read_table <- function(path, name = path) {
   as.data.frame(d, stringsAsFactors = FALSE)
 }
 
-sc_key_note <- function(var, typed) {
+sc_key_note <- function(var, typed, hosted = FALSE) {
   if (nzchar(typed %||% "")) return(shiny::div(class = "small text-success mb-2", "Key entered for this session."))
+  if (hosted) return(shiny::div(class = "small text-muted mb-2",
+                                "No key yet. Paste your own."))
   if (nzchar(Sys.getenv(var))) return(shiny::div(class = "small text-success mb-2",
                                                  sprintf("Using the key from your environment (%s).", var)))
   shiny::div(class = "small text-muted mb-2", sprintf("No key yet. Type one, or set %s in .Renviron.", var))
@@ -1021,7 +1053,9 @@ sc_key_note <- function(var, typed) {
 
 # set the keys typed in the app for one evaluation, then restore the environment
 sc_with_keys <- function(keys, code) {
-  keys <- keys[nzchar(keys)]
+  # hosted mode keeps empty keys, which blank out any key in the server's environment
+  if (!isTRUE(attr(keys, "keep_empty"))) keys <- keys[nzchar(keys)]
+  keys <- c(keys)
   if (length(keys)) {
     old <- Sys.getenv(names(keys), unset = NA, names = TRUE)
     do.call(Sys.setenv, as.list(keys))

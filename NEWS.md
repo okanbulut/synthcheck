@@ -20,6 +20,15 @@
   `persona_fidelity()` after a run with two or more personas, and the
   Compare tab shows the intervals in the plot and the table.
 
+* New `synthcheck_app()` returns the app as an object for a server, and a
+  `deploy/` folder in the repository (not in the package) publishes it on
+  Posit Connect Cloud or shinyapps.io. On a server the app runs in hosted
+  mode: Ollama is not offered, visitors paste their own API keys, which stay
+  in their browser session's memory, keys in the server's environment are
+  never used, and each session's files are deleted when it ends. The About
+  tab says so. `run_synthcheck_app()` on your own computer is unchanged. A
+  new article, "Hosting the app on Posit Connect Cloud", walks through it.
+
 * The tutorial on generating synthetic respondents has a new section on the
   persona check, the benchmark article explains the intervals, and the tour
   of the app and the app demos show both, with new screenshots.
