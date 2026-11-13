@@ -72,6 +72,7 @@ sc_app_about <- function(has_real = FALSE) {
              li("Use a built-in instrument (the IPIP-HEXACO, or three short scales with known item problems) or upload your own questionnaire"),
              li("Type, upload or build a grid of personas"),
              li("Generate respondents with Anthropic, OpenAI or local Ollama models, side by side"),
+             li("Show the estimated cost before a paid run, and reuse saved answers so the same run again is free"),
              li("Show a progress bar with the time left, and stop a run at any time"),
              li("Benchmark several models against real data in one table"),
              li("Without real data, pretest a scale on synthetic respondents and see which flagged items hold across models"),
@@ -108,7 +109,10 @@ sc_app_about <- function(has_real = FALSE) {
            li(shiny::strong("Instrument: "), "Keep the IPIP-HEXACO items with two traits, pick a short scale with known item problems (RSES, DASS-21 or Mini-IPIP), or upload your own."),
            li(shiny::strong("Personas: "), "Build a small grid, for example three ages and two genders."),
            li(shiny::strong("Models: "), "Add a model. Choose ", shiny::em("Mock"),
-              " to try the app without an API key, then press ", shiny::em("Generate data"), "."),
+              " to try the app without an API key, then press ", shiny::em("Generate data"),
+              ". For real models, see ",
+              shiny::a(href = sc_key_guide_url, target = "_blank", rel = "noopener", "how to get an API key"),
+              ". The app shows the estimated cost before a paid run, and the same run again is free."),
            li(shiny::strong("Compare: "), "Choose the real data and press ", shiny::em("Run the benchmark"),
               ". Or pick ", shiny::em("hexaco_llm"), " to compare six models without generating anything."),
            li(shiny::strong("Pretest "), "(no real data): Press ", shiny::em("Run the pretest"),
@@ -125,6 +129,22 @@ sc_app_about <- function(has_real = FALSE) {
 }
 
 sc_has_tour <- function() requireNamespace("cicerone", quietly = TRUE)
+
+# links for people who do not have an API key yet: The website's step-by-step
+# article and the providers' own sign-up pages
+sc_key_guide_url <- "https://www.okanbulut.com/synthcheck/articles/api-keys.html"
+
+sc_key_help <- function() {
+  a <- function(href, text) sprintf('<a href="%s" target="_blank" rel="noopener">%s</a>', href, text)
+  shiny::div(
+    class = "alert alert-info py-2 px-3 small mb-0", id = "mod_key_help",
+    shiny::HTML(paste0(
+      "<strong>No API key yet?</strong> ", a(sc_key_guide_url, "How to get an API key"),
+      " walks through signing up, adding credit, keeping the key private and setting a spending limit. ",
+      "Sign up for ", a("https://openai.com/api/", "OpenAI"), " or ",
+      a("https://platform.claude.com/dashboard", "Claude"), ". ",
+      "Or choose <em>Mock</em> below to try the app for free.")))
+}
 
 # the guided tour, one step per main control (cicerone switches the tabs).
 # It follows the path chosen on the About tab: With real data (or no answer
@@ -145,7 +165,7 @@ sc_app_tour <- function(path = NULL) {
          "Models play your personas, think aloud on each item and answer probes. Start with the items the pretest flagged, or choose your own: The pretest is optional.",
          "interviews", "right"),
     list("iv_settings_card", "Interview settings",
-         "The personas and models come from tabs 2 and 3. Choose who codes the transcripts, edit the probes and run the interviews.",
+         "The personas and models come from tabs 2 and 3. Choose who codes the transcripts, edit the probes and run the interviews. The plan shows the estimated cost, and saved answers are reused.",
          "interviews", "right"),
     list("iv_plot_card", "Problems per item",
          "Where the interviews ran into comprehension, retrieval, judgement, response or sensitivity problems. A screening aid, not a substitute for interviews with real people.",
@@ -182,12 +202,19 @@ sc_app_tour <- function(path = NULL) {
          "This is exactly what a model reads for each respondent.", "instrument", "left"),
     list("per_card", "2. Personas",
          "Give each synthetic respondent a persona: Type them, build a grid or upload a table.", "personas"),
-    list("mod_add_card", "3. Add a model",
+    list("mod_keys_card", "3. Models: API keys",
+         paste("Paste an OpenAI or Anthropic key, or set it in .Renviron. Keys stay in memory and are never saved.",
+               "No key yet? The link in this card explains how to get one, add credit and set a spending limit."),
+         "models", "right"),
+    list("mod_add_card", "Add a model",
          paste("Pick a provider and a model. Mock gives random answers and needs no API key.",
                if (path == "pretest") "Several temperatures add one model per temperature, for the stability check in the Pretest tab."),
          "models", "right"),
     list("mod_run_card", "Generate data",
-         "Set the attempts and respondents, estimate the run time and start the run.", "models", "left")),
+         paste("Set the attempts and respondents, estimate the run time and start the run.",
+               "The plan shows the estimated cost, and the app asks before a paid run.",
+               "Saved answers (the cache) make the same run again repeatable and free."),
+         "models", "left")),
     fourth, list(
     list("exp_report_card", if (path == "pretest") "6. Export" else "5. Export",
          paste("Download a results report: One HTML or PDF file with the plots, tables, summaries",

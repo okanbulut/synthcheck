@@ -165,7 +165,8 @@ sc_persona_grid <- function(..., template) {
 #' API keys are read from the `ANTHROPIC_API_KEY` and `OPENAI_API_KEY`
 #' environment variables (set them in `.Renviron`, or with [Sys.setenv()]
 #' for one session). They are never stored in the model specification or in
-#' the saved data.
+#' the saved data. To get a key, see the article
+#' [Getting an API key](https://www.okanbulut.com/synthcheck/articles/api-keys.html).
 #'
 #' @param provider `"anthropic"`, `"openai"`, `"ollama"` or `"mock"`.
 #' @param model the model id, for example `"claude-haiku-5-5"`. `NULL` uses

@@ -98,7 +98,12 @@ the analysis.
 They are never written to the saved data, the run settings or the R
 script. Keys set as \code{ANTHROPIC_API_KEY} or \code{OPENAI_API_KEY} (for example
 in \code{.Renviron}) are used without being shown. The app runs on your own
-computer; do not deploy it on a shared server with keys typed in.
+computer; do not deploy it on a shared server with keys typed in. New to
+API keys? The article
+\href{https://www.okanbulut.com/synthcheck/articles/api-keys.html}{Getting an API key}
+walks through signing up with OpenAI or Anthropic, adding credit, keeping
+the key private and setting a spending limit, and the Models tab links to
+it next to the key fields.
 
 Runs go to a background R process when callr is installed, so the app
 stays responsive and the Stop button works. Every attempt is written to

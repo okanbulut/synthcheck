@@ -40,7 +40,8 @@ without calling any model, for trying the workflow and the app.
 API keys are read from the \code{ANTHROPIC_API_KEY} and \code{OPENAI_API_KEY}
 environment variables (set them in \code{.Renviron}, or with \code{\link[=Sys.setenv]{Sys.setenv()}}
 for one session). They are never stored in the model specification or in
-the saved data.
+the saved data. To get a key, see the article
+\href{https://www.okanbulut.com/synthcheck/articles/api-keys.html}{Getting an API key}.
 }
 \examples{
 sc_model("anthropic", temperature = 1)
