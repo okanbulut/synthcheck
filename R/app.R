@@ -55,9 +55,10 @@
 #'   summary ([summarise_interviews()]), the plot ([gg_interview()]) and the
 #'   transcripts. A screening aid, not a substitute for cognitive
 #'   interviews with real people.
-#' * **Export:** Download the synthetic data
-#'   (CSV, JSON, RDS or Excel), the benchmark or the pretest and interviews,
-#'   and an R script that repeats the analysis.
+#' * **Export:** Download a results report (HTML or PDF, see
+#'   [write_report()]), the synthetic data (CSV, JSON, RDS or Excel), the
+#'   benchmark or the pretest and interviews, and an R script that repeats
+#'   the analysis.
 #'
 #' **API keys** typed into the app stay in memory for that session only:
 #' They are never written to the saved data, the run settings or the R
@@ -427,7 +428,17 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
   export <- bslib::nav_panel(
     shiny::tagList(shiny::textOutput("exp_num", inline = TRUE), "Export"), value = "export", icon = shiny::icon("download"),
     bslib::layout_columns(
-      col_widths = c(6, 6), fill = FALSE,
+      col_widths = c(12, 6, 6), fill = FALSE,
+      card("Results report", id = "exp_report_card",
+           shiny::p("One file with the plots, tables and plain-language summaries of this session,",
+                    "and the settings needed to repeat the run. It covers the path you chose:",
+                    "The benchmark with real data, or the pretest and the interviews without."),
+           row(shiny::radioButtons("exp_report_format", "Format",
+                                   c("HTML (one self-contained file)" = "html", "PDF" = "pdf"),
+                                   inline = TRUE),
+               shiny::textInput("exp_report_title", "Title (optional)", "")),
+           shiny::uiOutput("exp_report_status"),
+           shiny::downloadButton("dl_report", "Download the report", class = "btn-primary")),
       card("Download", id = "exp_dl_card",
            shiny::selectInput("exp_format", "Format for the synthetic data",
                               c("CSV" = "csv", "JSON" = "json", "RDS" = "rds", "Excel" = "xlsx")),

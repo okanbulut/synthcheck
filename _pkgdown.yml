@@ -118,6 +118,10 @@ reference:
   - sc_cache_info
   - write_synthetic
   - as_synthetic_list
+- title: Reports
+  desc: All results of a session in one HTML or PDF file.
+  contents:
+  - write_report
 - title: Cognitive interviews
   desc: Screen item wording with language models playing personas, when there are no real respondents yet.
   contents:

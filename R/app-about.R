@@ -86,6 +86,7 @@ sc_app_about <- function(has_real = FALSE) {
              li("A plain-language summary for each model"),
              li("Without real data: Flagged items, their agreement across models and a check of the designed structure"),
              li("Cognitive interview transcripts, coded problems per item and suggested rewordings"),
+             li("A results report as one HTML or PDF file, with the run settings"),
              li("An R script that repeats the comparison"))),
       card("Designer",
            shiny::div(
@@ -114,7 +115,7 @@ sc_app_about <- function(has_real = FALSE) {
               " to see which items are flagged and whether the models agree."),
            li(shiny::strong("Interviews "), "(no real data): Press ", shiny::em("Run the interviews"),
               " to have each persona think aloud on the flagged items and read what tripped them up."),
-           li(shiny::strong("Export: "), "Download the data, the plot and an R script, or close the app",
+           li(shiny::strong("Export: "), "Download a results report (HTML or PDF), the data and an R script, or close the app",
               " to get everything back in R.")),
          shiny::p(class = "mb-0 small text-muted",
                   if (sc_has_tour()) paste("The guided tour above points to each of these steps in the app.",
@@ -188,7 +189,10 @@ sc_app_tour <- function(path = NULL) {
     list("mod_run_card", "Generate data",
          "Set the attempts and respondents, estimate the run time and start the run.", "models", "left")),
     fourth, list(
-    list("exp_dl_card", if (path == "pretest") "6. Export" else "5. Export", export_text, "export"),
+    list("exp_report_card", if (path == "pretest") "6. Export" else "5. Export",
+         paste("Download a results report: One HTML or PDF file with the plots, tables, summaries",
+               "and run settings of this session."), "export"),
+    list("exp_dl_card", "Downloads", export_text, "export"),
     list("exp_script_card", "Repeat it in R",
          "An R script repeats the analysis. Close the app to get everything back in R.", "export")
   ))

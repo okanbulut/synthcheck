@@ -88,9 +88,10 @@ flagged or on items you choose (the pretest is optional), and read the
 summary (\code{\link[=summarise_interviews]{summarise_interviews()}}), the plot (\code{\link[=gg_interview]{gg_interview()}}) and the
 transcripts. A screening aid, not a substitute for cognitive
 interviews with real people.
-\item \strong{Export:} Download the synthetic data
-(CSV, JSON, RDS or Excel), the benchmark or the pretest and interviews,
-and an R script that repeats the analysis.
+\item \strong{Export:} Download a results report (HTML or PDF, see
+\code{\link[=write_report]{write_report()}}), the synthetic data (CSV, JSON, RDS or Excel), the
+benchmark or the pretest and interviews, and an R script that repeats
+the analysis.
 }
 
 \strong{API keys} typed into the app stay in memory for that session only:
