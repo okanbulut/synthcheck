@@ -91,6 +91,17 @@ table.table { font-size: .9rem; }
 .sc-contact { line-height: 1.55; }
 .sc-contact .sc-name { font-weight: 700; font-size: 1.05rem; color: var(--sc-navy); }
 .sc-contact a { color: var(--sc-blue); }
+.sc-links { display: flex; flex-wrap: wrap; gap: .4rem; }
+.sc-links .btn { display: inline-flex; align-items: center; gap: .35rem; }
+.card-body:has(> .sc-designer) { display: flex; flex-direction: column; }
+.sc-designer { display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; flex: 1 1 auto; }
+.sc-designer > * { margin: 0; }
+.sc-cite {
+  line-height: 1.5; padding: .75rem .9rem; border-radius: .4rem;
+  background: var(--sc-pale); border-left: 3px solid var(--sc-blue);
+}
+.sc-cite strong { display: block; color: var(--sc-navy); margin-bottom: .25rem; }
+.sc-cite a { overflow-wrap: anywhere; }
 
 /* ---- the animation: a persona prompt, a model, and answers filling in ---- */
 .sc-anim svg { width: 100%; height: auto; display: block; }

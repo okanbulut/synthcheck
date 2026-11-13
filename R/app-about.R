@@ -89,20 +89,7 @@ sc_app_about <- function(has_real = FALSE) {
              li("Cognitive interview transcripts, coded problems per item and suggested rewordings"),
              li("A results report as one HTML or PDF file, with the run settings"),
              li("An R script that repeats the comparison"))),
-      card("Designer",
-           shiny::div(
-             class = "sc-contact",
-             shiny::div(class = "sc-name", "Okan Bulut"),
-             shiny::div("Professor, Measurement, Evaluation, and Data Science"),
-             shiny::div("University of Alberta"),
-             shiny::div("E-mail: ", shiny::a(href = "mailto:bulut@ualberta.ca", "bulut@ualberta.ca")),
-             shiny::div("Website: ", shiny::a(href = "https://www.okanbulut.com", target = "_blank",
-                                              rel = "noopener", "www.okanbulut.com"))),
-           shiny::hr(),
-           shiny::p(class = "small text-muted mb-0",
-                    "synthcheck is an open-source R package (GPL-3). Documentation and tutorials: ",
-                    shiny::a(href = "https://www.okanbulut.com/synthcheck/", target = "_blank",
-                             rel = "noopener", "okanbulut.com/synthcheck"), "."))),
+      card("Designer", sc_app_designer())),
     card("A quick guided demo",
          shiny::tags$ol(
            class = "sc-steps",
@@ -126,6 +113,45 @@ sc_app_about <- function(has_real = FALSE) {
                                            "It follows the path you choose in the first step.")
                   else "Install the cicerone package for a guided tour that points to each step in the app."))
   )
+}
+
+# The designer card: Contact details, links to the designer's website, blog,
+# ORCID and GitHub, and how to cite the package
+sc_app_designer <- function() {
+  ext <- function(href, ...) shiny::a(href = href, target = "_blank", rel = "noopener", ...)
+  doi <- "10.5281/zenodo.24173113"
+  shiny::div(
+    class = "sc-designer",
+    shiny::div(
+      class = "sc-contact",
+      shiny::div(class = "sc-name", "Okan Bulut, Ph.D."),
+      shiny::div("Professor"),
+      shiny::div("Measurement, Evaluation, and Data Science"),
+      shiny::div("University of Alberta, Canada"),
+      shiny::div("E-mail: ", shiny::a(href = "mailto:bulut@ualberta.ca", "bulut@ualberta.ca"))),
+    shiny::p(
+             "For more information on Dr. Bulut's research, check out his website: ",
+             ext("https://www.okanbulut.com", "www.okanbulut.com"),
+             " and his blog where he shares data science tutorials on R and Python: ",
+             ext("https://www.okan.cloud", "www.okan.cloud")),
+    shiny::div(
+      class = "sc-links",
+      ext("https://orcid.org/0000-0001-5853-1267", class = "btn btn-sm btn-outline-secondary",
+          shiny::icon("id-badge"), "ORCID"),
+      ext("https://github.com/okanbulut/synthcheck", class = "btn btn-sm btn-outline-secondary",
+          shiny::icon("github"), "GitHub"),
+      ext("https://www.okanbulut.com/synthcheck/", class = "btn btn-sm btn-outline-secondary",
+          shiny::icon("book"), "Documentation")),
+    shiny::div(
+      class = "sc-cite small",
+      shiny::strong("How to cite synthcheck"),
+      shiny::p(class = "mb-1",
+               "Bulut, O. (2026). ", shiny::em("synthcheck: Tests how authentic synthetic survey respondents look"),
+               paste0(" (R package version ", utils::packageVersion("synthcheck"), "). "),
+               ext(paste0("https://doi.org/", doi), paste0("doi.org/", doi))),
+      shiny::p(class = "text-muted mb-0",
+               "In R, ", shiny::code('citation("synthcheck")'), " gives the BibTeX entry.",
+               "synthcheck is open source under the GPL-3 license.")))
 }
 
 sc_has_tour <- function() requireNamespace("cicerone", quietly = TRUE)
