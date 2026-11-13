@@ -1,64 +1,3 @@
-# synthcheck (development version)
-
-* New `synthetic_pretest()` for scales without real data: Pilot screening of
-  the items on synthetic respondents alone (item-rest correlations, alpha if
-  an item is dropped, items that barely vary or duplicate another item,
-  reverse keys, GRM slopes with mirt, alpha and parallel analysis per
-  scale). It checks whether the flags hold across models, temperatures,
-  prompt wordings or persona sets (`by`), in every attempt, and whether the
-  designed structure (the `scale` and `reverse` columns) comes back.
-  `gg_pretest()` draws the flagged items and the scales, and
-  `summarise_pretest()` describes the result in plain language. It is
-  screening, not validation.
-
-* The app now asks first whether you have real data. With real data, the
-  fourth tab is Compare (the benchmark); without it, the fourth tab is the
-  new Pretest tab. The Models tab can add one model at several temperatures
-  for the stability check, and Export saves the pretest and its R script.
-
-* New article: "Pretesting a scale without real data".
-
-* New cognitive interviews for items without real data (experimental):
-  `cognitive_interview()` has language models play each persona, think
-  aloud while answering an item and answer scripted verbal probes
-  (`sc_probes()`, after Willis, 2005), then a separate call codes each
-  transcript for comprehension, retrieval, judgement, response-mapping and
-  sensitivity problems. A synthetic pretest result can choose the items and
-  adds a probe aimed at each flag. `summarise_interviews()` rolls the codes
-  up per item, flags items by fixed rules and says how they agree with the
-  pretest, and `gg_interview()` draws one heatmap. `sc_interview_prompts()`
-  shows what is sent. The new article "Cognitive interviews with language
-  models" walks through it. It is a screening aid, not a substitute for
-  cognitive interviews with real people.
-
-* The app has a new Interviews tab (5) on the path without real data, so
-  Export is tab 6 there and tab 5 with real data. It
-  runs `cognitive_interview()` with the personas and models of tabs 2 and 3,
-  on the items the pretest flagged or on items you choose (the pretest is
-  optional), with editable probes, a choice of coder, a progress bar and a
-  Stop button. It shows the summary, the heatmap and the transcripts, and
-  Export saves the interviews, the transcripts and the plot.
-
-* The app's guided tour follows the path chosen in the first step and now
-  covers every tab on both paths, including the designed structure on the
-  Pretest tab and the interview settings and transcripts. The tour of the
-  app, the app demos (with a new demo of the path without real data), Get
-  started, the README and the help page of `run_synthcheck_app()` describe
-  the final design.
-
-* The app has a new look in the logo colours, with the logo in the navbar
-  and a coverage strip under it. A new About tab opens the app: It explains
-  the purpose, lists what the app can do and produce, shows an animated
-  picture of a language model answering survey items, gives the designer's
-  contact details and starts a guided tour of the five tabs (with the
-  cicerone package, in Suggests).
-* The website matches the app: A navy navbar with the coverage strip under
-  it, navy headings and framed screenshots. The app articles describe the
-  About tab and the guided tour.
-
-* The README, `citation("synthcheck")` and `CITATION.cff` give the Zenodo
-  DOI that covers all versions (10.5281/zenodo.24173113).
-
 # synthcheck 0.1.0
 
 First release, archived on Zenodo. synthcheck is experimental: The benchmark
@@ -139,3 +78,66 @@ These do not change the benchmark score.
   practice run with the mock provider, and your own questionnaire).
 * `citation("synthcheck")`, `CITATION.cff` and `.zenodo.json` give the
   citation and the Zenodo metadata.
+
+## Added after the Zenodo archive
+
+These changes came after the archived 0.1.0 and keep the version number.
+
+* New `synthetic_pretest()` for scales without real data: Pilot screening of
+  the items on synthetic respondents alone (item-rest correlations, alpha if
+  an item is dropped, items that barely vary or duplicate another item,
+  reverse keys, GRM slopes with mirt, alpha and parallel analysis per
+  scale). It checks whether the flags hold across models, temperatures,
+  prompt wordings or persona sets (`by`), in every attempt, and whether the
+  designed structure (the `scale` and `reverse` columns) comes back.
+  `gg_pretest()` draws the flagged items and the scales, and
+  `summarise_pretest()` describes the result in plain language. It is
+  screening, not validation.
+
+* The app now asks first whether you have real data. With real data, the
+  fourth tab is Compare (the benchmark); without it, the fourth tab is the
+  new Pretest tab. The Models tab can add one model at several temperatures
+  for the stability check, and Export saves the pretest and its R script.
+
+* New article: "Pretesting a scale without real data".
+
+* New cognitive interviews for items without real data (experimental):
+  `cognitive_interview()` has language models play each persona, think
+  aloud while answering an item and answer scripted verbal probes
+  (`sc_probes()`, after Willis, 2005), then a separate call codes each
+  transcript for comprehension, retrieval, judgement, response-mapping and
+  sensitivity problems. A synthetic pretest result can choose the items and
+  adds a probe aimed at each flag. `summarise_interviews()` rolls the codes
+  up per item, flags items by fixed rules and says how they agree with the
+  pretest, and `gg_interview()` draws one heatmap. `sc_interview_prompts()`
+  shows what is sent. The new article "Cognitive interviews with language
+  models" walks through it. It is a screening aid, not a substitute for
+  cognitive interviews with real people.
+
+* The app has a new Interviews tab (5) on the path without real data, so
+  Export is tab 6 there and tab 5 with real data. It
+  runs `cognitive_interview()` with the personas and models of tabs 2 and 3,
+  on the items the pretest flagged or on items you choose (the pretest is
+  optional), with editable probes, a choice of coder, a progress bar and a
+  Stop button. It shows the summary, the heatmap and the transcripts, and
+  Export saves the interviews, the transcripts and the plot.
+
+* The app's guided tour follows the path chosen in the first step and now
+  covers every tab on both paths, including the designed structure on the
+  Pretest tab and the interview settings and transcripts. The tour of the
+  app, the app demos (with a new demo of the path without real data), Get
+  started, the README and the help page of `run_synthcheck_app()` describe
+  the final design.
+
+* The app has a new look in the logo colours, with the logo in the navbar
+  and a coverage strip under it. A new About tab opens the app: It explains
+  the purpose, lists what the app can do and produce, shows an animated
+  picture of a language model answering survey items, gives the designer's
+  contact details and starts a guided tour of the five tabs (with the
+  cicerone package, in Suggests).
+* The website matches the app: A navy navbar with the coverage strip under
+  it, navy headings and framed screenshots. The app articles describe the
+  About tab and the guided tour.
+
+* The README, `citation("synthcheck")` and `CITATION.cff` give the Zenodo
+  DOI that covers all versions (10.5281/zenodo.24173113).
