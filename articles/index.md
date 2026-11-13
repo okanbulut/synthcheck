@@ -21,6 +21,8 @@ One step of the workflow at a time, with the functions behind it.
   data](https://www.okanbulut.com/synthcheck/articles/pretest.md):
 - [Generating synthetic respondents in
   R](https://www.okanbulut.com/synthcheck/articles/generate.md):
+- [Short instruments with known item
+  problems](https://www.okanbulut.com/synthcheck/articles/instruments.md):
 - [Cognitive interviews with language
   models](https://www.okanbulut.com/synthcheck/articles/cognitive-interviews.md):
 

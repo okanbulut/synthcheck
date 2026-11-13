@@ -34,6 +34,7 @@ path chosen in the first step."><meta property="og:image" content="https://www.o
     <li><a class="dropdown-item" href="../articles/diagnostics.html">Diagnostics beside the benchmark</a></li>
     <li><a class="dropdown-item" href="../articles/pretest.html">Pretesting a scale without real data</a></li>
     <li><a class="dropdown-item" href="../articles/generate.html">Generating synthetic respondents in R</a></li>
+    <li><a class="dropdown-item" href="../articles/instruments.html">Short instruments with known item problems</a></li>
     <li><a class="dropdown-item" href="../articles/cognitive-interviews.html">Cognitive interviews with language models</a></li>
   </ul></li>
 <li class="nav-item dropdown">
@@ -54,7 +55,7 @@ path chosen in the first step."><meta property="og:image" content="https://www.o
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.svg" class="logo" alt=""><h1>Generate and benchmark synthetic data in a Shiny app</h1>
-      <small class="dont-index">Source: <a href="https://github.com/okanbulut/synthcheck/blob/v0.2.0/R/app.R" class="external-link"><code>R/app.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/okanbulut/synthcheck/blob/main/R/app.R" class="external-link"><code>R/app.R</code></a></small>
       <div class="d-none name"><code>run_synthcheck_app.Rd</code></div>
     </div>
 
@@ -122,8 +123,11 @@ against real people.</p></li>
 <li><p><strong>No, not yet:</strong> The fourth tab is <strong>Pretest</strong>, followed by
 <strong>Interviews</strong>, so Export becomes the sixth tab. Compare is hidden.</p></li>
 </ul><p>The tabs, in order (with real data: 1 to 4 and 5. Export; without: 1 to
-3, 4. Pretest, 5. Interviews and 6. Export):</p><ul><li><p><strong>1. Instrument:</strong> Upload an item table or use the IPIP-HEXACO items,
-and set the response scale and instructions (<code><a href="sc_instrument.html">sc_instrument()</a></code>).</p></li>
+3, 4. Pretest, 5. Interviews and 6. Export):</p><ul><li><p><strong>1. Instrument:</strong> Upload an item table or use a built-in instrument
+(the IPIP-HEXACO, or one of three short scales with well-documented
+item problems: The Rosenberg Self-Esteem Scale, the DASS-21 and the
+Mini-IPIP; see <code><a href="sc_builtin_instrument.html">sc_builtin_instrument()</a></code>), and set the response scale
+and instructions (<code><a href="sc_instrument.html">sc_instrument()</a></code>).</p></li>
 <li><p><strong>2. Personas:</strong> Type, upload or build the personas that take the
 instrument (<code><a href="sc_personas.html">sc_personas()</a></code>, <code><a href="sc_personas.html">sc_persona_grid()</a></code>). Both upload panels
 offer a template to fill in. The templates are also in the package:

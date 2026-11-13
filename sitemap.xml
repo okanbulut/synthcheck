@@ -9,6 +9,7 @@
 <url><loc>https://www.okanbulut.com/synthcheck/articles/diagnostics.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/articles/generate.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/articles/index.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/articles/instruments.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/articles/overlap-structure.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/articles/pretest.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/articles/synthcheck.html</loc></url>
@@ -20,6 +21,7 @@
 <url><loc>https://www.okanbulut.com/synthcheck/reference/behaviour_features.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/blend_llms.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/cognitive_interview.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/dass.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/flag_careless.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/generate_synthetic.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/gg_behaviour.html</loc></url>
@@ -33,9 +35,12 @@
 <url><loc>https://www.okanbulut.com/synthcheck/reference/hexaco_llm.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/hexaco_real.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/index.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/mini_ipip.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/reexports.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/respondent_coverage.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/rses.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/run_synthcheck_app.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/sc_builtin_instrument.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/sc_default_models.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/sc_instrument.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/sc_interview_prompts.html</loc></url>

@@ -1,5 +1,28 @@
 # Changelog
 
+## synthcheck (development version)
+
+- Three short instruments with well-documented item problems, each with
+  real responses from the Open-Source Psychometrics Project: The
+  Rosenberg Self-Esteem Scale (`rses_items`, `rses_real`; a
+  negative-wording method factor), the DASS-21 (`dass_items`,
+  `dass_real`; a disputed three-factor structure) and the Mini-IPIP
+  (`mini_ipip_items`, `mini_ipip_real`; poor fit and a weak
+  Intellect/Imagination scale). The `issue` column of each item table
+  says what has been reported about each item, with references in the
+  help pages.
+
+- New
+  [`sc_builtin_instrument()`](https://www.okanbulut.com/synthcheck/reference/sc_builtin_instrument.md)
+  returns any bundled instrument, with its response scale, category
+  labels and instructions.
+
+- The app’s Instrument tab offers all four built-in instruments, and the
+  Compare tab’s built-in real data follow the instrument chosen there,
+  with a country filter.
+
+- New article: “Short instruments with known item problems”.
+
 ## synthcheck 0.2.0
 
 Adds a path for scales without real data (a synthetic pretest and

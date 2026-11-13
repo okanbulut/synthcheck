@@ -164,6 +164,24 @@ Psychometrics Project). `hexaco_llm` holds 89,597 synthetic respondents
 from six language models (10 attempts per country), and `hexaco_items`
 holds the item text, facets and keys.
 
+Three short instruments with well-documented item problems come with
+real responses, so you can check whether the pretest, the interviews and
+the benchmark find what the literature already knows.
+[`sc_builtin_instrument()`](https://www.okanbulut.com/synthcheck/reference/sc_builtin_instrument.md)
+returns any of them, ready for
+[`generate_synthetic()`](https://www.okanbulut.com/synthcheck/reference/generate_synthetic.md),
+and the app offers them in its first tab:
+
+| Instrument | Items | Known problems | Real data |
+|----|----|----|----|
+| Rosenberg Self-Esteem Scale (`rses_items`) | 10 | Negative-wording method factor, weak item 8 | `rses_real`, 47,974 people |
+| DASS-21 (`dass_items`) | 21 | Disputed three-factor structure, weak somatic items | `dass_real`, 39,775 people |
+| Mini-IPIP (`mini_ipip_items`) | 20 | Poor fit, weak Intellect scale, reverse-keyed method effect | `mini_ipip_real`, 20,000 people |
+
+The real responses come from the Open-Source Psychometrics Project,
+which gives no formal licence for its data. The items are public domain
+or free to use.
+
 ## Citation
 
 Run `citation("synthcheck")` for the citation, or use the “Cite this

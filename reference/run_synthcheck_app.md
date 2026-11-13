@@ -72,7 +72,11 @@ data later and benchmark the same synthetic data.
 The tabs, in order (with real data: 1 to 4 and 5. Export; without: 1 to
 3, 4. Pretest, 5. Interviews and 6. Export):
 
-- **1. Instrument:** Upload an item table or use the IPIP-HEXACO items,
+- **1. Instrument:** Upload an item table or use a built-in instrument
+  (the IPIP-HEXACO, or one of three short scales with well-documented
+  item problems: The Rosenberg Self-Esteem Scale, the DASS-21 and the
+  Mini-IPIP; see
+  [`sc_builtin_instrument()`](https://www.okanbulut.com/synthcheck/reference/sc_builtin_instrument.md)),
   and set the response scale and instructions
   ([`sc_instrument()`](https://www.okanbulut.com/synthcheck/reference/sc_instrument.md)).
 
