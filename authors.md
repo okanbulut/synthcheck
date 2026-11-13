@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/okanbulut/synthcheck/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/okanbulut/synthcheck/blob/v0.2.0/inst/CITATION)
 
 Bulut, O. (2026). synthcheck: Tests how authentic synthetic survey
 respondents look. R package version 0.2.0.
