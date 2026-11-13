@@ -64,7 +64,12 @@
 #' They are never written to the saved data, the run settings or the R
 #' script. Keys set as `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` (for example
 #' in `.Renviron`) are used without being shown. The app runs on your own
-#' computer; do not deploy it on a shared server with keys typed in.
+#' computer; do not deploy it on a shared server with keys typed in. New to
+#' API keys? The article
+#' [Getting an API key](https://www.okanbulut.com/synthcheck/articles/api-keys.html)
+#' walks through signing up with OpenAI or Anthropic, adding credit, keeping
+#' the key private and setting a spending limit, and the Models tab links to
+#' it next to the key fields.
 #'
 #' Runs go to a background R process when callr is installed, so the app
 #' stays responsive and the Stop button works. Every attempt is written to
@@ -213,13 +218,14 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
       col_widths = c(4, 8), fill = FALSE,
       bslib::layout_columns(
         col_widths = 12, row_heights = "auto", fill = FALSE,
-        card("API keys",
+        card("API keys", id = "mod_keys_card",
              shiny::passwordInput("key_anthropic", "Anthropic API key"),
              shiny::uiOutput("key_anthropic_env"),
              shiny::passwordInput("key_openai", "OpenAI API key"),
              shiny::uiOutput("key_openai_env"),
              shiny::textInput("ollama_url", "Ollama server", "http://localhost:11434"),
-             shiny::helpText("Keys stay in memory for this session only. They are never saved.")),
+             shiny::helpText("Keys stay in memory for this session only. They are never saved."),
+             sc_key_help()),
         card("Add a model", id = "mod_add_card",
              shiny::selectInput("mod_provider", "Provider",
                                 c("Anthropic" = "anthropic", "OpenAI" = "openai",

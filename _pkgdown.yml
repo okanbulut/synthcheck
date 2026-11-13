@@ -45,6 +45,8 @@ navbar:
         href: articles/app-tour.html
       - text: "App demos: Four ways to use the app"
         href: articles/app-demo.html
+      - text: Getting an API key for OpenAI or Claude
+        href: articles/api-keys.html
 
 articles:
 - title: Get started
@@ -63,10 +65,11 @@ articles:
   - articles/instruments
   - articles/cognitive-interviews
 - title: The synthcheck app
-  desc: The whole workflow on screen, from an instrument to a benchmark.
+  desc: The whole workflow on screen, from an instrument to a benchmark, and how to get an API key for real models.
   contents:
   - articles/app-tour
   - articles/app-demo
+  - articles/api-keys
 
 reference:
 - title: Overlap and Structure

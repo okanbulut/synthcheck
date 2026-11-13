@@ -79,8 +79,19 @@ test_that("the app opens on the About tab with the contact details and the tour"
   expect_match(html, 'id="about_path"', fixed = TRUE)
   expect_match(html, 'data-value="pretest"', fixed = TRUE)
   ids <- c("about_hero", "about_path", "pt_data_card", "pt_plot_card", "iv_items_card", "iv_plot_card", "ins_items_card", "ins_prompt_card", "per_card", "mod_add_card",
-           "mod_run_card", "cmp_data_card", "cmp_plot_card", "exp_dl_card", "exp_script_card")
+           "mod_run_card", "cmp_data_card", "cmp_plot_card", "exp_dl_card", "exp_script_card",
+           "mod_keys_card", "exp_report_card", "pt_structure_card", "iv_settings_card", "iv_transcripts_card")
   for (id in ids) expect_match(html, paste0('id="', id, '"'), fixed = TRUE)
+})
+
+test_that("the Models tab links to the API key guide and the providers", {
+  skip_if_not_installed("shiny")
+  skip_if_not_installed("bslib")
+  html <- as.character(sc_app_ui())
+  expect_match(html, 'id="mod_key_help"', fixed = TRUE)
+  expect_match(html, "https://www.okanbulut.com/synthcheck/articles/api-keys.html", fixed = TRUE)
+  expect_match(html, "https://openai.com/api/", fixed = TRUE)
+  expect_match(html, "https://platform.claude.com/dashboard", fixed = TRUE)
 })
 
 test_that("without real data, the app pretests mock data across temperatures", {
