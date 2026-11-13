@@ -97,6 +97,13 @@ Define an instrument and personas, call language models, save the data.
 - [`as_synthetic_list()`](https://www.okanbulut.com/synthcheck/reference/as_synthetic_list.md)
   : Turn a table of synthetic respondents into benchmark input
 
+## Reports
+
+All results of a session in one HTML or PDF file.
+
+- [`write_report()`](https://www.okanbulut.com/synthcheck/reference/write_report.md)
+  : Write a report of the results
+
 ## Cognitive interviews
 
 Screen item wording with language models playing personas, when there

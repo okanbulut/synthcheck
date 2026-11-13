@@ -149,7 +149,7 @@
 <li>
 <strong>Without real data:</strong> The Pretest tab screens the items on the synthetic respondents and checks whether the flags hold across models or temperatures, and the Interviews tab runs cognitive interviews in which the models play your personas.</li>
 </ul>
-<p>The Export tab saves the results and an R script that repeats them. The answer can be changed at any time, so the same synthetic data can be benchmarked once real responses come in.</p>
+<p>The Export tab saves a results report (one HTML or PDF file with the plots, tables, summaries and run settings), the results and an R script that repeats them. The answer can be changed at any time, so the same synthetic data can be benchmarked once real responses come in.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"shiny"</span>, <span class="st">"bslib"</span>, <span class="st">"ellmer"</span>, <span class="st">"callr"</span>, <span class="st">"jsonlite"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/run_synthcheck_app.html">run_synthcheck_app</a></span><span class="op">(</span>real <span class="op">=</span> <span class="va">my_real_data</span><span class="op">)</span></span>

@@ -129,9 +129,10 @@ The tabs, in order (with real data: 1 to 4 and 5. Export; without: 1 to
   and the transcripts. A screening aid, not a substitute for cognitive
   interviews with real people.
 
-- **Export:** Download the synthetic data (CSV, JSON, RDS or Excel), the
-  benchmark or the pretest and interviews, and an R script that repeats
-  the analysis.
+- **Export:** Download a results report (HTML or PDF, see
+  [`write_report()`](https://www.okanbulut.com/synthcheck/reference/write_report.md)),
+  the synthetic data (CSV, JSON, RDS or Excel), the benchmark or the
+  pretest and interviews, and an R script that repeats the analysis.
 
 **API keys** typed into the app stay in memory for that session only:
 They are never written to the saved data, the run settings or the R

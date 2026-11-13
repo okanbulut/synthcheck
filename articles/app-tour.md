@@ -343,6 +343,16 @@ script.](figures/app-export.png)
 
 The Export tab with downloads and the R script.
 
+**Results report** saves one file with the plots, tables and
+plain-language summaries of the session, and the settings needed to
+repeat the run (the instrument, the personas, the models and their
+temperatures, the generation run and the benchmark or pretest settings).
+HTML is one self-contained file that opens in any browser; PDF needs
+nothing beyond R. The report covers the path you chose: The benchmark
+with real data, or the pretest and the interviews without. In R,
+[`write_report()`](https://www.okanbulut.com/synthcheck/reference/write_report.md)
+writes the same report.
+
 Download the synthetic data in CSV, JSON, RDS or Excel. The other
 downloads follow the path:
 

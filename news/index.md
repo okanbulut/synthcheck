@@ -57,6 +57,19 @@
 - With one respondent per call, a retry now asks only for the items
   still missing, in both the one-at-a-time and the parallel paths.
 
+- New
+  [`write_report()`](https://www.okanbulut.com/synthcheck/reference/write_report.md)
+  writes the results as one report: A self-contained HTML file (the
+  default) or a PDF, with the plots, tables, plain-language summaries
+  and the settings needed to repeat the run. It covers the benchmark,
+  the pretest and the cognitive interviews, and keeps the caveat that
+  the benchmark does not show that synthetic data can replace a field
+  test. The PDF uses the PDF device that comes with R, so it needs no
+  LaTeX or pandoc.
+
+- The app’s Export tab has a new **Results report** card that downloads
+  the report for the path you chose, in HTML or PDF.
+
 ## synthcheck 0.2.0
 
 Adds a path for scales without real data (a synthetic pretest and
