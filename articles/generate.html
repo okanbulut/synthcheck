@@ -46,7 +46,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-the-app" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">The app</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-the-app">
 <li><a class="dropdown-item" href="../articles/app-tour.html">A tour of the synthcheck app</a></li>
-    <li><a class="dropdown-item" href="../articles/app-demo.html">App demos: Three ways to use the app</a></li>
+    <li><a class="dropdown-item" href="../articles/app-demo.html">App demos: Four ways to use the app</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -80,9 +80,10 @@
     
 <p><strong>Experimental.</strong> This tutorial makes synthetic
 respondents from your own instrument, personas and models, in R code.
-The <a href="app-tour.html">app</a> does the same steps on screen.
-Synthetic respondents are for comparing models with the benchmark, not
-for replacing a field test.</p>
+The <a href="app-tour.html">app</a> does the same steps on screen, with
+or without real data. Synthetic respondents are for comparing models
+with the benchmark, or for pretesting a scale before real data exist,
+not for replacing a field test.</p>
 <p>Everything below runs with the <strong>mock</strong> provider, which
 gives random answers without calling an API. Swap in
 <code>sc_model("anthropic")</code>, <code>sc_model("openai")</code> or

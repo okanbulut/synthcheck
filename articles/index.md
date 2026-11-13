@@ -30,5 +30,5 @@ The whole workflow on screen, from an instrument to a benchmark.
 
 - [A tour of the synthcheck
   app](https://www.okanbulut.com/synthcheck/articles/app-tour.md):
-- [App demos: Three ways to use the
+- [App demos: Four ways to use the
   app](https://www.okanbulut.com/synthcheck/articles/app-demo.md):

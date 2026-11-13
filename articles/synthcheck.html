@@ -46,7 +46,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-the-app" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">The app</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-the-app">
 <li><a class="dropdown-item" href="../articles/app-tour.html">A tour of the synthcheck app</a></li>
-    <li><a class="dropdown-item" href="../articles/app-demo.html">App demos: Three ways to use the app</a></li>
+    <li><a class="dropdown-item" href="../articles/app-demo.html">App demos: Four ways to use the app</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -247,6 +247,67 @@ table:</p>
 <span><span class="co">#&gt; 100 = as close as a second sample of real people; 0 = no better than shuffled columns.</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="no-real-data-yet">No real data yet?<a class="anchor" aria-label="anchor" href="#no-real-data-yet"></a>
+</h2>
+<p>The benchmark needs real answers to compare with. For a new scale
+that has not been fielded, two tools screen the items on synthetic
+respondents alone:</p>
+<ul>
+<li>
+<code><a href="../reference/synthetic_pretest.html">synthetic_pretest()</a></code> flags items that barely vary, link
+weakly to their scale, duplicate another item or work against their
+reverse key, checks whether the scales you designed come back, and shows
+whether the flags hold across models, temperatures or personas.</li>
+<li>
+<code><a href="../reference/cognitive_interview.html">cognitive_interview()</a></code> has language models play your
+personas, think aloud on each item and answer verbal probes, and codes
+the transcripts for problems.</li>
+</ul>
+<p>Both are screening aids: They point to items worth a second look
+before a field test, and do not show that a scale works in people.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synthetic_pretest.html">synthetic_pretest</a></span><span class="op">(</span><span class="va">synthetic</span>, <span class="va">h</span>, irt <span class="op">=</span> <span class="cn">FALSE</span>, n_pa <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/summarise_pretest.html">summarise_pretest</a></span><span class="op">(</span><span class="va">pt</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Pretest without real data, in plain language (experimental)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; This is pilot screening on synthetic respondents only. It flags items</span></span>
+<span><span class="co">#&gt; worth a second look; it does not show that the scale works in people.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; 40 of 40 items are flagged in at least one condition, and 2 in all 6</span></span>
+<span><span class="co">#&gt; conditions. Flagged most often: HMode2 (near-duplicate, weak link to</span></span>
+<span><span class="co">#&gt; its scale, barely varies), HMode4 (near-duplicate, barely varies, weak</span></span>
+<span><span class="co">#&gt; link to its scale), HFair7 (barely varies, near-duplicate, weak link to</span></span>
+<span><span class="co">#&gt; its scale), HFair8 (barely varies, weak link to its scale) and HGree1</span></span>
+<span><span class="co">#&gt; (weak link to its scale, barely varies, near-duplicate). 10 of the</span></span>
+<span><span class="co">#&gt; flagged items are flagged in fewer than half of the single attempts, so</span></span>
+<span><span class="co">#&gt; their flags may be sampling noise. When most items are flagged, the</span></span>
+<span><span class="co">#&gt; flags describe the model's tidy answers as much as the items. Start</span></span>
+<span><span class="co">#&gt; with the items that most conditions agree on.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; The conditions disagree on which items link weakly to their scale (mean</span></span>
+<span><span class="co">#&gt; rank correlation 0.35) and share 38% of their flagged items on average.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; The reverse key comes through for 96% to 100% of the reverse-keyed</span></span>
+<span><span class="co">#&gt; items. You designed 1 scale; parallel analysis finds 2 to 10 dimensions</span></span>
+<span><span class="co">#&gt; over all items.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Alpha is 0.95 or higher in 3 of 6 scale results. Synthetic respondents</span></span>
+<span><span class="co">#&gt; are often more consistent than people, so expect lower values in real</span></span>
+<span><span class="co">#&gt; data.</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="using-the-app">Using the app<a class="anchor" aria-label="anchor" href="#using-the-app"></a>
+</h2>
+<p><code><a href="../reference/run_synthcheck_app.html">run_synthcheck_app()</a></code> does the same work on screen. It
+starts with one question: <strong>Do you already have real responses to
+this instrument?</strong> With real data, the app generates synthetic
+respondents and benchmarks them in the Compare tab. Without real data,
+it generates them the same way, pretests the scale in the Pretest tab
+and runs cognitive interviews in the Interviews tab.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/run_synthcheck_app.html">run_synthcheck_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="where-to-go-next">Where to go next<a class="anchor" aria-label="anchor" href="#where-to-go-next"></a>
 </h2>
 <ul>
@@ -260,11 +321,15 @@ people answer, and careless real respondents.</li>
 <a href="benchmark.html">The benchmark</a>: Anchors, scores and the
 choices behind the table.</li>
 <li>
+<a href="pretest.html">Pretesting a scale without real data</a> and
+<a href="cognitive-interviews.html">cognitive interviews</a>: Screening
+a new scale before it is fielded.</li>
+<li>
 <a href="generate.html">Generating synthetic respondents</a>: Your
 own instrument, personas and models, in R code.</li>
 <li>
-<a href="app-tour.html">A tour of the app</a> and the <a href="app-demo.html">app demo</a>: The same workflow without writing
-code.</li>
+<a href="app-tour.html">A tour of the app</a> and the <a href="app-demo.html">app demos</a>: The same workflow without writing
+code, on both paths.</li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

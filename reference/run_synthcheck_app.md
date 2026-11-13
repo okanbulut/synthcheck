@@ -1,11 +1,11 @@
 # Generate and benchmark synthetic data in a Shiny app
 
 **Experimental.** `run_synthcheck_app()` opens an app that walks through
-the whole workflow in five tabs. It opens on an **About** tab that
+the whole workflow without code. It opens on an **About** tab that
 explains the purpose of the app, lists what it can do and produce, shows
 an animated picture of a language model answering survey items and
-starts a guided tour of the five tabs (the tour needs the cicerone
-package).
+starts a guided tour (the tour needs the cicerone package). The tour
+follows the path chosen in the first step.
 
 ## Usage
 
@@ -24,6 +24,8 @@ run_synthcheck_app(
 - real:
 
   optional data frame of real responses, loaded into the Compare tab.
+  With real data given, the first step starts on "Yes, I have real
+  data".
 
 - synthetic:
 
@@ -31,7 +33,7 @@ run_synthcheck_app(
   [`generate_synthetic()`](https://www.okanbulut.com/synthcheck/reference/generate_synthetic.md)
   or
   [`read_synthetic()`](https://www.okanbulut.com/synthcheck/reference/write_synthetic.md)),
-  loaded into the Compare tab.
+  loaded into the Compare and Pretest tabs.
 
 - host, port:
 
@@ -56,67 +58,70 @@ result, if one was run), `path` (`"real"`, `"pretest"` or `NULL`),
 
 ## Details
 
-The About tab starts with one question: **Do you already have real
-responses to this instrument?** With real data, the fourth tab is
-**Compare** (the benchmark below). Without real data, it is **Pretest**:
-Pilot screening of the items on synthetic respondents alone, with the
-agreement across models or temperatures and a check of the structure you
-designed
-([`synthetic_pretest()`](https://www.okanbulut.com/synthcheck/reference/synthetic_pretest.md)).
-The answer can be changed at any time, so you can come back with real
-data later and compare the same synthetic data.
+**First step:** The About tab asks one question: **Do you already have
+real responses to this instrument?** The answer chooses one of two
+paths, and it can be changed at any time, so you can come back with real
+data later and benchmark the same synthetic data.
 
-1.  **Instrument:** Upload an item table or use the IPIP-HEXACO items,
-    and set the response scale and instructions
-    ([`sc_instrument()`](https://www.okanbulut.com/synthcheck/reference/sc_instrument.md)).
+- **Yes, I have real data:** The fourth tab is **Compare**, the
+  benchmark against real people.
 
-2.  **Personas:** Type, upload or build the personas that take the
-    instrument
-    ([`sc_personas()`](https://www.okanbulut.com/synthcheck/reference/sc_personas.md),
-    [`sc_persona_grid()`](https://www.okanbulut.com/synthcheck/reference/sc_personas.md)).
+- **No, not yet:** The fourth tab is **Pretest**, followed by
+  **Interviews**, so Export becomes the sixth tab. Compare is hidden.
 
-Both upload panels offer a template to fill in. The templates are also
-in the package:
-`system.file("templates", "instrument_template.csv", package = "synthcheck")`
-and `"personas_template.csv"`.
+The tabs, in order (with real data: 1 to 4 and 5. Export; without: 1 to
+3, 4. Pretest, 5. Interviews and 6. Export):
 
-1.  **Models:** Add Anthropic, OpenAI or local Ollama models with their
-    temperature, enter API keys, choose the number of attempts and
-    respondents, and run
-    [`generate_synthetic()`](https://www.okanbulut.com/synthcheck/reference/generate_synthetic.md)
-    with a progress bar and the time left.
+- **1. Instrument:** Upload an item table or use the IPIP-HEXACO items,
+  and set the response scale and instructions
+  ([`sc_instrument()`](https://www.okanbulut.com/synthcheck/reference/sc_instrument.md)).
 
-2.  **Compare:** Load real data and run
-    [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md),
-    with
-    [`gg_benchmark()`](https://www.okanbulut.com/synthcheck/reference/gg_benchmark.md),
-    [`gg_behaviour()`](https://www.okanbulut.com/synthcheck/reference/gg_behaviour.md)
-    and a plain-language summary per model
-    ([`summarise_benchmark()`](https://www.okanbulut.com/synthcheck/reference/summarise_benchmark.md)).
+- **2. Personas:** Type, upload or build the personas that take the
+  instrument
+  ([`sc_personas()`](https://www.okanbulut.com/synthcheck/reference/sc_personas.md),
+  [`sc_persona_grid()`](https://www.okanbulut.com/synthcheck/reference/sc_personas.md)).
+  Both upload panels offer a template to fill in. The templates are also
+  in the package:
+  `system.file("templates", "instrument_template.csv", package = "synthcheck")`
+  and `"personas_template.csv"`.
 
-3.  **Pretest** (without real data): Run
-    [`synthetic_pretest()`](https://www.okanbulut.com/synthcheck/reference/synthetic_pretest.md)
-    on the generated data, with
-    [`gg_pretest()`](https://www.okanbulut.com/synthcheck/reference/gg_pretest.md)
-    and a plain-language summary
-    ([`summarise_pretest()`](https://www.okanbulut.com/synthcheck/reference/summarise_pretest.md)).
-    Add the same model at several temperatures in the Models tab to
-    check whether the flags hold.
+- **3. Models:** Add Anthropic, OpenAI or local Ollama models with their
+  temperature (or several temperatures, one model each), enter API keys,
+  choose the number of attempts and respondents, and run
+  [`generate_synthetic()`](https://www.okanbulut.com/synthcheck/reference/generate_synthetic.md)
+  with a progress bar and the time left.
 
-4.  **Interviews** (tab 4b, without real data): Run
-    [`cognitive_interview()`](https://www.okanbulut.com/synthcheck/reference/cognitive_interview.md)
-    with the personas and models of tabs 2 and 3, on the items the
-    pretest flagged or on items you choose (the pretest is optional),
-    and read the summary
-    ([`summarise_interviews()`](https://www.okanbulut.com/synthcheck/reference/summarise_interviews.md)),
-    the plot
-    ([`gg_interview()`](https://www.okanbulut.com/synthcheck/reference/gg_interview.md))
-    and the transcripts. A screening aid, not a substitute for cognitive
-    interviews with real people.
+- **4. Compare** (with real data): Load real data and run
+  [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md),
+  with
+  [`gg_benchmark()`](https://www.okanbulut.com/synthcheck/reference/gg_benchmark.md),
+  [`gg_behaviour()`](https://www.okanbulut.com/synthcheck/reference/gg_behaviour.md)
+  and a plain-language summary per model
+  ([`summarise_benchmark()`](https://www.okanbulut.com/synthcheck/reference/summarise_benchmark.md)).
 
-5.  **Export:** Download the data (CSV, JSON, RDS or Excel), the
-    benchmark, the pretest or the interviews, and an R script that
-    repeats the analysis.
+- **4. Pretest** (without real data): Run
+  [`synthetic_pretest()`](https://www.okanbulut.com/synthcheck/reference/synthetic_pretest.md)
+  on the generated data, with
+  [`gg_pretest()`](https://www.okanbulut.com/synthcheck/reference/gg_pretest.md)
+  and a plain-language summary
+  ([`summarise_pretest()`](https://www.okanbulut.com/synthcheck/reference/summarise_pretest.md)).
+  Compare the flags across models, temperatures or personas to see
+  whether they hold. It is pilot screening, not validation.
+
+- **5. Interviews** (without real data): Run
+  [`cognitive_interview()`](https://www.okanbulut.com/synthcheck/reference/cognitive_interview.md)
+  with the personas and models of tabs 2 and 3, on the items the pretest
+  flagged or on items you choose (the pretest is optional), and read the
+  summary
+  ([`summarise_interviews()`](https://www.okanbulut.com/synthcheck/reference/summarise_interviews.md)),
+  the plot
+  ([`gg_interview()`](https://www.okanbulut.com/synthcheck/reference/gg_interview.md))
+  and the transcripts. A screening aid, not a substitute for cognitive
+  interviews with real people.
+
+- **Export** (5 with real data, 6 without): Download the synthetic data
+  (CSV, JSON, RDS or Excel), the benchmark or the pretest and
+  interviews, and an R script that repeats the analysis.
 
 **API keys** typed into the app stay in memory for that session only:
 They are never written to the saved data, the run settings or the R

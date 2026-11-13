@@ -315,6 +315,17 @@ agree with real people on the ranking of the items only in part. That is
 why the pretest is screening: It points at items to read again, and a
 field test still decides.
 
+## In the app
+
+On the About tab of the app, answer **No, not yet** to the first
+question. The fourth tab is then **Pretest**: Choose the synthetic data,
+what to compare the flags across and click **Run the pretest**. The
+**Interviews** tab (5) that follows runs cognitive interviews on the
+flagged items, as in [the cognitive interviews
+tutorial](https://www.okanbulut.com/synthcheck/articles/cognitive-interviews.md).
+See [the tour of the
+app](https://www.okanbulut.com/synthcheck/articles/app-tour.html#pretest-without-real-data).
+
 ## Later: Real data
 
 The pretest keeps the item table in `pt$settings$items`. Once real

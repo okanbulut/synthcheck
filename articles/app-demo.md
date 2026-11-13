@@ -1,9 +1,11 @@
-# App demos: Three ways to use the app
+# App demos: Four ways to use the app
 
 **Experimental.** These demos walk through the app from start to finish.
-The first two need no API key, so you can try them right away. The third
-is a real run with your own questionnaire. For what every control does,
-see [the tour of the
+The first three use real data to benchmark the models: Demos 1 and 2
+need no API key, so you can try them right away, and Demo 3 is a real
+run with your own questionnaire. Demo 4 takes the path without real
+data: A pretest and cognitive interviews, also without an API key. For
+what every control does, see [the tour of the
 app](https://www.okanbulut.com/synthcheck/articles/app-tour.md).
 
 ``` r
@@ -12,10 +14,12 @@ library(synthcheck)
 run_synthcheck_app()
 ```
 
-The app opens on the **About** tab. Click **Start with the instrument**
-to go straight to the first step, or **Take the guided tour** for a
-walkthrough that points to each control in turn (it needs the cicerone
-package). The demos below start on the Instrument tab.
+The app opens on the **About** tab with one question: **Do you already
+have real responses to this instrument?** Answer **Yes, I have real
+data** for Demos 1 to 3, and **No, not yet** for Demo 4. Then click
+**Start with the instrument** to go straight to the first step, or
+**Take the guided tour** for a walkthrough of the path you chose (it
+needs the cicerone package).
 
 ## Demo 1: Benchmark the six built-in models
 
@@ -23,12 +27,13 @@ The package ships synthetic answers from six language models to the
 IPIP-HEXACO items (`hexaco_llm`), so you can run the benchmark without
 generating anything.
 
-1.  **Instrument:** Keep **IPIP-HEXACO (built in)** and the traits
+1.  **About:** Answer **Yes, I have real data**.
+2.  **Instrument:** Keep **IPIP-HEXACO (built in)** and the traits
     Honesty-Humility and Conscientiousness (80 items).
-2.  **Compare:** Under *Real data*, choose **hexaco_real (built in)**
+3.  **Compare:** Under *Real data*, choose **hexaco_real (built in)**
     and *Canada*. Under *Synthetic data*, choose **hexaco_llm (built
     in)**, *Canada* and 3 attempts per model.
-3.  Switch off **Include person fit** for a faster first run, and click
+4.  Switch off **Include person fit** for a faster first run, and click
     **Run the benchmark**.
 
 ![Demo 1: The six built-in models benchmarked on two HEXACO traits,
@@ -61,16 +66,17 @@ summarise_benchmark(bm)
 The mock provider answers at random, without an API, so a practice run
 costs nothing and shows every step of a real one.
 
-1.  **Instrument:** Keep IPIP-HEXACO and choose only Honesty-Humility
+1.  **About:** Answer **Yes, I have real data**.
+2.  **Instrument:** Keep IPIP-HEXACO and choose only Honesty-Humility
     (40 items).
-2.  **Personas:** Choose **Build a grid** and keep the example: Three
+3.  **Personas:** Choose **Build a grid** and keep the example: Three
     ages, two genders and two countries make 12 personas.
-3.  **Models:** Choose the provider **Mock (random answers, no API)**
+4.  **Models:** Choose the provider **Mock (random answers, no API)**
     and click **Add model**. Change the label to *Mock B* and add it
     again, so there are two models to compare.
-4.  Set 2 attempts and 5 respondents per persona per attempt. The plan
+5.  Set 2 attempts and 5 respondents per persona per attempt. The plan
     says 240 synthetic respondents, 120 per model.
-5.  Click **Estimate run time**, then **Generate data**. The progress
+6.  Click **Estimate run time**, then **Generate data**. The progress
     bar counts the respondents and shows the time left.
 
 ![Demo 2: Two mock models in the run, after the run
@@ -78,7 +84,7 @@ finished.](figures/demo-mock-run.png)
 
 Demo 2: Two mock models in the run, after the run finished.
 
-6.  **Compare:** Keep *This session’s run* and real data from
+7.  **Compare:** Keep *This session’s run* and real data from
     **hexaco_real**, *Canada*, and run the benchmark.
 
 ![Demo 2: Random answers score near the floor on every
@@ -94,7 +100,7 @@ middle score deciles. The behaviour strip shows the other telltale sign
 of random answers: More extreme answers and more variability than real
 people (blue).
 
-7.  **Export:** Download the data in the format you need, and the R
+8.  **Export:** Download the data in the format you need, and the R
     script that repeats the comparison.
 
 ## Demo 3: Your own questionnaire, with real models
@@ -102,27 +108,28 @@ people (blue).
 For a real study, you bring three things: The items, the personas and
 real answers to the same items.
 
-1.  **Instrument:** Choose **Upload an item table**, click **Download a
+1.  **About:** Answer **Yes, I have real data**.
+2.  **Instrument:** Choose **Upload an item table**, click **Download a
     template**, and fill it in with your items. Use the same item names
     as the columns of your real data. Mark reverse-keyed items with
     `TRUE` in `reverse`, so that the benchmark can key them. Set the
     lowest and highest category and check the labels and instructions.
-2.  **Personas:** Upload a persona table (download the template on the
+3.  **Personas:** Upload a persona table (download the template on the
     same tab), or build a grid from the attributes that matter in your
     population, such as age, gender and region.
-3.  **Models:** Enter your API keys, or set `ANTHROPIC_API_KEY` and
+4.  **Models:** Enter your API keys, or set `ANTHROPIC_API_KEY` and
     `OPENAI_API_KEY` in `.Renviron` before you start R. Add the models
     to compare, for example `claude-haiku-5-5` and `gpt-4.1-nano` at
     temperature
     1.  For a local model, start Ollama, choose *Ollama (local)* and
         click **Refresh the model list**.
-4.  Start small: 1 attempt and 2 respondents per persona. Click
+5.  Start small: 1 attempt and 2 respondents per persona. Click
     **Estimate run time** to check the keys and see the time for a full
     run. Then raise the attempts (5 or more give a sense of stability)
     and generate.
-5.  **Compare:** Upload your real data (CSV, Excel or RDS, one row per
+6.  **Compare:** Upload your real data (CSV, Excel or RDS, one row per
     person, the items as columns) and run the benchmark.
-6.  **Export:** Save the data and the R script with your results.
+7.  **Export:** Save the data and the R script with your results.
 
 The same run in code:
 
@@ -138,6 +145,79 @@ gg_benchmark(bm)
 summarise_benchmark(bm)
 ```
 
+## Demo 4: A new scale without real data
+
+Before a scale has been fielded, there are no real answers to benchmark
+against. The path without real data screens the items on synthetic
+respondents instead and lets language models play your personas in
+cognitive interviews. This demo uses the built-in `hexaco_llm` and the
+mock provider, so it needs no API key.
+
+1.  **About:** Answer **No, not yet**. The fourth tab becomes
+    **Pretest**, the fifth **Interviews** and the sixth **Export**.
+    Compare is hidden.
+2.  **Instrument:** Keep IPIP-HEXACO and choose Honesty-Humility and
+    Conscientiousness (80 items). The `scale` and `reverse` columns of
+    the items are the structure the pretest checks.
+3.  **Personas:** Choose **Type them** and keep the three example
+    personas.
+4.  **Pretest:** Under *Synthetic data*, choose **hexaco_llm (built
+    in)**, *Canada* and 3 attempts per model. Keep *Compare the flags
+    across: Models* and click **Run the pretest**.
+
+![Demo 4: The pretest of six models on two HEXACO traits,
+Canada.](figures/app-pretest.png)
+
+Demo 4: The pretest of six models on two HEXACO traits, Canada.
+
+The summary names the items that most models flag and the scales whose
+structure does not come back as designed. The plot shows each flagged
+item with the number of models that flag it: An item that every model
+flags is worth reading again, one flagged by a single model less so.
+Language models answer more tidily than people, so treat the flags as a
+reading list, not a verdict.
+
+5.  **Models:** Add **Mock (random answers, no API)**. The interviews
+    use the models of this tab and the personas of the Personas tab.
+    With an API key, add a real model instead, for example
+    `claude-haiku-5-5`.
+6.  **Interviews:** Keep **Items flagged by the pretest** and click
+    **Run the interviews**. The plan counts the interviews and the
+    requests.
+
+![Demo 4: Cognitive interviews on the items the pretest
+flagged.](figures/app-interviews.png)
+
+Demo 4: Cognitive interviews on the items the pretest flagged.
+
+The heatmap shows which kinds of problems each item ran into, and the
+transcripts show what each persona said. Mock interviews are made-up
+text that only show how the tab works. With a real model, read the
+transcripts of the flagged items and the suggested rewordings, and
+decide which items to reword before the field test.
+
+7.  **Export:** Download the pretest, the interviews and the
+    transcripts, and the R script that repeats them. Once real responses
+    come in, go back to the About tab, answer **Yes, I have real data**,
+    and benchmark the same synthetic data in the Compare tab.
+
+The same steps in code:
+
+``` r
+
+items <- hexaco_items[hexaco_items$trait %in% c("H", "C"), ]
+ca <- hexaco_llm[hexaco_llm$country == "Canada" & hexaco_llm$attempt <= 3, ]
+pt <- synthetic_pretest(as_synthetic_list(ca), items, irt = FALSE)
+summarise_pretest(pt)
+gg_pretest(pt)
+
+iv <- cognitive_interview(sc_instrument(items, scale = c(1, 7)), sc_model("mock"),
+                          sc_personas(c("You are a 34-year-old nurse living in Calgary, Canada.",
+                                        "You are a 21-year-old university student in Toronto, Canada.")),
+                          pretest = pt)
+gg_interview(summarise_interviews(iv))
+```
+
 ### Things to keep in mind
 
 - **Cost.** The number of calls is models × attempts × personas ×
@@ -149,3 +229,7 @@ summarise_benchmark(bm)
 - **What the benchmark says.** It tells you which model resembles your
   real respondents most, and on which side it falls short. It does not
   show that synthetic data can replace a field test.
+- **What the pretest and the interviews say.** They point to items worth
+  a second look before the field test. They do not show that a scale
+  works in people, and they are not a substitute for cognitive
+  interviews with real people.

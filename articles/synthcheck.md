@@ -176,6 +176,71 @@ summarise_benchmark(bm)
 #> 100 = as close as a second sample of real people; 0 = no better than shuffled columns.
 ```
 
+## No real data yet?
+
+The benchmark needs real answers to compare with. For a new scale that
+has not been fielded, two tools screen the items on synthetic
+respondents alone:
+
+- [`synthetic_pretest()`](https://www.okanbulut.com/synthcheck/reference/synthetic_pretest.md)
+  flags items that barely vary, link weakly to their scale, duplicate
+  another item or work against their reverse key, checks whether the
+  scales you designed come back, and shows whether the flags hold across
+  models, temperatures or personas.
+- [`cognitive_interview()`](https://www.okanbulut.com/synthcheck/reference/cognitive_interview.md)
+  has language models play your personas, think aloud on each item and
+  answer verbal probes, and codes the transcripts for problems.
+
+Both are screening aids: They point to items worth a second look before
+a field test, and do not show that a scale works in people.
+
+``` r
+
+pt <- synthetic_pretest(synthetic, h, irt = FALSE, n_pa = 10)
+summarise_pretest(pt)
+#> Pretest without real data, in plain language (experimental)
+#> 
+#> This is pilot screening on synthetic respondents only. It flags items
+#> worth a second look; it does not show that the scale works in people.
+#> 
+#> 40 of 40 items are flagged in at least one condition, and 2 in all 6
+#> conditions. Flagged most often: HMode2 (near-duplicate, weak link to
+#> its scale, barely varies), HMode4 (near-duplicate, barely varies, weak
+#> link to its scale), HFair7 (barely varies, near-duplicate, weak link to
+#> its scale), HFair8 (barely varies, weak link to its scale) and HGree1
+#> (weak link to its scale, barely varies, near-duplicate). 10 of the
+#> flagged items are flagged in fewer than half of the single attempts, so
+#> their flags may be sampling noise. When most items are flagged, the
+#> flags describe the model's tidy answers as much as the items. Start
+#> with the items that most conditions agree on.
+#> 
+#> The conditions disagree on which items link weakly to their scale (mean
+#> rank correlation 0.35) and share 38% of their flagged items on average.
+#> 
+#> The reverse key comes through for 96% to 100% of the reverse-keyed
+#> items. You designed 1 scale; parallel analysis finds 2 to 10 dimensions
+#> over all items.
+#> 
+#> Alpha is 0.95 or higher in 3 of 6 scale results. Synthetic respondents
+#> are often more consistent than people, so expect lower values in real
+#> data.
+```
+
+## Using the app
+
+[`run_synthcheck_app()`](https://www.okanbulut.com/synthcheck/reference/run_synthcheck_app.md)
+does the same work on screen. It starts with one question: **Do you
+already have real responses to this instrument?** With real data, the
+app generates synthetic respondents and benchmarks them in the Compare
+tab. Without real data, it generates them the same way, pretests the
+scale in the Pretest tab and runs cognitive interviews in the Interviews
+tab.
+
+``` r
+
+run_synthcheck_app()
+```
+
 ## Where to go next
 
 - [Overlap and
@@ -187,11 +252,16 @@ summarise_benchmark(bm)
 - [The
   benchmark](https://www.okanbulut.com/synthcheck/articles/benchmark.md):
   Anchors, scores and the choices behind the table.
+- [Pretesting a scale without real
+  data](https://www.okanbulut.com/synthcheck/articles/pretest.md) and
+  [cognitive
+  interviews](https://www.okanbulut.com/synthcheck/articles/cognitive-interviews.md):
+  Screening a new scale before it is fielded.
 - [Generating synthetic
   respondents](https://www.okanbulut.com/synthcheck/articles/generate.md):
   Your own instrument, personas and models, in R code.
 - [A tour of the
   app](https://www.okanbulut.com/synthcheck/articles/app-tour.md) and
   the [app
-  demo](https://www.okanbulut.com/synthcheck/articles/app-demo.md): The
-  same workflow without writing code.
+  demos](https://www.okanbulut.com/synthcheck/articles/app-demo.md): The
+  same workflow without writing code, on both paths.

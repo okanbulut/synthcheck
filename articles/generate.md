@@ -3,8 +3,10 @@
 **Experimental.** This tutorial makes synthetic respondents from your
 own instrument, personas and models, in R code. The
 [app](https://www.okanbulut.com/synthcheck/articles/app-tour.md) does
-the same steps on screen. Synthetic respondents are for comparing models
-with the benchmark, not for replacing a field test.
+the same steps on screen, with or without real data. Synthetic
+respondents are for comparing models with the benchmark, or for
+pretesting a scale before real data exist, not for replacing a field
+test.
 
 Everything below runs with the **mock** provider, which gives random
 answers without calling an API. Swap in `sc_model("anthropic")`,

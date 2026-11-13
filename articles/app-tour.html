@@ -46,7 +46,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-the-app" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">The app</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-the-app">
 <li><a class="dropdown-item" href="../articles/app-tour.html">A tour of the synthcheck app</a></li>
-    <li><a class="dropdown-item" href="../articles/app-demo.html">App demos: Three ways to use the app</a></li>
+    <li><a class="dropdown-item" href="../articles/app-demo.html">App demos: Four ways to use the app</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -79,13 +79,85 @@
     
     
 <p><strong>Experimental.</strong> <code><a href="../reference/run_synthcheck_app.html">run_synthcheck_app()</a></code>
-opens an app that does the whole synthcheck workflow without code:
-Define an instrument and personas, generate synthetic respondents with
-one or more language models, benchmark them against real data and save
-everything. This article walks through the About tab that opens the app
-and the five tabs of the workflow. For worked examples, see <a href="app-demo.html">the app demos</a>.</p>
+opens an app that does the whole synthcheck workflow without code. It
+starts with one question: <strong>Do you already have real responses to
+this instrument?</strong> The answer chooses one of two paths through
+the same tabs.</p>
+<ul>
+<li>
+<strong>With real data:</strong> Define an instrument and personas,
+generate synthetic respondents with one or more language models,
+<strong>benchmark</strong> them against the real data in the Compare
+tab, and save everything.</li>
+<li>
+<strong>Without real data:</strong> Generate synthetic respondents
+the same way, <strong>pretest</strong> the scale on them in the Pretest
+tab, run <strong>cognitive interviews</strong> with language models in
+the Interviews tab, and save everything.</li>
+</ul>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Tab</th>
+<th>With real data</th>
+<th>Without real data</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>About</td>
+<td>The first question and the guided tour</td>
+<td>The first question and the guided tour</td>
+</tr>
+<tr class="even">
+<td>1. Instrument</td>
+<td>The items and the response scale</td>
+<td>The items and the response scale</td>
+</tr>
+<tr class="odd">
+<td>2. Personas</td>
+<td>Who the synthetic respondents are</td>
+<td>Who the synthetic respondents are</td>
+</tr>
+<tr class="even">
+<td>3. Models</td>
+<td>Generate the synthetic data</td>
+<td>Generate the synthetic data, at several temperatures if you
+want</td>
+</tr>
+<tr class="odd">
+<td>4.</td>
+<td>
+<strong>Compare:</strong> The benchmark</td>
+<td>
+<strong>Pretest:</strong> Item screening and the designed
+structure</td>
+</tr>
+<tr class="even">
+<td>5.</td>
+<td>
+<strong>Export:</strong> Data, benchmark and R script</td>
+<td>
+<strong>Interviews:</strong> Cognitive interviews with language
+models</td>
+</tr>
+<tr class="odd">
+<td>6.</td>
+<td></td>
+<td>
+<strong>Export:</strong> Data, pretest, interviews and R script</td>
+</tr>
+</tbody>
+</table>
+<p>This article walks through every tab on both paths. For worked
+examples, see <a href="app-demo.html">the app demos</a>.</p>
 <p>The benchmark compares models and supports decisions about them. It
-does not show that synthetic data can replace a field test.</p>
+does not show that synthetic data can replace a field test. The pretest
+and the interviews are screening aids: They point to items worth a
+second look, and a field test with real people still decides.</p>
 <div class="section level2">
 <h2 id="starting-the-app">Starting the app<a class="anchor" aria-label="anchor" href="#starting-the-app"></a>
 </h2>
@@ -97,13 +169,14 @@ does not show that synthetic data can replace a field test.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/okanbulut/synthcheck" class="external-link">synthcheck</a></span><span class="op">)</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_synthcheck_app.html">run_synthcheck_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The app runs on your own computer and opens in your browser. You can
-pass real or synthetic data to it, and they appear in the Compare
-tab:</p>
+pass real or synthetic data to it. Real data appear in the Compare tab
+and start the app on the path with real data. Synthetic data appear in
+the Compare and Pretest tabs:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/run_synthcheck_app.html">run_synthcheck_app</a></span><span class="op">(</span>real <span class="op">=</span> <span class="va">my_real_data</span>, synthetic <span class="op">=</span> <span class="va">my_earlier_run</span><span class="op">)</span></span></code></pre></div>
 <p>When you close the app with the button in the Export tab,
-<code>res</code> holds the generated data, the benchmark, the instrument
-and the personas.</p>
+<code>res</code> holds the generated data, the benchmark, the pretest,
+the interviews, the path you chose, the instrument and the personas.</p>
 </div>
 <div class="section level2">
 <h2 id="about">About<a class="anchor" aria-label="anchor" href="#about"></a>
@@ -116,24 +189,48 @@ app is for, lists what it can do and what it produces, and shows an
 animated picture of a language model answering survey items: A persona
 and the items go in, the model answers each item on the response scale,
 and synthcheck compares the answers with real people. A short guided
-demo lists the five steps.</p>
-<p><strong>First step: Do you already have real responses to this
-instrument?</strong> The answer sets the fourth tab. With real data, it
-is <strong>Compare</strong>, the benchmark against real people. Without
-real data, it is <strong>Pretest</strong>, pilot screening of the scale
-on synthetic respondents alone. You can change the answer at any time,
-for example to benchmark the same synthetic data once real responses
-come in.</p>
+demo lists the steps of both paths, and the designer’s contact details
+and a link to this website are at the side.</p>
+<div class="section level3">
+<h3 id="first-step-real-data-or-not">First step: Real data or not?<a class="anchor" aria-label="anchor" href="#first-step-real-data-or-not"></a>
+</h3>
 <div class="float">
 <img src="figures/app-path.png" alt="The first step on the About tab: Real data or not?"><div class="figcaption">The first step on the About tab: Real data or
 not?</div>
 </div>
+<p><strong>Do you already have real responses to this
+instrument?</strong> The answer sets the fourth tab:</p>
+<ul>
+<li>
+<strong>Yes, I have real data.</strong> The fourth tab is
+<strong>Compare</strong>, the benchmark against real people.</li>
+<li>
+<strong>No, not yet.</strong> The fourth tab is
+<strong>Pretest</strong>, pilot screening of the scale on synthetic
+respondents alone, and the fifth is <strong>Interviews</strong>,
+cognitive interviews in which language models play your personas. Export
+moves to the sixth tab, and Compare is hidden.</li>
+</ul>
+<p>Tabs 1 to 3 and Export are the same on both paths. You can change the
+answer at any time: The data you generated stay in the session, so you
+can pretest a scale now and benchmark the same synthetic data once real
+responses come in.</p>
+</div>
+<div class="section level3">
+<h3 id="the-guided-tour">The guided tour<a class="anchor" aria-label="anchor" href="#the-guided-tour"></a>
+</h3>
 <p><strong>Take the guided tour</strong> walks through the app one
-control at a time and switches the tabs for you. The tour needs the
-cicerone package (<code>install.packages("cicerone")</code>).</p>
+control at a time and switches the tabs for you. It follows the path you
+chose: With real data, it ends with the benchmark; without real data, it
+shows the pretest and the interviews. To see the other path, change the
+answer and start the tour again. The tour needs the cicerone package
+(<code>install.packages("cicerone")</code>).</p>
 <div class="float">
 <img src="figures/app-tour-step.png" alt="The guided tour pointing to the items on the Instrument tab."><div class="figcaption">The guided tour pointing to the items on the
 Instrument tab.</div>
+</div>
+<p><strong>Start with the instrument</strong> skips the tour and opens
+the first tab.</p>
 </div>
 </div>
 <div class="section level2">
@@ -162,6 +259,9 @@ optionally <code>scale</code>, <code>facet</code> and
 and Excel both work. The same template is in the package:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"templates"</span>, <span class="st">"instrument_template.csv"</span>, package <span class="op">=</span> <span class="st">"synthcheck"</span><span class="op">)</span></span></code></pre></div>
+<p>Without real data, the <code>scale</code> and <code>reverse</code>
+columns matter more: They are the structure you designed, and the
+Pretest tab checks whether it comes back in the synthetic answers.</p>
 </div>
 <div class="section level2">
 <h2 id="personas">2. Personas<a class="anchor" aria-label="anchor" href="#personas"></a>
@@ -188,6 +288,8 @@ with optional <code>persona_id</code> and attribute columns. The
 attributes are kept in the generated data. The template is
 <code>personas_template.csv</code>.</li>
 </ul>
+<p>On the path without real data, the same personas also take part in
+the cognitive interviews.</p>
 </div>
 <div class="section level2">
 <h2 id="models">3. Models<a class="anchor" aria-label="anchor" href="#models"></a>
@@ -207,6 +309,11 @@ one), set the temperature and an optional label, and click <strong>Add
 model</strong>. Add as many as you want to compare.
 <strong>Mock</strong> gives random answers without an API, which is
 useful for trying the app.</p>
+<p><strong>Several temperatures.</strong> Type a list such as
+<code>0.3, 0.7, 1.2</code> in <strong>Or several temperatures</strong>
+to add the same model once per temperature. Without real data, the
+Pretest tab then shows whether the flagged items hold across the
+temperatures.</p>
 <p><strong>Run.</strong> Set the number of attempts (full passes over
 the personas) and the respondents per persona per attempt. The plan
 under the settings tells you how many respondents the run will make.</p>
@@ -238,7 +345,7 @@ folder as soon as it is done, so a stopped run keeps its finished
 attempts.</p>
 </div>
 <div class="section level2">
-<h2 id="compare">4. Compare<a class="anchor" aria-label="anchor" href="#compare"></a>
+<h2 id="compare-with-real-data">4. Compare (with real data)<a class="anchor" aria-label="anchor" href="#compare-with-real-data"></a>
 </h2>
 <div class="float">
 <img src="figures/demo-builtin.png" alt="The Compare tab after a benchmark."><div class="figcaption">The Compare tab after a benchmark.</div>
@@ -271,6 +378,8 @@ explore.</li>
 <strong>Real splits and shuffled draws:</strong> How many draws set
 the 0 and 100 anchors. More is steadier and slower.</li>
 </ul>
+<p>The <a href="benchmark.html">benchmark tutorial</a> explains the
+anchors and the score.</p>
 </div>
 <div class="section level2">
 <h2 id="pretest-without-real-data">4. Pretest (without real data)<a class="anchor" aria-label="anchor" href="#pretest-without-real-data"></a>
@@ -281,30 +390,100 @@ models.</div>
 </div>
 <p>Without real data, the fourth tab runs
 <code><a href="../reference/synthetic_pretest.html">synthetic_pretest()</a></code> on the synthetic data: This session’s
-run, the built-in <code>hexaco_llm</code>, or files saved by an earlier
-run. <strong>Compare the flags across</strong> sets the conditions:
-Models (each label in the Models tab), temperatures, personas, or
-nothing. To check temperatures, type several in <strong>Or several
-temperatures</strong> in the Models tab; the app adds one model per
-temperature.</p>
-<p>The tab shows a plain-language summary, the flagged items with the
-number of conditions that flag each one, and the reliability of each
-scale with the dimensions parallel analysis finds and whether the items
-and reverse keys follow the structure you designed. The items, scales
-and reverse keys come from the Instrument tab. The <a href="pretest.html">pretest tutorial</a> explains each result. It is
-pilot screening, not validation.</p>
+run, the built-in <code>hexaco_llm</code>, data you passed to
+<code><a href="../reference/run_synthcheck_app.html">run_synthcheck_app()</a></code>, or files saved by an earlier run.</p>
+<p><strong>Pretest settings:</strong></p>
+<ul>
+<li>
+<strong>Compare the flags across:</strong> Models (each label in the
+Models tab), temperatures, personas, or nothing (pool all respondents).
+An item that is flagged under every condition is worth more attention
+than one flagged by a single model.</li>
+<li>
+<strong>Include IRT slopes:</strong> Fits a graded response model
+per scale. It is slower.</li>
+<li>
+<strong>Random data sets for parallel analysis:</strong> How many
+random data sets set the line that a dimension has to clear.</li>
+</ul>
+<p>The items, scales and reverse keys come from the Instrument tab: They
+are the structure the pretest checks. Click <strong>Run the
+pretest</strong>.</p>
+<p>The tab shows a plain-language summary, the <strong>flagged
+items</strong> (items that barely vary, link weakly to their scale,
+duplicate another item or work against their reverse key) with the
+number of conditions that flag each one, and <strong>the scales and the
+structure you designed</strong>: The reliability of each scale, the
+dimensions parallel analysis finds and whether the items and reverse
+keys follow the design. The <a href="pretest.html">pretest tutorial</a>
+explains each result. It is pilot screening, not validation: Language
+models answer more tidily than people.</p>
 </div>
 <div class="section level2">
-<h2 id="export">5. Export<a class="anchor" aria-label="anchor" href="#export"></a>
+<h2 id="interviews-without-real-data">5. Interviews (without real data)<a class="anchor" aria-label="anchor" href="#interviews-without-real-data"></a>
+</h2>
+<div class="float">
+<img src="figures/app-interviews.png" alt="The Interviews tab after interviews on the flagged items."><div class="figcaption">The Interviews tab after interviews on the
+flagged items.</div>
+</div>
+<p>The Interviews tab runs <code><a href="../reference/cognitive_interview.html">cognitive_interview()</a></code>. A
+language model plays each persona from the Personas tab, thinks aloud
+while it answers an item and answers a set of verbal probes. A separate
+call then codes each transcript for comprehension, retrieval, judgement,
+response-mapping and sensitivity problems.</p>
+<p><strong>Items.</strong> Interview the <strong>items flagged by the
+pretest</strong>, or choose <strong>items I choose</strong> from the
+instrument. The pretest is optional. When it has run, each flagged item
+gets one more probe aimed at the reason for the flag.</p>
+<p><strong>Interview settings.</strong> The personas come from the
+Personas tab and the models from the Models tab.</p>
+<ul>
+<li>
+<strong>Who codes the transcripts:</strong> Each model codes its own
+interviews, or one of the other models codes them all, so that no model
+grades its own work.</li>
+<li>
+<strong>Interviews per persona and item</strong> and
+<strong>Interviews at the same time</strong> set the size and the speed
+of the run. The plan under the settings counts the interviews and the
+requests (three per interview: Think-aloud, probes and coding).</li>
+<li>
+<strong>Probes:</strong> One per line, as <code>stage: probe</code>.
+Edit them, add your own or remove the ones you do not need.</li>
+</ul>
+<p>Click <strong>Run the interviews</strong>. A progress bar counts the
+interviews, and <strong>Stop</strong> ends the run.</p>
+<p>The right side shows a plain-language summary, the <strong>problems
+per item</strong> (one row per item, one column per kind of problem,
+from pale to red as more interviews run into it) with a table of the
+share of interviews with a problem, the most common kind and a suggested
+rewording, and the <strong>transcripts</strong>: Pick an item to read
+each persona’s think-aloud, answer and probe answers, with the coding.
+The <a href="cognitive-interviews.html">cognitive interviews
+tutorial</a> explains the probes and the coding. It is a screening aid,
+not a substitute for cognitive interviews with real people.</p>
+</div>
+<div class="section level2">
+<h2 id="export-5-with-real-data-6-without">Export (5 with real data, 6 without)<a class="anchor" aria-label="anchor" href="#export-5-with-real-data-6-without"></a>
 </h2>
 <div class="float">
 <img src="figures/app-export.png" alt="The Export tab with downloads and the R script."><div class="figcaption">The Export tab with downloads and the R
 script.</div>
 </div>
-<p>Download the synthetic data (CSV, JSON, RDS or Excel), the benchmark
-table, the summary and the plot. <strong>Repeat it in R</strong> gives a
-script that reads the saved data and runs the same benchmark, so the
-comparison can be checked and rerun without the app. <strong>Close the
+<p>Download the synthetic data in CSV, JSON, RDS or Excel. The other
+downloads follow the path:</p>
+<ul>
+<li>
+<strong>With real data:</strong> The benchmark table, the summary
+and the benchmark plot.</li>
+<li>
+<strong>Without real data:</strong> The pretest items, the pretest
+summary and the pretest plot, and the interviews (CSV), the transcripts
+(Markdown) and the interview plot.</li>
+</ul>
+<p><strong>Repeat it in R</strong> gives a script that reads the saved
+data and runs the same benchmark, or the same pretest and interviews, so
+the analysis can be checked and rerun without the app. <strong>Close the
 app and return to R</strong> hands everything back to the R session.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

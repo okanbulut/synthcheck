@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>App demos: Three ways to use the app • synthcheck</title>
+<title>App demos: Four ways to use the app • synthcheck</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="App demos: Three ways to use the app">
+<meta property="og:title" content="App demos: Four ways to use the app">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -46,7 +46,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-the-app" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">The app</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-the-app">
 <li><a class="dropdown-item" href="../articles/app-tour.html">A tour of the synthcheck app</a></li>
-    <li><a class="dropdown-item" href="../articles/app-demo.html">App demos: Three ways to use the app</a></li>
+    <li><a class="dropdown-item" href="../articles/app-demo.html">App demos: Four ways to use the app</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -69,7 +69,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.svg" class="logo" alt=""><h1>App demos: Three ways to use the app</h1>
+      <img src="../logo.svg" class="logo" alt=""><h1>App demos: Four ways to use the app</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/okanbulut/synthcheck/blob/main/vignettes/articles/app-demo.Rmd" class="external-link"><code>vignettes/articles/app-demo.Rmd</code></a></small>
@@ -79,18 +79,22 @@
     
     
 <p><strong>Experimental.</strong> These demos walk through the app from
-start to finish. The first two need no API key, so you can try them
-right away. The third is a real run with your own questionnaire. For
-what every control does, see <a href="app-tour.html">the tour of the
-app</a>.</p>
+start to finish. The first three use real data to benchmark the models:
+Demos 1 and 2 need no API key, so you can try them right away, and Demo
+3 is a real run with your own questionnaire. Demo 4 takes the path
+without real data: A pretest and cognitive interviews, also without an
+API key. For what every control does, see <a href="app-tour.html">the
+tour of the app</a>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/okanbulut/synthcheck" class="external-link">synthcheck</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/run_synthcheck_app.html">run_synthcheck_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>The app opens on the <strong>About</strong> tab. Click <strong>Start
-with the instrument</strong> to go straight to the first step, or
-<strong>Take the guided tour</strong> for a walkthrough that points to
-each control in turn (it needs the cicerone package). The demos below
-start on the Instrument tab.</p>
+<p>The app opens on the <strong>About</strong> tab with one question:
+<strong>Do you already have real responses to this instrument?</strong>
+Answer <strong>Yes, I have real data</strong> for Demos 1 to 3, and
+<strong>No, not yet</strong> for Demo 4. Then click <strong>Start with
+the instrument</strong> to go straight to the first step, or
+<strong>Take the guided tour</strong> for a walkthrough of the path you
+chose (it needs the cicerone package).</p>
 <div class="section level2">
 <h2 id="demo-1-benchmark-the-six-built-in-models">Demo 1: Benchmark the six built-in models<a class="anchor" aria-label="anchor" href="#demo-1-benchmark-the-six-built-in-models"></a>
 </h2>
@@ -98,6 +102,9 @@ start on the Instrument tab.</p>
 IPIP-HEXACO items (<code>hexaco_llm</code>), so you can run the
 benchmark without generating anything.</p>
 <ol style="list-style-type: decimal">
+<li>
+<strong>About:</strong> Answer <strong>Yes, I have real
+data</strong>.</li>
 <li>
 <strong>Instrument:</strong> Keep <strong>IPIP-HEXACO (built
 in)</strong> and the traits Honesty-Humility and Conscientiousness (80
@@ -136,6 +143,9 @@ feature and the “too coherent” line to the summary.</p>
 run costs nothing and shows every step of a real one.</p>
 <ol style="list-style-type: decimal">
 <li>
+<strong>About:</strong> Answer <strong>Yes, I have real
+data</strong>.</li>
+<li>
 <strong>Instrument:</strong> Keep IPIP-HEXACO and choose only
 Honesty-Humility (40 items).</li>
 <li>
@@ -157,7 +167,7 @@ time left.</li>
 <img src="figures/demo-mock-run.png" alt="Demo 2: Two mock models in the run, after the run finished."><div class="figcaption">Demo 2: Two mock models in the run, after the
 run finished.</div>
 </div>
-<ol start="6" style="list-style-type: decimal">
+<ol start="7" style="list-style-type: decimal">
 <li>
 <strong>Compare:</strong> Keep <em>This session’s run</em> and real
 data from <strong>hexaco_real</strong>, <em>Canada</em>, and run the
@@ -174,7 +184,7 @@ average out to the middle of the scale, so the synthetic people bunch
 into a few middle score deciles. The behaviour strip shows the other
 telltale sign of random answers: More extreme answers and more
 variability than real people (blue).</p>
-<ol start="7" style="list-style-type: decimal">
+<ol start="8" style="list-style-type: decimal">
 <li>
 <strong>Export:</strong> Download the data in the format you need,
 and the R script that repeats the comparison.</li>
@@ -186,6 +196,9 @@ and the R script that repeats the comparison.</li>
 <p>For a real study, you bring three things: The items, the personas and
 real answers to the same items.</p>
 <ol style="list-style-type: decimal">
+<li>
+<strong>About:</strong> Answer <strong>Yes, I have real
+data</strong>.</li>
 <li>
 <strong>Instrument:</strong> Choose <strong>Upload an item
 table</strong>, click <strong>Download a template</strong>, and fill it
@@ -229,6 +242,87 @@ results.</li>
 <span><span class="va">bm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/authenticity_benchmark.html">authenticity_benchmark</a></span><span class="op">(</span><span class="fu"><a href="../reference/as_synthetic_list.html">as_synthetic_list</a></span><span class="op">(</span><span class="va">syn</span><span class="op">)</span>, <span class="va">real</span>, <span class="va">ins</span><span class="op">$</span><span class="va">items</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/gg_benchmark.html">gg_benchmark</a></span><span class="op">(</span><span class="va">bm</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/summarise_benchmark.html">summarise_benchmark</a></span><span class="op">(</span><span class="va">bm</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="demo-4-a-new-scale-without-real-data">Demo 4: A new scale without real data<a class="anchor" aria-label="anchor" href="#demo-4-a-new-scale-without-real-data"></a>
+</h2>
+<p>Before a scale has been fielded, there are no real answers to
+benchmark against. The path without real data screens the items on
+synthetic respondents instead and lets language models play your
+personas in cognitive interviews. This demo uses the built-in
+<code>hexaco_llm</code> and the mock provider, so it needs no API
+key.</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>About:</strong> Answer <strong>No, not yet</strong>. The
+fourth tab becomes <strong>Pretest</strong>, the fifth
+<strong>Interviews</strong> and the sixth <strong>Export</strong>.
+Compare is hidden.</li>
+<li>
+<strong>Instrument:</strong> Keep IPIP-HEXACO and choose
+Honesty-Humility and Conscientiousness (80 items). The
+<code>scale</code> and <code>reverse</code> columns of the items are the
+structure the pretest checks.</li>
+<li>
+<strong>Personas:</strong> Choose <strong>Type them</strong> and
+keep the three example personas.</li>
+<li>
+<strong>Pretest:</strong> Under <em>Synthetic data</em>, choose
+<strong>hexaco_llm (built in)</strong>, <em>Canada</em> and 3 attempts
+per model. Keep <em>Compare the flags across: Models</em> and click
+<strong>Run the pretest</strong>.</li>
+</ol>
+<div class="float">
+<img src="figures/app-pretest.png" alt="Demo 4: The pretest of six models on two HEXACO traits, Canada."><div class="figcaption">Demo 4: The pretest of six models on two HEXACO
+traits, Canada.</div>
+</div>
+<p>The summary names the items that most models flag and the scales
+whose structure does not come back as designed. The plot shows each
+flagged item with the number of models that flag it: An item that every
+model flags is worth reading again, one flagged by a single model less
+so. Language models answer more tidily than people, so treat the flags
+as a reading list, not a verdict.</p>
+<ol start="5" style="list-style-type: decimal">
+<li>
+<strong>Models:</strong> Add <strong>Mock (random answers, no
+API)</strong>. The interviews use the models of this tab and the
+personas of the Personas tab. With an API key, add a real model instead,
+for example <code>claude-haiku-5-5</code>.</li>
+<li>
+<strong>Interviews:</strong> Keep <strong>Items flagged by the
+pretest</strong> and click <strong>Run the interviews</strong>. The plan
+counts the interviews and the requests.</li>
+</ol>
+<div class="float">
+<img src="figures/app-interviews.png" alt="Demo 4: Cognitive interviews on the items the pretest flagged."><div class="figcaption">Demo 4: Cognitive interviews on the items the
+pretest flagged.</div>
+</div>
+<p>The heatmap shows which kinds of problems each item ran into, and the
+transcripts show what each persona said. Mock interviews are made-up
+text that only show how the tab works. With a real model, read the
+transcripts of the flagged items and the suggested rewordings, and
+decide which items to reword before the field test.</p>
+<ol start="7" style="list-style-type: decimal">
+<li>
+<strong>Export:</strong> Download the pretest, the interviews and
+the transcripts, and the R script that repeats them. Once real responses
+come in, go back to the About tab, answer <strong>Yes, I have real
+data</strong>, and benchmark the same synthetic data in the Compare
+tab.</li>
+</ol>
+<p>The same steps in code:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">items</span> <span class="op">&lt;-</span> <span class="va">hexaco_items</span><span class="op">[</span><span class="va">hexaco_items</span><span class="op">$</span><span class="va">trait</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"H"</span>, <span class="st">"C"</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="va">ca</span> <span class="op">&lt;-</span> <span class="va">hexaco_llm</span><span class="op">[</span><span class="va">hexaco_llm</span><span class="op">$</span><span class="va">country</span> <span class="op">==</span> <span class="st">"Canada"</span> <span class="op">&amp;</span> <span class="va">hexaco_llm</span><span class="op">$</span><span class="va">attempt</span> <span class="op">&lt;=</span> <span class="fl">3</span>, <span class="op">]</span></span>
+<span><span class="va">pt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/synthetic_pretest.html">synthetic_pretest</a></span><span class="op">(</span><span class="fu"><a href="../reference/as_synthetic_list.html">as_synthetic_list</a></span><span class="op">(</span><span class="va">ca</span><span class="op">)</span>, <span class="va">items</span>, irt <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/summarise_pretest.html">summarise_pretest</a></span><span class="op">(</span><span class="va">pt</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/gg_pretest.html">gg_pretest</a></span><span class="op">(</span><span class="va">pt</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">iv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cognitive_interview.html">cognitive_interview</a></span><span class="op">(</span><span class="fu"><a href="../reference/sc_instrument.html">sc_instrument</a></span><span class="op">(</span><span class="va">items</span>, scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">7</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="../reference/sc_model.html">sc_model</a></span><span class="op">(</span><span class="st">"mock"</span><span class="op">)</span>,</span>
+<span>                          <span class="fu"><a href="../reference/sc_personas.html">sc_personas</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"You are a 34-year-old nurse living in Calgary, Canada."</span>,</span>
+<span>                                        <span class="st">"You are a 21-year-old university student in Toronto, Canada."</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                          pretest <span class="op">=</span> <span class="va">pt</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/gg_interview.html">gg_interview</a></span><span class="op">(</span><span class="fu"><a href="../reference/summarise_interviews.html">summarise_interviews</a></span><span class="op">(</span><span class="va">iv</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="things-to-keep-in-mind">Things to keep in mind<a class="anchor" aria-label="anchor" href="#things-to-keep-in-mind"></a>
 </h3>
@@ -248,6 +342,11 @@ deploy it on a shared server with keys typed in.</li>
 <strong>What the benchmark says.</strong> It tells you which model
 resembles your real respondents most, and on which side it falls short.
 It does not show that synthetic data can replace a field test.</li>
+<li>
+<strong>What the pretest and the interviews say.</strong> They point
+to items worth a second look before the field test. They do not show
+that a scale works in people, and they are not a substitute for
+cognitive interviews with real people.</li>
 </ul>
 </div>
 </div>
