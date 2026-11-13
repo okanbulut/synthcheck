@@ -44,7 +44,7 @@ and \code{pattern}), \code{attempts} (one row per attempt), \code{reference} and
 \code{settings}. It has \code{print()}, \code{tidy()} and \code{autoplot()} methods.
 }
 \description{
-\strong{Experimental.} \code{respondent_coverage()} compares whole answer profiles.
+\code{respondent_coverage()} compares whole answer profiles.
 Overlap and Structure in \code{\link[=authenticity_benchmark]{authenticity_benchmark()}} look at scale scores
 and item pairs, so a model can match both while its respondents give
 combinations of answers that no real person gives, or crowd around a few

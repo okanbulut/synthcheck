@@ -45,7 +45,7 @@ respondents), \code{careless} (the flags, with \code{clean_real = TRUE}) and
 \code{settings}. It has \code{print()}, \code{tidy()} and \code{autoplot()} methods.
 }
 \description{
-\strong{Experimental.} \code{synthetic_behaviour()} compares how synthetic and real
+\code{synthetic_behaviour()} compares how synthetic and real
 respondents answer, using the eight \code{\link[=behaviour_features]{behaviour_features()}}. For each
 feature, the real values are cut at their deciles and the share of
 synthetic respondents in each decile is counted, as Overlap does for
@@ -69,7 +69,7 @@ below the real 5th percentile of \eqn{l_z} (careless-like) and above the
 real 95th percentile (too coherent); real data have 5\% in each by
 construction.
 
-Synthetic respondents are experimental: Use Behaviour to compare models,
+Use Behaviour to compare models,
 not to replace a field test.
 }
 \examples{

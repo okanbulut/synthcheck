@@ -2,7 +2,7 @@
 
 #' Save and read synthetic respondents
 #'
-#' **Experimental.** `write_synthetic()` saves a data frame of synthetic
+#' `write_synthetic()` saves a data frame of synthetic
 #' respondents (for example from [generate_synthetic()]) as CSV, JSON, RDS
 #' or Excel. `read_synthetic()` reads one file, or every data file in a
 #' folder written by [generate_synthetic()], back into one tibble.
@@ -70,7 +70,7 @@ read_synthetic <- function(path, format = NULL) {
 
 #' Turn a table of synthetic respondents into benchmark input
 #'
-#' **Experimental.** [authenticity_benchmark()], [synthetic_behaviour()]
+#' [authenticity_benchmark()], [synthetic_behaviour()]
 #' and [synthetic_coverage()] take a named list with one element per model,
 #' each a list of attempts. `as_synthetic_list()` splits a long table, such
 #' as the result of [generate_synthetic()] or [hexaco_llm], into that list.

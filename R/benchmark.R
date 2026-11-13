@@ -3,7 +3,7 @@
 
 #' The synthetic authenticity benchmark
 #'
-#' **Experimental.** `authenticity_benchmark()` scores several language
+#' `authenticity_benchmark()` scores several language
 #' models on three indices and puts them in one table, with one row per
 #' model:
 #'
@@ -54,7 +54,7 @@
 #' can be above 100: It reproduces the full real sample more closely than
 #' a second, smaller sample of real people does.
 #'
-#' Synthetic respondents are experimental: The benchmark compares models and
+#' The benchmark compares models and
 #' supports decisions about them. It does not show that synthetic data can
 #' replace a field test.
 #'
@@ -219,7 +219,7 @@ authenticity_benchmark <- function(synthetic, real, items, score = "weakest", we
 
 #' Draw the synthetic authenticity benchmark
 #'
-#' **Experimental.** One row per model, sorted by the benchmark score (best
+#' One row per model, sorted by the benchmark score (best
 #' at the top), and one tile for each anchored column (Overlap, Structure,
 #' Behaviour). Tiles run from red (-100 or lower, far worse than shuffled
 #' columns) through pale (around 0, no better than shuffled columns) to blue
@@ -276,7 +276,7 @@ gg_benchmark <- function(x, title = NULL, subtitle = NULL) {
 #' @export
 print.sc_benchmark <- function(x, digits = 0, ...) {
   s <- x$settings
-  cat("Synthetic authenticity benchmark (experimental)\n")
+  cat("Synthetic authenticity benchmark\n")
   cat(sprintf("%d items, %d real respondents%s. Score: %s.\n\n", length(s$items), s$n_real,
               if (s$clean_real) " after removing careless ones" else "", s$score))
   t <- as.data.frame(x$table)[c("model", "attempts", "overlap", "structure", "behaviour", "score", "weakest")]

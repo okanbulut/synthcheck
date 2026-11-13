@@ -25,7 +25,7 @@ A tibble of class \code{sc_personas} with \code{persona_id}, \code{description}
 and any attribute columns.
 }
 \description{
-\strong{Experimental.} A persona describes the person a synthetic respondent
+A persona describes the person a synthetic respondent
 plays. It becomes the system prompt of each call in
 \code{\link[=generate_synthetic]{generate_synthetic()}}. \code{sc_personas()} takes the descriptions directly,
 and \code{sc_persona_grid()} builds them from every combination of a few

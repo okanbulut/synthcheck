@@ -2,7 +2,7 @@
 
 #' The eight behaviour features of each respondent
 #'
-#' **Experimental.** `behaviour_features()` describes how each respondent
+#' `behaviour_features()` describes how each respondent
 #' answers, apart from what they answer. The eight features are the
 #' building blocks of the Behaviour index in [synthetic_behaviour()] and of
 #' the careless flags in [flag_careless()].
@@ -74,7 +74,7 @@ behaviour_features <- function(data, items, real = NULL, fit_scales = NULL) {
 
 #' Flag careless real respondents
 #'
-#' **Experimental.** `flag_careless()` marks real respondents whose answers
+#' `flag_careless()` marks real respondents whose answers
 #' look careless, using the eight [behaviour_features()]. By default a
 #' respondent is careless when at least two features fall in the real data's
 #' most extreme 2.5% on the careless side: The highest 2.5% for `extreme`,
@@ -117,7 +117,7 @@ flag_careless <- function(real, items, rule = NULL, fit_scales = NULL) {
 
 #' Behaviour: Do synthetic respondents answer the way real people do?
 #'
-#' **Experimental.** `synthetic_behaviour()` compares how synthetic and real
+#' `synthetic_behaviour()` compares how synthetic and real
 #' respondents answer, using the eight [behaviour_features()]. For each
 #' feature, the real values are cut at their deciles and the share of
 #' synthetic respondents in each decile is counted, as Overlap does for
@@ -140,7 +140,7 @@ flag_careless <- function(real, items, rule = NULL, fit_scales = NULL) {
 #' real 95th percentile (too coherent); real data have 5% in each by
 #' construction.
 #'
-#' Synthetic respondents are experimental: Use Behaviour to compare models,
+#' Use Behaviour to compare models,
 #' not to replace a field test.
 #'
 #' @inheritParams behaviour_features
@@ -203,7 +203,7 @@ synthetic_behaviour <- function(synthetic, real, items, fit_scales = NULL,
 
 #' Draw the behaviour strip
 #'
-#' **Experimental.** One row per model (or per attempt), one column per
+#' One row per model (or per attempt), one column per
 #' behaviour feature. Each tile is coloured by the direction of the gap
 #' (red: Synthetic respondents lower than real people, blue: Higher) with a
 #' strength of `100 - B_f`, so a pale tile is a match. The number in the
@@ -269,7 +269,7 @@ gg_behaviour <- function(x, by = c("model", "attempt"), title = NULL, subtitle =
 
 #' @export
 print.sc_behaviour <- function(x, digits = 1, ...) {
-  cat("Behaviour of synthetic respondents (experimental)\n")
+  cat("Behaviour of synthetic respondents\n")
   cat(sprintf("%d items, %d real respondents%s; person fit on %s.\n\n",
               length(x$settings$items), x$settings$n_real,
               if (x$settings$clean_real) " after removing careless ones" else "",

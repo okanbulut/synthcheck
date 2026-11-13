@@ -4,7 +4,7 @@
 
 #' Pretest a scale on synthetic respondents, without real data
 #'
-#' **Experimental.** `synthetic_pretest()` is for the stage before any real
+#' `synthetic_pretest()` is for the stage before any real
 #' data exist. It runs a standard item analysis on synthetic respondents and
 #' flags items worth a second look. It is **pilot screening, not
 #' validation**: Language models answer more tidily than people (see
@@ -155,7 +155,7 @@ synthetic_pretest <- function(synthetic, items, by = "model", scale_range = NULL
 
 #' Draw the pretest
 #'
-#' **Experimental.** With `what = "items"`, one row per flagged item and one
+#' With `what = "items"`, one row per flagged item and one
 #' column per condition. Red tiles are items with too little signal (they
 #' barely vary, link weakly to their scale, run against it or sit closer to
 #' another scale), blue tiles are near-duplicates of another item, pale
@@ -248,7 +248,7 @@ gg_pretest <- function(x, what = c("items", "scales"), max_items = 30, title = N
 
 #' Describe the pretest in plain language
 #'
-#' **Experimental.** `summarise_pretest()` writes a few sentences from a
+#' `summarise_pretest()` writes a few sentences from a
 #' result of [synthetic_pretest()]: Which items are flagged by most
 #' conditions and why, how well the conditions agree, whether the designed
 #' structure comes back, and whether the scales look too tidy. The text
@@ -346,7 +346,7 @@ summarise_pretest <- function(x, n_items = 5) {
 
 #' @export
 print.sc_pretest_summary <- function(x, ...) {
-  cat("Pretest without real data, in plain language (experimental)\n\n")
+  cat("Pretest without real data, in plain language\n\n")
   for (i in seq_len(nrow(x))) {
     cat(strwrap(x$text[i], width = 0.9 * getOption("width")), sep = "\n")
     cat("\n")
@@ -357,7 +357,7 @@ print.sc_pretest_summary <- function(x, ...) {
 #' @export
 print.sc_pretest <- function(x, digits = 2, ...) {
   s <- x$settings
-  cat("Pretest without real data (experimental): Pilot screening, not validation\n")
+  cat("Pretest without real data: Pilot screening, not validation\n")
   cat(sprintf("%d items in %d scale%s, %d condition%s.\n\n", nrow(s$items),
               length(unique(s$items$scale)), if (length(unique(s$items$scale)) == 1) "" else "s",
               length(s$conditions), if (length(s$conditions) == 1) "" else "s"))

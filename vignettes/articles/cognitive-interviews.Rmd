@@ -7,7 +7,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 8, fig.height
                       dpi = 96, out.width = "100%")
 ```
 
-**Experimental.** This tutorial runs simulated cognitive interviews: A
+This tutorial runs simulated cognitive interviews: A
 language model plays each persona you define, thinks aloud while it answers
 a survey item, and then answers the verbal probes a cognitive interviewer
 would ask. A second call codes each transcript for problems. The result is

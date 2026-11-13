@@ -25,7 +25,7 @@ A tibble with one row per respondent of \code{data} and the eight
 feature columns.
 }
 \description{
-\strong{Experimental.} \code{behaviour_features()} describes how each respondent
+\code{behaviour_features()} describes how each respondent
 answers, apart from what they answer. The eight features are the
 building blocks of the Behaviour index in \code{\link[=synthetic_behaviour]{synthetic_behaviour()}} and of
 the careless flags in \code{\link[=flag_careless]{flag_careless()}}.

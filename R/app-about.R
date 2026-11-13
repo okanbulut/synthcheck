@@ -20,7 +20,6 @@ sc_app_about <- function(has_real = FALSE) {
       class = "sc-hero", id = "about_hero",
       shiny::img(src = "synthcheck-www/logo.png", alt = "synthcheck logo"),
       shiny::div(
-        shiny::span(class = "sc-badge", "Experimental"),
         shiny::h1("synthcheck"),
         shiny::p(class = "sc-tagline",
                  "Do synthetic respondents look like real people? Generate survey answers with",
@@ -63,7 +62,6 @@ sc_app_about <- function(has_real = FALSE) {
                     "Each index runs from 0 (shuffled real answers) to 100 (a second sample of real",
                     "people), and the benchmark score is the weakest of the three by default."),
            shiny::div(class = "alert alert-warning py-2 mt-3 mb-0 small",
-                      shiny::strong("Experimental. "),
                       "The benchmark compares models and supports decisions about them.",
                       "It does not show that synthetic data can replace a field test."))),
     bslib::layout_columns(

@@ -1,8 +1,8 @@
 # synthcheck 0.1.0
 
-First release, archived on Zenodo. synthcheck is experimental: The benchmark
-compares models and supports decisions about them. It does not show that
-synthetic respondents can replace a field test.
+First release, archived on Zenodo. The benchmark compares models and
+supports decisions about them. It does not show that synthetic respondents
+can replace a field test.
 
 ## The synthetic authenticity benchmark
 
@@ -101,7 +101,7 @@ These changes came after the archived 0.1.0 and keep the version number.
 
 * New article: "Pretesting a scale without real data".
 
-* New cognitive interviews for items without real data (experimental):
+* New cognitive interviews for items without real data:
   `cognitive_interview()` has language models play each persona, think
   aloud while answering an item and answer scripted verbal probes
   (`sc_probes()`, after Willis, 2005), then a separate call codes each
@@ -141,3 +141,8 @@ These changes came after the archived 0.1.0 and keep the version number.
 
 * The README, `citation("synthcheck")` and `CITATION.cff` give the Zenodo
   DOI that covers all versions (10.5281/zenodo.24173113).
+
+* synthcheck is no longer labelled experimental in the README, the help
+  pages, the articles, the printed results or the app. The caveat stays: The
+  benchmark compares models and supports decisions about them, and it does
+  not show that synthetic data can replace a field test.

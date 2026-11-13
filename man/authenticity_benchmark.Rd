@@ -72,7 +72,7 @@ the attempts), \code{attempts} (raw and anchored values per attempt),
 \code{autoplot()} methods.
 }
 \description{
-\strong{Experimental.} \code{authenticity_benchmark()} scores several language
+\code{authenticity_benchmark()} scores several language
 models on three indices and puts them in one table, with one row per
 model:
 }
@@ -126,7 +126,7 @@ table), not a competitor. For the same reason, its Overlap and Structure
 can be above 100: It reproduces the full real sample more closely than
 a second, smaller sample of real people does.
 
-Synthetic respondents are experimental: The benchmark compares models and
+The benchmark compares models and
 supports decisions about them. It does not show that synthetic data can
 replace a field test.
 }

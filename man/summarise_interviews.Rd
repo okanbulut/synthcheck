@@ -22,7 +22,7 @@ major problems), \code{personas} and \code{models} (how many raised a problem),
 The attribute \code{text} holds the paragraph.
 }
 \description{
-\strong{Experimental.} \code{summarise_interviews()} rolls the coded interviews of
+\code{summarise_interviews()} rolls the coded interviews of
 \code{\link[=cognitive_interview]{cognitive_interview()}} up to one row per item: The share of interviews
 with a problem at each stage and at any stage, how many personas and
 models raised a problem, the coder's most common notes and the suggested

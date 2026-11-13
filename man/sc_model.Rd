@@ -31,7 +31,7 @@ on another machine.}
 An object of class \code{sc_model}.
 }
 \description{
-\strong{Experimental.} \code{sc_model()} names a model and its settings for
+\code{sc_model()} names a model and its settings for
 \code{\link[=generate_synthetic]{generate_synthetic()}}. Anthropic, OpenAI and Ollama models are called
 through the ellmer package. \code{provider = "mock"} gives random answers
 without calling any model, for trying the workflow and the app.

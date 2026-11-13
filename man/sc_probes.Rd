@@ -21,7 +21,7 @@ A tibble of class \code{sc_probes} with \code{probe_id}, \code{stage} and
 \code{probe}.
 }
 \description{
-\strong{Experimental.} \code{sc_probes()} returns the scripted verbal probes that
+\code{sc_probes()} returns the scripted verbal probes that
 \code{\link[=cognitive_interview]{cognitive_interview()}} asks after the think-aloud, one row per probe.
 With no arguments it gives the default protocol: Two comprehension probes
 (paraphrase and terms), then one probe each for retrieval, judgement,

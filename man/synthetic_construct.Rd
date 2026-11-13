@@ -47,7 +47,7 @@ attempt and pair of scales: \code{cor}, \code{cor_real}, \code{difference}),
 \code{settings}. It has \code{print()}, \code{tidy()} and \code{autoplot()} methods.
 }
 \description{
-\strong{Experimental.} \code{synthetic_construct()} checks the scales rather than
+\code{synthetic_construct()} checks the scales rather than
 the items. Structure in \code{\link[=authenticity_benchmark]{authenticity_benchmark()}} averages over every
 pair of items, so a model can score well there and still blur the traits
 together or make every scale too coherent. Three checks, for each model

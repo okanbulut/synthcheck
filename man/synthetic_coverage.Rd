@@ -75,7 +75,7 @@ definitions) and \code{notes}. It has \code{print()}, \code{tidy()} and \code{au
 methods.
 }
 \description{
-\strong{Experimental.} \code{synthetic_coverage()} compares synthetic respondents
+\code{synthetic_coverage()} compares synthetic respondents
 from one or more language models (each run several times) with real
 responses to
 the same items, and finds the blend of models that matches the real
@@ -132,7 +132,7 @@ half, so that it is not judged on the data it was chosen on. The
 structure of a blend is computed on a pooled sample drawn with the
 recipe's weights. See \code{\link[=blend_llms]{blend_llms()}} to search again with other settings.
 
-Synthetic respondents are experimental: Use the coverage strip to compare
+Use the coverage strip to compare
 models and to decide how to combine them, not to replace a field test.
 }
 \examples{

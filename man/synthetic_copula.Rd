@@ -25,7 +25,7 @@ columns, ready to be one element of \code{synthetic} in
 \code{\link[=authenticity_benchmark]{authenticity_benchmark()}} and the other functions.
 }
 \description{
-\strong{Experimental.} \code{synthetic_copula()} makes synthetic respondents with no
+\code{synthetic_copula()} makes synthetic respondents with no
 language model. It keeps each item's answer distribution and the rank
 correlations between items, and nothing else. It is a reference
 generator: A language model that does no better than the copula adds

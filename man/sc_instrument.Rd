@@ -34,7 +34,7 @@ scales and labels the endpoints only otherwise.}
 An object of class \code{sc_instrument}.
 }
 \description{
-\strong{Experimental.} \code{sc_instrument()} describes the survey that synthetic
+\code{sc_instrument()} describes the survey that synthetic
 respondents take: The items, the response scale and the instructions.
 \code{\link[=generate_synthetic]{generate_synthetic()}} turns it into a prompt, and the item table works
 as \code{items} in \code{\link[=authenticity_benchmark]{authenticity_benchmark()}}.

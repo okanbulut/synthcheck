@@ -82,7 +82,7 @@ interviews. Summarise it with \code{\link[=summarise_interviews]{summarise_inter
 \code{\link[=gg_interview]{gg_interview()}}.
 }
 \description{
-\strong{Experimental.} \code{cognitive_interview()} asks one or more language
+\code{cognitive_interview()} asks one or more language
 models to take part in a cognitive interview about each survey item, as
 each persona. It is meant for screening items when there are no real
 respondents yet, for example after a \code{\link[=synthetic_pretest]{synthetic_pretest()}}: It points to

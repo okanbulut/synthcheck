@@ -2,7 +2,7 @@
 
 #' Describe the benchmark in plain language
 #'
-#' **Experimental.** `summarise_benchmark()` writes a few sentences per model
+#' `summarise_benchmark()` writes a few sentences per model
 #' from a result of [authenticity_benchmark()]: The score and its weakest
 #' column, how close each anchored column is to real people, the behaviour
 #' features that differ most from real people and in which direction, and
@@ -13,7 +13,7 @@
 #' of real people, 0 is no better than shuffling the real answers within
 #' each item, and below 0 is worse than that.
 #'
-#' Synthetic respondents are experimental: The benchmark compares models and
+#' The benchmark compares models and
 #' supports decisions about them. It does not show that synthetic data can
 #' replace a field test.
 #'
@@ -71,7 +71,7 @@ summarise_benchmark <- function(x, n_features = 2) {
 
 #' @export
 print.sc_summary <- function(x, ...) {
-  cat("Synthetic authenticity benchmark in plain language (experimental)\n\n")
+  cat("Synthetic authenticity benchmark in plain language\n\n")
   for (i in seq_len(nrow(x))) {
     cat(strwrap(x$summary[i], width = 0.9 * getOption("width")), sep = "\n")
     cat("\n")

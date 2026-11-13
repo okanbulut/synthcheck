@@ -22,7 +22,7 @@ read_synthetic(path, format = NULL)
 returns a tibble.
 }
 \description{
-\strong{Experimental.} \code{write_synthetic()} saves a data frame of synthetic
+\code{write_synthetic()} saves a data frame of synthetic
 respondents (for example from \code{\link[=generate_synthetic]{generate_synthetic()}}) as CSV, JSON, RDS
 or Excel. \code{read_synthetic()} reads one file, or every data file in a
 folder written by \code{\link[=generate_synthetic]{generate_synthetic()}}, back into one tibble.

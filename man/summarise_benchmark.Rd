@@ -16,7 +16,7 @@ A tibble with \code{model}, \code{score}, \code{weakest} and \code{summary} (the
 in the order of the benchmark table. Printing it shows the text.
 }
 \description{
-\strong{Experimental.} \code{summarise_benchmark()} writes a few sentences per model
+\code{summarise_benchmark()} writes a few sentences per model
 from a result of \code{\link[=authenticity_benchmark]{authenticity_benchmark()}}: The score and its weakest
 column, how close each anchored column is to real people, the behaviour
 features that differ most from real people and in which direction, and
@@ -28,7 +28,7 @@ The anchored values read as follows: 100 is as close as a second sample
 of real people, 0 is no better than shuffling the real answers within
 each item, and below 0 is worse than that.
 
-Synthetic respondents are experimental: The benchmark compares models and
+The benchmark compares models and
 supports decisions about them. It does not show that synthetic data can
 replace a field test.
 }

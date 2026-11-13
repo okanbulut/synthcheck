@@ -26,7 +26,7 @@ first.}
 A ggplot object.
 }
 \description{
-\strong{Experimental.} With \code{what = "items"}, one row per flagged item and one
+With \code{what = "items"}, one row per flagged item and one
 column per condition. Red tiles are items with too little signal (they
 barely vary, link weakly to their scale, run against it or sit closer to
 another scale), blue tiles are near-duplicates of another item, pale

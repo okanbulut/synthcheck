@@ -2,7 +2,7 @@
 title: "A tour of the synthcheck app"
 ---
 
-**Experimental.** `run_synthcheck_app()` opens an app that does the whole
+`run_synthcheck_app()` opens an app that does the whole
 synthcheck workflow without code. It starts with one question: **Do you
 already have real responses to this instrument?** The answer chooses one of
 two paths through the same tabs.

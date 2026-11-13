@@ -15,7 +15,7 @@ gg_respondent_coverage(x, title = NULL, subtitle = NULL)
 A ggplot object.
 }
 \description{
-\strong{Experimental.} One point per model at its RCG (across) and OSR (up),
+One point per model at its RCG (across) and OSR (up),
 with the second sample of real people and the shuffled real columns as
 grey references. Real-like models sit near the bottom left corner (both
 ratios near 1). Far to the right and up means off-support, far to the

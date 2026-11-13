@@ -4,7 +4,7 @@
 
 #' How well do synthetic respondents cover the real population?
 #'
-#' **Experimental.** `synthetic_coverage()` compares synthetic respondents
+#' `synthetic_coverage()` compares synthetic respondents
 #' from one or more language models (each run several times) with real
 #' responses to
 #' the same items, and finds the blend of models that matches the real
@@ -60,7 +60,7 @@
 #' structure of a blend is computed on a pooled sample drawn with the
 #' recipe's weights. See [blend_llms()] to search again with other settings.
 #'
-#' Synthetic respondents are experimental: Use the coverage strip to compare
+#' Use the coverage strip to compare
 #' models and to decide how to combine them, not to replace a field test.
 #'
 #' @param synthetic a named list with one element per language model. Each
@@ -371,7 +371,7 @@ print.sc_coverage <- function(x, ...) {
   what <- switch(s$slices, score = "real total-score slices", theta = "real theta slices",
                  group = "groups", item = "items")
   n_models <- length(unique(x$attempts$model[x$attempts$model != "Best Blend"]))
-  cat(sprintf("<sc_coverage> %d model(s), %d item(s), coverage of %s (EXPERIMENTAL)\n",
+  cat(sprintf("<sc_coverage> %d model(s), %d item(s), coverage of %s\n",
               n_models, length(s$items), what))
   tab <- as.data.frame(x$summary)
   pct <- grepl("^(overlap|structure)_", names(tab))

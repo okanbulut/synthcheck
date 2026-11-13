@@ -2,7 +2,7 @@
 
 #' Respondent coverage of synthetic respondents
 #'
-#' **Experimental.** `respondent_coverage()` compares whole answer profiles.
+#' `respondent_coverage()` compares whole answer profiles.
 #' Overlap and Structure in [authenticity_benchmark()] look at scale scores
 #' and item pairs, so a model can match both while its respondents give
 #' combinations of answers that no real person gives, or crowd around a few
@@ -120,7 +120,7 @@ respondent_coverage <- function(synthetic, real, items, clean_real = FALSE, care
 
 #' Draw the respondent coverage
 #'
-#' **Experimental.** One point per model at its RCG (across) and OSR (up),
+#' One point per model at its RCG (across) and OSR (up),
 #' with the second sample of real people and the shuffled real columns as
 #' grey references. Real-like models sit near the bottom left corner (both
 #' ratios near 1). Far to the right and up means off-support, far to the
@@ -163,7 +163,7 @@ gg_respondent_coverage <- function(x, title = NULL, subtitle = NULL) {
 #' @export
 print.sc_respondent <- function(x, digits = 2, ...) {
   s <- x$settings
-  cat("Respondent coverage (experimental)\n")
+  cat("Respondent coverage\n")
   cat(sprintf("%d items, %d real respondents, %d real samples per attempt.\n\n", length(s$items),
               s$n_real, s$n_draws))
   t <- rbind(as.data.frame(x$summary)[c("model", "rcg", "osr", "pattern")],

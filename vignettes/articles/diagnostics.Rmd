@@ -7,7 +7,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 8, fig.height
                       dpi = 96, out.width = "100%")
 ```
 
-**Experimental.** The benchmark scores each model on Overlap, Structure and
+The benchmark scores each model on Overlap, Structure and
 Behaviour. Three diagnostics look at failures those columns can miss. They
 come from recent studies of synthetic survey respondents, and they do not
 change the benchmark score:
