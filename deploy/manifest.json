@@ -3433,16 +3433,16 @@
         "RemoteRepo": "synthcheck",
         "RemoteUsername": "okanbulut",
         "RemoteRef": "HEAD",
-        "RemoteSha": "49cb097242964dd76d8ccf2d16e5a3f7d2e62431",
+        "RemoteSha": "c29694e66443d5b1447c3be3be6a4e46c3605dbf",
         "GithubRepo": "synthcheck",
         "GithubUsername": "okanbulut",
         "GithubRef": "HEAD",
-        "GithubSHA1": "49cb097242964dd76d8ccf2d16e5a3f7d2e62431",
+        "GithubSHA1": "c29694e66443d5b1447c3be3be6a4e46c3605dbf",
         "NeedsCompilation": "no",
-        "Packaged": "2026-11-13 19:02:13 UTC; bulut",
+        "Packaged": "2026-11-13 20:14:16 UTC; bulut",
         "Author": "Okan Bulut [aut, cre, cph] (ORCID:\n    <https://orcid.org/0000-0001-5853-1267>)",
         "Maintainer": "Okan Bulut <bulut@ualberta.ca>",
-        "Built": "R 4.5.2; ; 2026-11-13 19:02:15 UTC; windows"
+        "Built": "R 4.5.2; ; 2026-11-13 20:14:19 UTC; windows"
       }
     },
     "sys": {
