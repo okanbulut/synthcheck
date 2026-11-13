@@ -176,6 +176,15 @@ summarise_interviews(iv2)
 interviews, by one of them, or by neither. Items flagged by both are the
 first to revise.
 
+## In the app
+
+The app runs the same interviews on screen. On the About tab, answer **No,
+not yet** to the first question, and the app adds an **Interviews** tab (5)
+after the Pretest tab. It uses the personas and models of the Personas and
+Models tabs, interviews the items the pretest flagged or items you choose,
+lets you edit the probes and pick the coder, and shows the summary, the
+heatmap and the transcripts. See [the tour of the app](app-tour.html#interviews-without-real-data).
+
 ## What the interviews can and cannot tell you
 
 - **Most useful:** Comprehension and response mapping. Vague words,

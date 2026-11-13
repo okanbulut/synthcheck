@@ -14,11 +14,12 @@ run_synthcheck_app(
 }
 \arguments{
 \item{real}{optional data frame of real responses, loaded into the
-Compare tab.}
+Compare tab. With real data given, the first step starts on "Yes, I
+have real data".}
 
 \item{synthetic}{optional data frame of synthetic respondents (for
 example from \code{\link[=generate_synthetic]{generate_synthetic()}} or \code{\link[=read_synthetic]{read_synthetic()}}), loaded into
-the Compare tab.}
+the Compare and Pretest tabs.}
 
 \item{host, port}{where to serve the app. The default serves it on your
 own computer only.}
@@ -35,50 +36,54 @@ with \code{synthetic} (the generated data), \code{benchmark} (the
 }
 \description{
 \strong{Experimental.} \code{run_synthcheck_app()} opens an app that walks through
-the whole workflow in five tabs. It opens on an \strong{About} tab that
+the whole workflow without code. It opens on an \strong{About} tab that
 explains the purpose of the app, lists what it can do and produce, shows
 an animated picture of a language model answering survey items and starts
-a guided tour of the five tabs (the tour needs the cicerone package).
+a guided tour (the tour needs the cicerone package). The tour follows the
+path chosen in the first step.
 }
 \details{
-The About tab starts with one question: \strong{Do you already have real
-responses to this instrument?} With real data, the fourth tab is
-\strong{Compare} (the benchmark below). Without real data, it is \strong{Pretest}:
-Pilot screening of the items on synthetic respondents alone, with the
-agreement across models or temperatures and a check of the structure you
-designed (\code{\link[=synthetic_pretest]{synthetic_pretest()}}). The answer can be changed at any time,
-so you can come back with real data later and compare the same synthetic
-data.
-\enumerate{
-\item \strong{Instrument:} Upload an item table or use the IPIP-HEXACO items,
-and set the response scale and instructions (\code{\link[=sc_instrument]{sc_instrument()}}).
-\item \strong{Personas:} Type, upload or build the personas that take the
-instrument (\code{\link[=sc_personas]{sc_personas()}}, \code{\link[=sc_persona_grid]{sc_persona_grid()}}).
+\strong{First step:} The About tab asks one question: \strong{Do you already have
+real responses to this instrument?} The answer chooses one of two paths,
+and it can be changed at any time, so you can come back with real data
+later and benchmark the same synthetic data.
+\itemize{
+\item \strong{Yes, I have real data:} The fourth tab is \strong{Compare}, the benchmark
+against real people.
+\item \strong{No, not yet:} The fourth tab is \strong{Pretest}, followed by
+\strong{Interviews}, so Export becomes the sixth tab. Compare is hidden.
 }
 
-Both upload panels offer a template to fill in. The templates are also
-in the package: \code{system.file("templates", "instrument_template.csv", package = "synthcheck")} and \code{"personas_template.csv"}.
-\enumerate{
-\item \strong{Models:} Add Anthropic, OpenAI or local Ollama models with their
-temperature, enter API keys, choose the number of attempts and
-respondents, and run \code{\link[=generate_synthetic]{generate_synthetic()}} with a progress bar and
-the time left.
-\item \strong{Compare:} Load real data and run \code{\link[=authenticity_benchmark]{authenticity_benchmark()}}, with
-\code{\link[=gg_benchmark]{gg_benchmark()}}, \code{\link[=gg_behaviour]{gg_behaviour()}} and a plain-language summary per
-model (\code{\link[=summarise_benchmark]{summarise_benchmark()}}).
-\item \strong{Pretest} (without real data): Run \code{\link[=synthetic_pretest]{synthetic_pretest()}} on the
+The tabs, in order (with real data: 1 to 4 and 5. Export; without: 1 to
+3, 4. Pretest, 5. Interviews and 6. Export):
+\itemize{
+\item \strong{1. Instrument:} Upload an item table or use the IPIP-HEXACO items,
+and set the response scale and instructions (\code{\link[=sc_instrument]{sc_instrument()}}).
+\item \strong{2. Personas:} Type, upload or build the personas that take the
+instrument (\code{\link[=sc_personas]{sc_personas()}}, \code{\link[=sc_persona_grid]{sc_persona_grid()}}). Both upload panels
+offer a template to fill in. The templates are also in the package:
+\code{system.file("templates", "instrument_template.csv", package = "synthcheck")} and \code{"personas_template.csv"}.
+\item \strong{3. Models:} Add Anthropic, OpenAI or local Ollama models with their
+temperature (or several temperatures, one model each), enter API keys,
+choose the number of attempts and respondents, and run
+\code{\link[=generate_synthetic]{generate_synthetic()}} with a progress bar and the time left.
+\item \strong{4. Compare} (with real data): Load real data and run
+\code{\link[=authenticity_benchmark]{authenticity_benchmark()}}, with \code{\link[=gg_benchmark]{gg_benchmark()}}, \code{\link[=gg_behaviour]{gg_behaviour()}}
+and a plain-language summary per model (\code{\link[=summarise_benchmark]{summarise_benchmark()}}).
+\item \strong{4. Pretest} (without real data): Run \code{\link[=synthetic_pretest]{synthetic_pretest()}} on the
 generated data, with \code{\link[=gg_pretest]{gg_pretest()}} and a plain-language summary
-(\code{\link[=summarise_pretest]{summarise_pretest()}}). Add the same model at several temperatures in
-the Models tab to check whether the flags hold.
-\item \strong{Interviews} (tab 4b, without real data): Run \code{\link[=cognitive_interview]{cognitive_interview()}} with
-the personas and models of tabs 2 and 3, on the items the pretest
+(\code{\link[=summarise_pretest]{summarise_pretest()}}). Compare the flags across models,
+temperatures or personas to see whether they hold. It is pilot
+screening, not validation.
+\item \strong{5. Interviews} (without real data): Run \code{\link[=cognitive_interview]{cognitive_interview()}}
+with the personas and models of tabs 2 and 3, on the items the pretest
 flagged or on items you choose (the pretest is optional), and read the
 summary (\code{\link[=summarise_interviews]{summarise_interviews()}}), the plot (\code{\link[=gg_interview]{gg_interview()}}) and the
 transcripts. A screening aid, not a substitute for cognitive
 interviews with real people.
-\item \strong{Export:} Download the data (CSV, JSON, RDS or Excel), the
-benchmark, the pretest or the interviews, and an R script that repeats
-the analysis.
+\item \strong{Export} (5 with real data, 6 without): Download the synthetic data
+(CSV, JSON, RDS or Excel), the benchmark or the pretest and interviews,
+and an R script that repeats the analysis.
 }
 
 \strong{API keys} typed into the app stay in memory for that session only:

@@ -25,7 +25,7 @@ sc_app_about <- function(has_real = FALSE) {
         shiny::p(class = "sc-tagline",
                  "Do synthetic respondents look like real people? Generate survey answers with",
                  "language models and test how authentic they are with the synthetic",
-                 "authenticity benchmark."),
+                 "authenticity benchmark, or pretest a new scale before any real data exist."),
         tour_btn, start_btn)),
     card("First step: Do you already have real responses to this instrument?", id = "about_path",
          shiny::radioButtons(
@@ -119,42 +119,62 @@ sc_app_about <- function(has_real = FALSE) {
            li(shiny::strong("Export: "), "Download the data, the plot and an R script, or close the app",
               " to get everything back in R.")),
          shiny::p(class = "mb-0 small text-muted",
-                  if (sc_has_tour()) "The guided tour above points to each of these steps in the app."
+                  if (sc_has_tour()) paste("The guided tour above points to each of these steps in the app.",
+                                           "It follows the path you choose in the first step.")
                   else "Install the cicerone package for a guided tour that points to each step in the app."))
   )
 }
 
 sc_has_tour <- function() requireNamespace("cicerone", quietly = TRUE)
 
-# the guided tour, one step per main control (cicerone switches the tabs)
+# the guided tour, one step per main control (cicerone switches the tabs).
+# It follows the path chosen on the About tab: With real data (or no answer
+# yet) it shows Compare; without real data, Pretest and Interviews.
 sc_app_tour <- function(path = NULL) {
   path <- if (identical(path, "pretest")) "pretest" else "real"
   fourth <- if (path == "pretest") list(
     list("pt_data_card", "4. Pretest: The data",
-         "Without real data, the pretest screens the items on the synthetic respondents alone.",
+         "Without real data, the pretest screens the items on the synthetic respondents alone: This session's run, the built-in hexaco_llm or saved files.",
          "pretest", "right"),
     list("pt_plot_card", "Flagged items",
-         "Items that barely vary, link weakly to their scale or duplicate another item, and how many models agree.",
+         "Items that barely vary, link weakly to their scale, duplicate another item or fight their reverse key, and how many models agree on each flag.",
          "pretest", "left"),
-    list("iv_items_card", "4b. Cognitive interviews",
-         "Models play your personas, think aloud on each item and answer probes. Start with the items the pretest flagged, or choose your own.",
+    list("pt_structure_card", "The structure you designed",
+         "Reliability per scale, the dimensions parallel analysis finds and whether the scales and reverse keys from the Instrument tab come back. Pilot screening, not validation.",
+         "pretest", "left"),
+    list("iv_items_card", "5. Interviews: The items",
+         "Models play your personas, think aloud on each item and answer probes. Start with the items the pretest flagged, or choose your own: The pretest is optional.",
+         "interviews", "right"),
+    list("iv_settings_card", "Interview settings",
+         "The personas and models come from tabs 2 and 3. Choose who codes the transcripts, edit the probes and run the interviews.",
          "interviews", "right"),
     list("iv_plot_card", "Problems per item",
-         "Where the interviews ran into comprehension, retrieval, judgement, response or sensitivity problems. A screening aid, not a substitute for real interviews.",
+         "Where the interviews ran into comprehension, retrieval, judgement, response or sensitivity problems. A screening aid, not a substitute for interviews with real people.",
+         "interviews", "left"),
+    list("iv_transcripts_card", "Transcripts",
+         "Read what each persona thought aloud about an item, its answers to the probes and the coder's notes.",
          "interviews", "left")
   ) else list(
     list("cmp_data_card", "4. Compare: The data",
-         "Choose the real data and the synthetic data. The built-in hexaco_llm has six models.", "compare",
-         "right"),
+         "Choose the real data and the synthetic data, and the benchmark settings. The built-in hexaco_llm has six models.",
+         "compare", "right"),
     list("cmp_plot_card", "The benchmark",
-         "Overlap, Structure and Behaviour for every model, from 0 (shuffled) to 100 (real people).",
+         "Overlap, Structure and Behaviour for every model, from 0 (shuffled real answers) to 100 (a second sample of real people). The summary above explains each model in plain language.",
          "compare", "left"))
+  export_text <- if (path == "pretest") {
+    "Download the synthetic data, the pretest items, summary and plot, and the interviews with their transcripts."
+  } else "Download the synthetic data, the benchmark table, the summary and the plot."
   steps <- c(list(
     list("about_hero", "Welcome to synthcheck",
-         "This tour shows the five steps of the app. Use the arrow keys or the buttons to move on.",
+         paste("This tour walks through the app one step at a time.",
+               if (path == "pretest") "It follows the path without real data: Pretest and Interviews."
+               else "It follows the path with real data: The benchmark in the Compare tab.",
+               "Use the arrow keys or the buttons to move on."),
          "about"),
     list("about_path", "First: Real data or not?",
-         "With real data, the fourth tab benchmarks the models. Without it, the fourth tab pretests the scale.",
+         paste("With real data, the fourth tab is Compare: The benchmark against real people.",
+               "Without it, the fourth tab is Pretest, and the fifth is Interviews.",
+               "Change the answer and start the tour again to see the other path."),
          "about"),
     list("ins_items_card", "1. Instrument",
          "Choose the items: The built-in IPIP-HEXACO items or your own item table, with the response scale.",
@@ -164,12 +184,13 @@ sc_app_tour <- function(path = NULL) {
     list("per_card", "2. Personas",
          "Give each synthetic respondent a persona: Type them, build a grid or upload a table.", "personas"),
     list("mod_add_card", "3. Add a model",
-         "Pick a provider and a model. Mock gives random answers and needs no API key.", "models", "right"),
+         paste("Pick a provider and a model. Mock gives random answers and needs no API key.",
+               if (path == "pretest") "Several temperatures add one model per temperature, for the stability check in the Pretest tab."),
+         "models", "right"),
     list("mod_run_card", "Generate data",
          "Set the attempts and respondents, estimate the run time and start the run.", "models", "left")),
     fourth, list(
-    list("exp_dl_card", "5. Export",
-         "Download the data, the table, the summary and the plot.", "export"),
+    list("exp_dl_card", if (path == "pretest") "6. Export" else "5. Export", export_text, "export"),
     list("exp_script_card", "Repeat it in R",
          "An R script repeats the analysis. Close the app to get everything back in R.", "export")
   ))

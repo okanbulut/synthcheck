@@ -41,7 +41,7 @@ navbar:
       menu:
       - text: A tour of the synthcheck app
         href: articles/app-tour.html
-      - text: "App demos: Three ways to use the app"
+      - text: "App demos: Four ways to use the app"
         href: articles/app-demo.html
 
 articles:
