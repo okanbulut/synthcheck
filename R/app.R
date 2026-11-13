@@ -569,7 +569,16 @@ sc_parse_probes <- function(x) {
   bad <- lengths(m) != 3L
   if (any(bad)) stop("Write each probe as stage: probe, for example ",
                      "\"comprehension: What does this statement mean to you?\"", call. = FALSE)
-  sc_probes(vapply(m, `[`, "", 2L), vapply(m, `[`, "", 3L))
+  stage <- tolower(vapply(m, `[`, "", 2L)); probe <- trimws(vapply(m, `[`, "", 3L))
+  # a default probe keeps its default name (paraphrase, terms, ...); a new probe
+  # is named after its stage, numbered when the stage has several
+  def <- sc_probes()
+  hit <- match(paste(stage, probe), paste(def$stage, def$probe))
+  id <- def$probe_id[hit]
+  new <- is.na(id)
+  if (any(new)) id[new] <- utils::tail(make.unique(c(id[!new], stage[new]), sep = "_"), sum(new))
+  if (anyDuplicated(id)) id <- make.unique(id, sep = "_")
+  sc_probes(stage, probe, probe_id = id)
 }
 
 # a Bootstrap 5 theme in the logo colours (navy, the coverage strip blues and reds)

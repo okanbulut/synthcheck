@@ -184,6 +184,12 @@ test_that("probes typed in the app are parsed", {
   expect_error(sc_parse_probes("no stage here"), "stage: probe")
   expect_error(sc_parse_probes("memory: What?"), "Unknown stage")
   expect_equal(sc_parse_probes(sc_probe_text(sc_probes()))$probe, sc_probes()$probe)
+  # unchanged default probes keep their default names; new ones are named by stage
+  expect_equal(sc_parse_probes(sc_probe_text(sc_probes()))$probe_id, sc_probes()$probe_id)
+  p <- sc_parse_probes(paste(sc_probe_text(sc_probes()),
+                             "comprehension: Is it one question or two?",
+                             "comprehension: Who is it about?", sep = "\n"))
+  expect_equal(p$probe_id, c(sc_probes()$probe_id, "comprehension", "comprehension_1"))
 })
 
 test_that("the app uses a short built-in instrument and its real data", {
