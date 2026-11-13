@@ -272,7 +272,59 @@ nrow(syn2)
 [`read_synthetic()`](https://www.okanbulut.com/synthcheck/reference/write_synthetic.md)
 also reads a whole output folder back into one table.
 
-## 7. Benchmark
+## 7. Check the personas
+
+A persona-based run assumes the model follows its personas.
+[`persona_fidelity()`](https://www.okanbulut.com/synthcheck/reference/persona_fidelity.md)
+checks that. For each model and scale it measures how much of the scale
+score lies between personas (eta squared) and compares it with the same
+data after shuffling the persona labels. Add `target_<scale>` columns to
+the persona table (1 for high, 0 for average, -1 for low) to check the
+direction too:
+
+``` r
+
+per2 <- sc_personas(data.frame(
+  description = c("You never bend the rules to get ahead and you dislike flattery.",
+                  "You will say what people want to hear if it gets you what you want."),
+  target_H = c(1, -1)))
+syn_p <- generate_synthetic(ins, models[1], per2, respondents = 20, progress = FALSE)
+fid <- persona_fidelity(syn_p, ins, per2)
+fid
+#> Persona check
+#> 1 scale; scores standardized against each model's own respondents; 200 label shuffles.
+#> 
+#> Do personas separate respondents? (eta squared, against shuffled labels)
+#>   model scale eta2 null    p separated
+#>  Mock A     H 0.05 0.09 0.14     FALSE
+#> 
+#> Do they move in the intended direction?
+#>   model persona  n targets  r  gap agree
+#>  Mock A    p001 20       1 NA 1.21     0
+#>  Mock A    p002 20       1 NA 1.21     0
+#> 
+#> Mock A: Personas do not change the scale scores more than shuffled labels do. The personas match the sign of 0% of their targets.
+```
+
+``` r
+
+gg_persona_fidelity(fid)
+```
+
+![](generate_files/figure-html/unnamed-chunk-14-1.png)
+
+The mock provider ignores personas, so its Honesty-Humility scores do
+not separate, and the personas miss their targets. A model that follows
+its personas separates them, with each persona on the side of its
+target. Give `real` to standardize the scores against real people, so a
+target of 1 means one standard deviation above them. The check shows
+whether a model follows its personas. It does not show that a persona
+answers like real people like it: The benchmark does that.
+
+In the app, the Models tab shows the same check after a run with two or
+more personas.
+
+## 8. Benchmark
 
 [`as_synthetic_list()`](https://www.okanbulut.com/synthcheck/reference/as_synthetic_list.md)
 turns the long table into the list of models and attempts that the
@@ -322,7 +374,7 @@ guaranteed to do better. On HEXACO, the six models in `hexaco_llm` often
 fall below 0 because their respondents bunch together; see [the
 benchmark](https://www.okanbulut.com/synthcheck/articles/benchmark.md).
 
-## 8. A report
+## 9. A report
 
 [`write_report()`](https://www.okanbulut.com/synthcheck/reference/write_report.md)
 puts the results in one file: The plots, the tables, the plain-language

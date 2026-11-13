@@ -188,9 +188,35 @@ clamped values, and a function of <code>overlap</code>,
 score.</p>
 </div>
 <div class="section level2">
+<h2 id="how-sure-is-the-ranking">How sure is the ranking?<a class="anchor" aria-label="anchor" href="#how-sure-is-the-ranking"></a>
+</h2>
+<p>Every anchored value and the score come with an interval (95% by
+default, <code>conf</code>). It is a bootstrap that resamples each
+model’s attempts and, separately, the floor and ceiling draws, and
+recomputes the values each time:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">bm</span><span class="op">$</span><span class="va">table</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"model"</span>, <span class="st">"score"</span>, <span class="st">"score_lower"</span>, <span class="st">"score_upper"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
+<span><span class="co">#&gt;   model             score score_lower score_upper</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> GPT-OSS-120B      -<span style="color: #BB0000;">49.5</span>       -<span style="color: #BB0000;">54.1</span>       -<span style="color: #BB0000;">43.9</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Claude Haiku 5.5  -<span style="color: #BB0000;">66.3</span>       -<span style="color: #BB0000;">68.6</span>       -<span style="color: #BB0000;">64.3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Qwen 3.8 27B      -<span style="color: #BB0000;">74.6</span>       -<span style="color: #BB0000;">84.6</span>       -<span style="color: #BB0000;">65.7</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Qwen 3.5 122B     -<span style="color: #BB0000;">88.2</span>       -<span style="color: #BB0000;">91.3</span>       -<span style="color: #BB0000;">85.0</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> GPT-4.1 mini      -<span style="color: #BB0000;">93.5</span>       -<span style="color: #BB0000;">96.5</span>       -<span style="color: #BB0000;">90.3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Gemma 4 26B      -<span style="color: #BB0000;">151.</span>       -<span style="color: #BB0000;">157.</span>       -<span style="color: #BB0000;">145.</span></span></span></code></pre></div>
+<p><code><a href="../reference/gg_benchmark.html">gg_benchmark()</a></code> prints the interval in small type under
+each value. Two models whose score intervals overlap are not clearly
+apart, and the plain-language summary below says so. More attempts give
+narrower intervals. With a single attempt the spread between attempts is
+unknown, so it is approximated by the spread between two samples of real
+people of the same size. Turn the small print off with
+<code>gg_benchmark(bm, intervals = FALSE)</code>.</p>
+</div>
+<div class="section level2">
 <h2 id="the-plain-language-summary">The plain-language summary<a class="anchor" aria-label="anchor" href="#the-plain-language-summary"></a>
 </h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summarise_benchmark.html">summarise_benchmark</a></span><span class="op">(</span><span class="va">bm</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Synthetic authenticity benchmark in plain language</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -253,7 +279,7 @@ the same benchmark always gives the same summary.</p>
 <div class="section level2">
 <h2 id="the-pieces-behind-the-table">The pieces behind the table<a class="anchor" aria-label="anchor" href="#the-pieces-behind-the-table"></a>
 </h2>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">bm</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "table"     "attempts"  "anchors"   "behaviour" "careless"  "settings"</span></span>
 <span><span class="va">bm</span><span class="op">$</span><span class="va">attempts</span></span>
@@ -282,9 +308,9 @@ the same benchmark always gives the same summary.</p>
 <p><code>bm$behaviour</code> is the full
 <code><a href="../reference/synthetic_behaviour.html">synthetic_behaviour()</a></code> result, so the behaviour strip comes
 for free:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gg_behaviour.html">gg_behaviour</a></span><span class="op">(</span><span class="va">bm</span><span class="op">$</span><span class="va">behaviour</span><span class="op">)</span></span></code></pre></div>
-<p><img src="benchmark_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="100%"></p>
+<p><img src="benchmark_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="100%"></p>
 </div>
 <div class="section level2">
 <h2 id="settings-that-change-the-target">Settings that change the target<a class="anchor" aria-label="anchor" href="#settings-that-change-the-target"></a>
@@ -308,7 +334,7 @@ Structure (needs polycor, slow on many items).</li>
 </h2>
 <p>The full benchmark, with person fit on all six traits, takes several
 minutes:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">real</span> <span class="op">&lt;-</span> <span class="va">hexaco_real</span><span class="op">[</span><span class="va">hexaco_real</span><span class="op">$</span><span class="va">country</span> <span class="op">==</span> <span class="st">"Canada"</span>, <span class="op">]</span></span>
 <span><span class="va">ca</span> <span class="op">&lt;-</span> <span class="va">hexaco_llm</span><span class="op">[</span><span class="va">hexaco_llm</span><span class="op">$</span><span class="va">country</span> <span class="op">==</span> <span class="st">"Canada"</span>, <span class="op">]</span></span>
 <span><span class="va">bm_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/authenticity_benchmark.html">authenticity_benchmark</a></span><span class="op">(</span><span class="fu"><a href="../reference/as_synthetic_list.html">as_synthetic_list</a></span><span class="op">(</span><span class="va">ca</span><span class="op">)</span>, <span class="va">real</span>, <span class="va">hexaco_items</span><span class="op">)</span></span>

@@ -322,11 +322,54 @@ too, and <code><a href="../reference/estimate_cost.html">estimate_interview_cost
 into one table.</p>
 </div>
 <div class="section level2">
-<h2 id="benchmark">7. Benchmark<a class="anchor" aria-label="anchor" href="#benchmark"></a>
+<h2 id="check-the-personas">7. Check the personas<a class="anchor" aria-label="anchor" href="#check-the-personas"></a>
+</h2>
+<p>A persona-based run assumes the model follows its personas.
+<code><a href="../reference/persona_fidelity.html">persona_fidelity()</a></code> checks that. For each model and scale it
+measures how much of the scale score lies between personas (eta squared)
+and compares it with the same data after shuffling the persona labels.
+Add <code>target_&lt;scale&gt;</code> columns to the persona table (1
+for high, 0 for average, -1 for low) to check the direction too:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">per2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sc_personas.html">sc_personas</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  description <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"You never bend the rules to get ahead and you dislike flattery."</span>,</span>
+<span>                  <span class="st">"You will say what people want to hear if it gets you what you want."</span><span class="op">)</span>,</span>
+<span>  target_H <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">syn_p</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/generate_synthetic.html">generate_synthetic</a></span><span class="op">(</span><span class="va">ins</span>, <span class="va">models</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">per2</span>, respondents <span class="op">=</span> <span class="fl">20</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">fid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/persona_fidelity.html">persona_fidelity</a></span><span class="op">(</span><span class="va">syn_p</span>, <span class="va">ins</span>, <span class="va">per2</span><span class="op">)</span></span>
+<span><span class="va">fid</span></span>
+<span><span class="co">#&gt; Persona check</span></span>
+<span><span class="co">#&gt; 1 scale; scores standardized against each model's own respondents; 200 label shuffles.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Do personas separate respondents? (eta squared, against shuffled labels)</span></span>
+<span><span class="co">#&gt;   model scale eta2 null    p separated</span></span>
+<span><span class="co">#&gt;  Mock A     H 0.05 0.09 0.14     FALSE</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Do they move in the intended direction?</span></span>
+<span><span class="co">#&gt;   model persona  n targets  r  gap agree</span></span>
+<span><span class="co">#&gt;  Mock A    p001 20       1 NA 1.21     0</span></span>
+<span><span class="co">#&gt;  Mock A    p002 20       1 NA 1.21     0</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Mock A: Personas do not change the scale scores more than shuffled labels do. The personas match the sign of 0% of their targets.</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/gg_persona_fidelity.html">gg_persona_fidelity</a></span><span class="op">(</span><span class="va">fid</span><span class="op">)</span></span></code></pre></div>
+<p><img src="generate_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="100%"></p>
+<p>The mock provider ignores personas, so its Honesty-Humility scores do
+not separate, and the personas miss their targets. A model that follows
+its personas separates them, with each persona on the side of its
+target. Give <code>real</code> to standardize the scores against real
+people, so a target of 1 means one standard deviation above them. The
+check shows whether a model follows its personas. It does not show that
+a persona answers like real people like it: The benchmark does that.</p>
+<p>In the app, the Models tab shows the same check after a run with two
+or more personas.</p>
+</div>
+<div class="section level2">
+<h2 id="benchmark">8. Benchmark<a class="anchor" aria-label="anchor" href="#benchmark"></a>
 </h2>
 <p><code><a href="../reference/as_synthetic_list.html">as_synthetic_list()</a></code> turns the long table into the list
 of models and attempts that the benchmark takes:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">real</span> <span class="op">&lt;-</span> <span class="va">hexaco_real</span><span class="op">[</span><span class="va">hexaco_real</span><span class="op">$</span><span class="va">country</span> <span class="op">==</span> <span class="st">"Canada"</span>, <span class="op">]</span></span>
 <span><span class="va">bm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/authenticity_benchmark.html">authenticity_benchmark</a></span><span class="op">(</span><span class="fu"><a href="../reference/as_synthetic_list.html">as_synthetic_list</a></span><span class="op">(</span><span class="va">syn</span>, items <span class="op">=</span> <span class="va">ins</span><span class="op">$</span><span class="va">items</span><span class="op">$</span><span class="va">item</span><span class="op">)</span>, <span class="va">real</span>, <span class="va">ins</span><span class="op">$</span><span class="va">items</span>,</span>
 <span>                             fit_scales <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>, n_splits <span class="op">=</span> <span class="fl">5</span>, n_floor <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
@@ -368,13 +411,13 @@ guaranteed to do better. On HEXACO, the six models in
 bunch together; see <a href="benchmark.html">the benchmark</a>.</p>
 </div>
 <div class="section level2">
-<h2 id="a-report">8. A report<a class="anchor" aria-label="anchor" href="#a-report"></a>
+<h2 id="a-report">9. A report<a class="anchor" aria-label="anchor" href="#a-report"></a>
 </h2>
 <p><code><a href="../reference/write_report.html">write_report()</a></code> puts the results in one file: The plots,
 the tables, the plain-language summaries and the settings needed to
 repeat the run. HTML (the default) is one self-contained file that opens
 in any browser. PDF uses R’s own PDF device, so it needs no LaTeX.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/write_report.html">write_report</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>benchmark <span class="op">=</span> <span class="va">bm</span>, synthetic <span class="op">=</span> <span class="va">syn</span>, instrument <span class="op">=</span> <span class="va">ins</span>,</span>
 <span>                  personas <span class="op">=</span> <span class="va">per</span>, models <span class="op">=</span> <span class="va">models</span><span class="op">)</span>, <span class="st">"my_report.html"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/write_report.html">write_report</a></span><span class="op">(</span><span class="va">bm</span>, <span class="st">"my_report.pdf"</span><span class="op">)</span></span></code></pre></div>

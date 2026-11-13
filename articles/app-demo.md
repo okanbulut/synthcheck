@@ -85,6 +85,9 @@ finished.](figures/demo-mock-run.png)
 
 Demo 2: Two mock models in the run, after the run finished.
 
+The persona check at the bottom finds no difference between the 12
+personas, as it should: The mock provider ignores personas.
+
 7.  **Compare:** Keep *This session’s run* and the built-in real data,
     *Canada*, and run the benchmark.
 

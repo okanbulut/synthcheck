@@ -119,6 +119,36 @@ bm_mean$table[, c("model", "score", "overlap", "structure", "behaviour")]
 and a function of `overlap`, `structure` and `behaviour` gives your own
 score.
 
+## How sure is the ranking?
+
+Every anchored value and the score come with an interval (95% by
+default, `conf`). It is a bootstrap that resamples each model’s attempts
+and, separately, the floor and ceiling draws, and recomputes the values
+each time:
+
+``` r
+
+bm$table[, c("model", "score", "score_lower", "score_upper")]
+#> # A tibble: 6 × 4
+#>   model             score score_lower score_upper
+#>   <chr>             <dbl>       <dbl>       <dbl>
+#> 1 GPT-OSS-120B      -49.5       -54.1       -43.9
+#> 2 Claude Haiku 5.5  -66.3       -68.6       -64.3
+#> 3 Qwen 3.8 27B      -74.6       -84.6       -65.7
+#> 4 Qwen 3.5 122B     -88.2       -91.3       -85.0
+#> 5 GPT-4.1 mini      -93.5       -96.5       -90.3
+#> 6 Gemma 4 26B      -151.       -157.       -145.
+```
+
+[`gg_benchmark()`](https://www.okanbulut.com/synthcheck/reference/gg_benchmark.md)
+prints the interval in small type under each value. Two models whose
+score intervals overlap are not clearly apart, and the plain-language
+summary below says so. More attempts give narrower intervals. With a
+single attempt the spread between attempts is unknown, so it is
+approximated by the spread between two samples of real people of the
+same size. Turn the small print off with
+`gg_benchmark(bm, intervals = FALSE)`.
+
 ## The plain-language summary
 
 ``` r
@@ -224,7 +254,7 @@ result, so the behaviour strip comes for free:
 gg_behaviour(bm$behaviour)
 ```
 
-![](benchmark_files/figure-html/unnamed-chunk-9-1.png)
+![](benchmark_files/figure-html/unnamed-chunk-10-1.png)
 
 ## Settings that change the target
 
