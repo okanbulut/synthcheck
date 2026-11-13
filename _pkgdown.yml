@@ -34,6 +34,8 @@ navbar:
         href: articles/pretest.html
       - text: Generating synthetic respondents in R
         href: articles/generate.html
+      - text: Short instruments with known item problems
+        href: articles/instruments.html
       - text: Cognitive interviews with language models
         href: articles/cognitive-interviews.html
     app:
@@ -58,6 +60,7 @@ articles:
   - articles/diagnostics
   - articles/pretest
   - articles/generate
+  - articles/instruments
   - articles/cognitive-interviews
 - title: The synthcheck app
   desc: The whole workflow on screen, from an instrument to a benchmark.
@@ -103,6 +106,7 @@ reference:
   contents:
   - run_synthcheck_app
   - sc_instrument
+  - sc_builtin_instrument
   - sc_personas
   - sc_model
   - sc_default_models
@@ -123,6 +127,9 @@ reference:
   - hexaco_real
   - hexaco_llm
   - hexaco_items
+  - rses
+  - dass
+  - mini_ipip
 - title: Helpers
   contents:
   - theme_synthcheck

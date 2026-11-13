@@ -69,7 +69,7 @@ sc_app_about <- function(has_real = FALSE) {
       card("What the app can do",
            shiny::tags$ul(
              class = "sc-list",
-             li("Use the built-in IPIP-HEXACO items or upload your own questionnaire"),
+             li("Use a built-in instrument (the IPIP-HEXACO, or three short scales with known item problems) or upload your own questionnaire"),
              li("Type, upload or build a grid of personas"),
              li("Generate respondents with Anthropic, OpenAI or local Ollama models, side by side"),
              li("Show a progress bar with the time left, and stop a run at any time"),
@@ -104,7 +104,7 @@ sc_app_about <- function(has_real = FALSE) {
     card("A quick guided demo",
          shiny::tags$ol(
            class = "sc-steps",
-           li(shiny::strong("Instrument: "), "Keep the IPIP-HEXACO items with two traits, or upload your own."),
+           li(shiny::strong("Instrument: "), "Keep the IPIP-HEXACO items with two traits, pick a short scale with known item problems (RSES, DASS-21 or Mini-IPIP), or upload your own."),
            li(shiny::strong("Personas: "), "Build a small grid, for example three ages and two genders."),
            li(shiny::strong("Models: "), "Add a model. Choose ", shiny::em("Mock"),
               " to try the app without an API key, then press ", shiny::em("Generate data"), "."),
@@ -154,7 +154,7 @@ sc_app_tour <- function(path = NULL) {
          "interviews", "left")
   ) else list(
     list("cmp_data_card", "4. Compare: The data",
-         "Choose the real data and the synthetic data, and the benchmark settings. The built-in hexaco_llm has six models.",
+         "Choose the real data and the synthetic data, and the benchmark settings. Each built-in instrument comes with real data, and the built-in hexaco_llm has six models.",
          "compare", "right"),
     list("cmp_plot_card", "The benchmark",
          "Overlap, Structure and Behaviour for every model, from 0 (shuffled real answers) to 100 (a second sample of real people). The summary above explains each model in plain language.",
@@ -175,7 +175,7 @@ sc_app_tour <- function(path = NULL) {
                "Change the answer and start the tour again to see the other path."),
          "about"),
     list("ins_items_card", "1. Instrument",
-         "Choose the items: The built-in IPIP-HEXACO items or your own item table, with the response scale.",
+         "Choose the items: A built-in instrument or your own item table, with the response scale. The Rosenberg Self-Esteem Scale, the DASS-21 and the Mini-IPIP have items with well-documented problems, so you can see whether the checks find them.",
          "instrument", "right"),
     list("ins_prompt_card", "The prompt",
          "This is exactly what a model reads for each respondent.", "instrument", "left"),

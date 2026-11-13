@@ -265,3 +265,128 @@ sc_prompt <- function(instrument, persona = NULL, items = NULL, n = 1L) {
                    " elements in all. Each person answers independently of the others.")
   list(system = system, user = user)
 }
+
+#' Use an instrument that comes with synthcheck
+#'
+#' `sc_builtin_instrument()` returns one of the bundled instruments as an
+#' [sc_instrument()], with its response scale, category labels and
+#' instructions, ready for [generate_synthetic()], [synthetic_pretest()] or
+#' [cognitive_interview()]. Each one comes with real responses for
+#' [authenticity_benchmark()].
+#'
+#' Besides the long IPIP-HEXACO, three short instruments are included
+#' because their items have well-documented problems. They let you check
+#' whether the pretest, the interviews and the benchmark find what the
+#' literature already knows:
+#'
+#' | `name` | Instrument | Items | Answers | Known problems | Real data |
+#' |---|---|---|---|---|---|
+#' | `"hexaco"` | IPIP-HEXACO | 240 | 1 to 7 | | [hexaco_real] |
+#' | `"rses"` | Rosenberg Self-Esteem Scale | 10 | 1 to 4 | Negative-wording method factor | [rses_real] |
+#' | `"dass21"` | DASS-21 | 21 | 1 to 4 | Disputed three-factor structure | [dass_real] |
+#' | `"mini_ipip"` | Mini-IPIP | 20 | 1 to 5 | Poor fit, weak Intellect scale, reverse-keyed method effect | [mini_ipip_real] |
+#'
+#' The `issue` column of the item tables says, in one sentence, what has
+#' been reported about each item; the help pages of the item tables give
+#' the references.
+#'
+#' @param name the instrument: `"hexaco"`, `"rses"`, `"dass21"` or
+#'   `"mini_ipip"`.
+#' @param scales optional scale codes to keep, for example `c("H", "C")`
+#'   for two HEXACO traits or `"D"` for DASS-21 Depression. `NULL` keeps all
+#'   items.
+#' @return An object of class `sc_instrument`.
+#' @seealso [rses_items], [dass_items], [mini_ipip_items], [hexaco_items]
+#' @examples
+#' sc_builtin_instrument("rses")
+#' dass <- sc_builtin_instrument("dass21", scales = c("A", "S"))
+#' dass$labels
+#' cat(sc_prompt(dass)$user)
+#' @export
+sc_builtin_instrument <- function(name = c("hexaco", "rses", "dass21", "mini_ipip"),
+                                  scales = NULL) {
+  name <- match.arg(name)
+  b <- sc_builtin[[name]]
+  items <- sc_builtin_items(name)
+  if (!is.null(scales)) {
+    bad <- setdiff(scales, items$scale)
+    if (length(bad))
+      stop(sprintf("Unknown scale%s for %s: %s. The scales are %s.", if (length(bad) > 1) "s" else "",
+                   b$name, paste(bad, collapse = ", "), paste(unique(items$scale), collapse = ", ")),
+           call. = FALSE)
+    items <- items[items$scale %in% scales, , drop = FALSE]
+  }
+  sc_instrument(items, scale = b$range, labels = b$labels, instructions = b$instructions,
+                name = b$name)
+}
+
+# The bundled instruments: Name, response range, labels, instructions and the
+# names of the item table and the real data.
+sc_builtin <- list(
+  hexaco = list(name = "IPIP-HEXACO", range = c(1L, 7L), labels = NULL,
+                instructions = sc_default_instructions, items = "hexaco_items",
+                real = "hexaco_real", scale_col = "trait", default = c("H", "C")),
+  rses = list(name = "Rosenberg Self-Esteem Scale", range = c(1L, 4L),
+              labels = c("Strongly disagree", "Disagree", "Agree", "Strongly agree"),
+              instructions = paste(
+                "Below is a list of statements dealing with your general feelings about yourself.",
+                "Please indicate how strongly you agree or disagree with each statement.",
+                "There are no right or wrong answers. Answer every statement."),
+              items = "rses_items", real = "rses_real", scale_col = "scale", default = "SE"),
+  dass21 = list(name = "DASS-21", range = c(1L, 4L),
+                labels = c("Did not apply to me at all",
+                           "Applied to me to some degree, or some of the time",
+                           "Applied to me to a considerable degree, or a good part of the time",
+                           "Applied to me very much, or most of the time"),
+                instructions = paste(
+                  "Please read each statement and choose how much it applied to you over the past week.",
+                  "There are no right or wrong answers. Do not spend too much time on any statement.",
+                  "Answer every statement."),
+                items = "dass_items", real = "dass_real", scale_col = "scale",
+                default = c("D", "A", "S")),
+  mini_ipip = list(name = "Mini-IPIP", range = c(1L, 5L), labels = NULL,
+                   instructions = paste(
+                     "Please read each statement and decide how much you agree or disagree that it",
+                     "describes you as you generally are now. There are no right or wrong answers.",
+                     "Answer every statement."),
+                   items = "mini_ipip_items", real = "mini_ipip_real", scale_col = "scale",
+                   default = c("E", "A", "C", "N", "I"))
+)
+
+# item table of a bundled instrument, with a `scale` column for every one
+sc_builtin_items <- function(name) {
+  items <- as.data.frame(switch(name,
+                                hexaco = synthcheck::hexaco_items,
+                                rses = synthcheck::rses_items,
+                                dass21 = synthcheck::dass_items,
+                                mini_ipip = synthcheck::mini_ipip_items))
+  if (!"scale" %in% names(items)) items$scale <- items$trait
+  items
+}
+
+sc_builtin_real <- function(name) {
+  switch(name,
+         hexaco = synthcheck::hexaco_real,
+         rses = synthcheck::rses_real,
+         dass21 = synthcheck::dass_real,
+         mini_ipip = synthcheck::mini_ipip_real)
+}
+
+# named scale choices (label = code) of a bundled instrument
+sc_builtin_scales <- function(name) {
+  it <- sc_builtin_items(name)
+  lab <- if ("trait_label" %in% names(it)) it$trait_label else it$scale_label
+  u <- !duplicated(it$scale)
+  out <- stats::setNames(it$scale[u], lab[u])
+  ord <- sc_builtin[[name]]$default
+  if (setequal(ord, out)) out[match(ord, out)] else out
+}
+
+# R code that selects the items of a bundled instrument
+sc_builtin_items_code <- function(name, scales) {
+  b <- sc_builtin[[name]]
+  all <- sc_builtin_scales(name)
+  if (is.null(scales) || setequal(scales, all)) return(sprintf("items <- %s", b$items))
+  sprintf("items <- %s[%s$%s %%in%% c(%s), ]", b$items, b$items, b$scale_col,
+          paste(sprintf('"%s"', scales), collapse = ", "))
+}

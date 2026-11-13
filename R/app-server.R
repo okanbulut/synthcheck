@@ -32,26 +32,58 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
     })
 
     # ---- 1. Instrument -------------------------------------------------------
+    # the labels a built-in instrument sets, so that changing its range does
+    # not overwrite them with agree-disagree labels
+    builtin_labels <- shiny::reactiveVal(NULL)
     shiny::observeEvent(input$ins_source, {
-      if (input$ins_source == "hexaco") {
-        shiny::updateTextInput(session, "ins_name", value = "IPIP-HEXACO")
-        shiny::updateNumericInput(session, "ins_min", value = 1)
-        shiny::updateNumericInput(session, "ins_max", value = 7)
-      } else shiny::updateTextInput(session, "ins_name", value = "Instrument")
+      src <- input$ins_source
+      if (src %in% names(sc_builtin)) {
+        b <- sc_builtin[[src]]
+        lab <- b$labels %||% sc_default_labels(b$range[2] - b$range[1] + 1)
+        builtin_labels(list(range = b$range, labels = lab))
+        shiny::updateTextInput(session, "ins_name", value = b$name)
+        shiny::updateNumericInput(session, "ins_min", value = b$range[1])
+        shiny::updateNumericInput(session, "ins_max", value = b$range[2])
+        shiny::updateTextAreaInput(session, "ins_labels", value = paste(lab, collapse = "\n"))
+        shiny::updateTextAreaInput(session, "ins_instructions", value = b$instructions)
+        if (src != "hexaco")
+          shiny::updateCheckboxGroupInput(session, "ins_scales", choices = sc_builtin_scales(src),
+                                          selected = b$default, inline = TRUE)
+        cn <- sc_country_choices(src)
+        shiny::updateSelectInput(session, "real_country", choices = cn, selected = cn[1])
+      } else {
+        builtin_labels(NULL)
+        shiny::updateTextInput(session, "ins_name", value = "Instrument")
+      }
     })
     shiny::observeEvent(list(input$ins_min, input$ins_max), {
       if (is.numeric(input$ins_min) && is.numeric(input$ins_max) && !is.na(input$ins_min) &&
           !is.na(input$ins_max) && input$ins_max > input$ins_min) {
-        lab <- sc_default_labels(input$ins_max - input$ins_min + 1)
+        bl <- builtin_labels()
+        lab <- if (!is.null(bl) && identical(as.integer(c(input$ins_min, input$ins_max)), bl$range))
+          bl$labels else sc_default_labels(input$ins_max - input$ins_min + 1)
         shiny::updateTextAreaInput(session, "ins_labels", value = paste(lab, collapse = "\n"))
       }
     }, ignoreInit = TRUE)
+    output$ins_about <- shiny::renderUI({
+      src <- input$ins_source
+      if (!src %in% c("rses", "dass21", "mini_ipip")) return(NULL)
+      shiny::helpText(sc_builtin_about[[src]])
+    })
+    # the chosen scales of a built-in instrument, or NULL for an uploaded table
+    ins_scales <- shiny::reactive({
+      if (identical(input$ins_source, "hexaco")) input$ins_traits else
+        if (input$ins_source %in% names(sc_builtin)) input$ins_scales else NULL
+    })
 
     instrument <- shiny::reactive({
-      items <- if (input$ins_source == "hexaco") {
-        shiny::validate(shiny::need(length(input$ins_traits) > 0, "Choose at least one trait."))
-        h <- synthcheck::hexaco_items
-        h[h$trait %in% input$ins_traits, , drop = FALSE]
+      items <- if (input$ins_source %in% names(sc_builtin)) {
+        what <- if (input$ins_source == "hexaco") "trait" else "scale"
+        shiny::validate(shiny::need(length(ins_scales()) > 0, sprintf("Choose at least one %s.", what)))
+        it <- sc_builtin_items(input$ins_source)
+        it <- it[it$scale %in% ins_scales(), , drop = FALSE]
+        shiny::validate(shiny::need(nrow(it) > 0, sprintf("Choose at least one %s.", what)))
+        it
       } else {
         shiny::validate(shiny::need(input$ins_file, "Upload an item table."))
         sc_read_table(input$ins_file$datapath, input$ins_file$name)
@@ -346,9 +378,12 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
     real_data <- shiny::reactive({
       switch(input$real_source,
              arg = as.data.frame(real),
-             hexaco = {
-               h <- synthcheck::hexaco_real
-               if (input$real_country == "All") h else h[h$country == input$real_country, ]
+             builtin = {
+               shiny::validate(shiny::need(input$ins_source %in% names(sc_builtin),
+                                           "Choose a built-in instrument in tab 1, or upload real data."))
+               h <- sc_builtin_real(input$ins_source)
+               cn <- input$real_country %||% "All"
+               if (cn == "All" || !cn %in% h$country) h else h[h$country %in% cn, ]
              },
              upload = {
                shiny::validate(shiny::need(input$real_file, "Upload the real responses."))
@@ -759,11 +794,11 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
       run_dir = rv$run_dir, syn_source = input$syn_source, real_source = input$real_source,
       country = input$real_country, score = input$bm_score, clean = isTRUE(input$bm_clean),
       fit = isTRUE(input$bm_fit), splits = input$bm_splits,
-      traits = if (input$ins_source == "hexaco") input$ins_traits else NULL))
+      builtin = sc_script_builtin(input$ins_source, ins_scales())))
     pt_script <- shiny::reactive(sc_pretest_script(
       run_dir = rv$run_dir, source = input$pt_source, country = input$pt_country,
       attempts = input$pt_attempts, by = input$pt_by, irt = isTRUE(input$pt_irt), n_pa = input$pt_pa,
-      traits = if (input$ins_source == "hexaco") input$ins_traits else NULL,
+      builtin = sc_script_builtin(input$ins_source, ins_scales()),
       interviews = if (!is.null(rv$interviews)) list(models = rv$models, coder = input$iv_coder,
                                                      items_from = input$iv_items_from,
                                                      items = shiny::isolate(iv_items()),
@@ -864,16 +899,39 @@ sc_parse_temps <- function(x) {
   as.list(unique(v))
 }
 
-sc_pretest_script <- function(run_dir, source, country, attempts, by, irt, n_pa, traits,
+# country choices for the built-in real data: The three HEXACO countries, or
+# all respondents and then each country with at least 1,000 respondents
+sc_country_choices <- function(name) {
+  if (name == "hexaco") return(c("Canada", "Great Britain", "United States", "All"))
+  tab <- sort(table(sc_builtin_real(name)$country), decreasing = TRUE)
+  tab <- tab[tab >= 1000]
+  c("All" = "All", stats::setNames(names(tab), sprintf("%s (%s)", names(tab),
+                                                       format(as.integer(tab), big.mark = ","))))
+}
+
+sc_builtin_about <- list(
+  rses = paste("Ten items, five negatively worded. Known for a negative-wording method factor",
+               "and a weak item 8. Real data: rses_real."),
+  dass21 = paste("Depression, Anxiety and Stress, seven items each, about the past week.",
+                 "Known for a disputed three-factor structure. Real data: dass_real."),
+  mini_ipip = paste("Four items per Big Five trait, half reverse-keyed. Known for poor fit and",
+                    "a weak Intellect/Imagination scale. Real data: mini_ipip_real."))
+
+# the built-in instrument and scales for the exported script, or NULL
+sc_script_builtin <- function(source, scales) {
+  if (is.null(source) || !source %in% names(sc_builtin)) return(NULL)
+  list(name = source, scales = scales)
+}
+
+sc_pretest_script <- function(run_dir, source, country, attempts, by, irt, n_pa, builtin,
                               interviews = NULL) {
   syn <- switch(source %||% "run",
                 run = sprintf('synthetic <- read_synthetic("%s")', run_dir %||% "path/to/run"),
                 hexaco = sprintf('synthetic <- hexaco_llm[hexaco_llm$country == "%s" & hexaco_llm$attempt <= %d, ]',
                                  country %||% "Canada", as.integer(attempts %||% 3)),
                 'synthetic <- read_synthetic("path/to/your/synthetic/files")')
-  items <- if (!is.null(traits)) {
-    sprintf("items <- hexaco_items[hexaco_items$trait %%in%% c(%s), ]",
-            paste(sprintf('"%s"', traits), collapse = ", "))
+  items <- if (!is.null(builtin)) {
+    sc_builtin_items_code(builtin$name, builtin$scales)
   } else if (identical(source, "run") && !is.null(run_dir)) {
     sprintf('items <- jsonlite::read_json("%s", simplifyVector = TRUE)$instrument$items',
             file.path(run_dir, "run.json"))
@@ -913,18 +971,19 @@ sc_interview_script <- function(iv, run_dir) {
     "summarise_interviews(iv)", "gg_interview(iv)")
 }
 
-sc_app_script <- function(run_dir, syn_source, real_source, country, score, clean, fit, splits, traits) {
+sc_app_script <- function(run_dir, syn_source, real_source, country, score, clean, fit, splits,
+                          builtin) {
   syn <- switch(syn_source,
                 run = sprintf('synthetic <- read_synthetic("%s")', run_dir %||% "path/to/run"),
                 hexaco = 'synthetic <- hexaco_llm[hexaco_llm$country == "Canada", ]',
                 'synthetic <- read_synthetic("path/to/your/synthetic/files")')
+  real_obj <- if (!is.null(builtin)) sc_builtin[[builtin$name]]$real else "hexaco_real"
   real <- switch(real_source,
-                 hexaco = if (identical(country, "All")) "real <- hexaco_real" else
-                   sprintf('real <- hexaco_real[hexaco_real$country == "%s", ]', country),
+                 builtin = if (is.null(country) || identical(country, "All")) sprintf("real <- %s", real_obj) else
+                   sprintf('real <- %s[%s$country %%in%% "%s", ]', real_obj, real_obj, country),
                  'real <- read.csv("path/to/real_data.csv")')
-  items <- if (!is.null(traits)) {
-    sprintf("items <- hexaco_items[hexaco_items$trait %%in%% c(%s), ]",
-            paste(sprintf('"%s"', traits), collapse = ", "))
+  items <- if (!is.null(builtin)) {
+    sc_builtin_items_code(builtin$name, builtin$scales)
   } else if (syn_source == "run" && !is.null(run_dir)) {
     sprintf('items <- jsonlite::read_json("%s", simplifyVector = TRUE)$instrument$items',
             file.path(run_dir, "run.json"))

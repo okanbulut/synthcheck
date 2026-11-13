@@ -29,7 +29,7 @@ test_that("the app generates mock data, benchmarks it and returns it", {
     expect_equal(nrow(rv$run_data), 2 * 2 * 2 * 30)
     expect_equal(rv$run_status$status, "done")
     expect_true(file.exists(file.path(out, "run", "Mock-A_attempt01.csv")))
-    session$setInputs(real_source = "hexaco", real_country = "Canada", syn_source = "run",
+    session$setInputs(real_source = "builtin", real_country = "Canada", syn_source = "run",
                       bm_score = "weakest", bm_clean = FALSE, bm_fit = FALSE, bm_splits = 3,
                       bm_run = 1)
     expect_s3_class(rv$benchmark, "sc_benchmark")
@@ -48,10 +48,16 @@ test_that("keys typed in the app are set only while the code runs", {
 })
 
 test_that("the R script repeats the comparison", {
-  s <- sc_app_script("my_run", "run", "hexaco", "Canada", "weakest", FALSE, TRUE, 20, c("H", "C"))
+  s <- sc_app_script("my_run", "run", "builtin", "Canada", "weakest", FALSE, TRUE, 20,
+                     list(name = "hexaco", scales = c("H", "C")))
   expect_match(s, 'read_synthetic("my_run")', fixed = TRUE)
   expect_match(s, 'hexaco_items$trait %in% c("H", "C")', fixed = TRUE)
+  expect_match(s, 'hexaco_real[hexaco_real$country %in% "Canada", ]', fixed = TRUE)
   expect_match(s, "fit_scales = NULL", fixed = TRUE)
+  s <- sc_app_script("my_run", "run", "builtin", "All", "weakest", FALSE, TRUE, 20,
+                     list(name = "dass21", scales = c("D", "A", "S")))
+  expect_match(s, "items <- dass_items\n", fixed = TRUE)
+  expect_match(s, "real <- dass_real\n", fixed = TRUE)
 })
 
 test_that("the app opens on the About tab with the contact details and the tour", {
@@ -111,7 +117,8 @@ test_that("temperatures are parsed for the stability check", {
   expect_equal(sc_parse_temps(""), list())
   expect_s3_class(sc_parse_temps("hot"), "error")
   expect_s3_class(sc_parse_temps("3"), "error")
-  s <- sc_pretest_script("my_run", "run", "Canada", 3, "model", FALSE, 20, "H")
+  s <- sc_pretest_script("my_run", "run", "Canada", 3, "model", FALSE, 20,
+                         list(name = "hexaco", scales = "H"))
   expect_match(s, 'synthetic_pretest(synthetic, items, by = "model", irt = FALSE, n_pa = 20)', fixed = TRUE)
 })
 
@@ -166,4 +173,21 @@ test_that("probes typed in the app are parsed", {
   expect_error(sc_parse_probes("no stage here"), "stage: probe")
   expect_error(sc_parse_probes("memory: What?"), "Unknown stage")
   expect_equal(sc_parse_probes(sc_probe_text(sc_probes()))$probe, sc_probes()$probe)
+})
+
+test_that("the app uses a short built-in instrument and its real data", {
+  skip_if_not_installed("shiny")
+  skip_if_not_installed("bslib")
+  shiny::testServer(sc_app_server(), {
+    session$setInputs(ins_source = "dass21", ins_scales = c("D", "A"), ins_min = 1, ins_max = 4,
+                      ins_labels = paste(sc_builtin$dass21$labels, collapse = "\n"),
+                      ins_instructions = sc_builtin$dass21$instructions, ins_name = "DASS-21")
+    expect_equal(nrow(instrument()$items), 14)
+    expect_equal(instrument()$labels[1], "Did not apply to me at all")
+    session$setInputs(real_source = "builtin", real_country = "All")
+    expect_equal(nrow(real_data()), nrow(dass_real))
+    expect_true(all(instrument()$items$item %in% names(real_data())))
+    session$setInputs(ins_scales = character(0))
+    expect_error(instrument(), "at least one scale")
+  })
 })
