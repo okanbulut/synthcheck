@@ -102,14 +102,14 @@
 #' @seealso [gg_coverage()], [blend_llms()], [hexaco_real], [hexaco_llm]
 #' @examples
 #' # made-up example: three "models" whose respondents differ from the
-#' # real population in different ways, five attempts each
+#' # real population in different ways, three attempts each
 #' set.seed(1)
 #' a <- matrix(rlnorm(12, 0.2, 0.3)); d <- matrix(rnorm(12))
 #' real <- as.data.frame(mirt::simdata(a, d, 1000, itemtype = "dich"))
-#' llm <- function(mu, s) lapply(1:5, function(i) as.data.frame(
+#' llm <- function(mu, s) lapply(1:3, function(i) as.data.frame(
 #'   mirt::simdata(a, d, 200, itemtype = "dich", Theta = matrix(rnorm(200, mu, s)))))
 #' cov <- synthetic_coverage(list("LLM A" = llm(0.8, 0.7), "LLM B" = llm(0, 0.4),
-#'                                "LLM C" = llm(-0.6, 0.9)), real)
+#'                                "LLM C" = llm(-0.6, 0.9)), real, cor = "pearson")
 #' cov
 #' gg_coverage(cov)
 #' @export

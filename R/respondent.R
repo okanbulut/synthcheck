@@ -52,9 +52,10 @@
 #' @seealso [gg_respondent_coverage()], [authenticity_benchmark()]
 #' @examples
 #' real <- hexaco_real[hexaco_real$country == "Canada", ]
-#' ca <- hexaco_llm[hexaco_llm$country == "Canada" & hexaco_llm$attempt <= 2, ]
+#' ca <- hexaco_llm[hexaco_llm$country == "Canada" & hexaco_llm$attempt == 1, ]
 #' syn <- lapply(split(ca, ca$model, drop = TRUE), function(m) split(m, m$attempt))
-#' rc <- respondent_coverage(syn, real, hexaco_items, n_draws = 2)
+#' hc <- hexaco_items[hexaco_items$trait %in% c("H", "C"), ]
+#' rc <- respondent_coverage(syn, real, hc, n_draws = 2)
 #' rc
 #' gg_respondent_coverage(rc)
 #' @export

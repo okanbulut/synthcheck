@@ -58,3 +58,33 @@ test_that("authenticity_benchmark() handles options and bad input", {
   expect_error(authenticity_benchmark(list(beh_sim(50)), real, beh_items()), "named list")
   expect_error(authenticity_benchmark(syn, real, beh_items(), score = "best"))
 })
+
+test_that("the benchmark gives an interval for every value and the score", {
+  real <- beh_sim(1200)
+  syn <- list("Many" = lapply(11:16, function(s) beh_sim(200, s)),
+              "One" = list(beh_sim(200, 20)),
+              "Random" = list(beh_random(200, 9), beh_random(200, 10)))
+  bm <- authenticity_benchmark(syn, real, beh_items(), n_splits = 6, n_floor = 6, n_boot = 200,
+                               fit_scales = character(0))
+  tab <- bm$table
+  for (k in c("overlap", "structure", "behaviour", "score")) {
+    lo <- tab[[paste0(k, "_lower")]]; hi <- tab[[paste0(k, "_upper")]]
+    expect_true(all(is.finite(lo) & is.finite(hi)))
+    expect_true(all(lo <= hi))
+  }
+  expect_true(all(tab$score_lower <= tab$score + 1e-8 & tab$score <= tab$score_upper + 1e-8))
+  # a real-like model is clearly apart from random answers
+  m <- tab[tab$model == "Many", ]; r <- tab[tab$model == "Random", ]
+  expect_false(bm_overlapping(m, r))
+  expect_equal(bm$settings$conf, 0.95)
+  # the same seed gives the same intervals
+  again <- authenticity_benchmark(syn, real, beh_items(), n_splits = 6, n_floor = 6, n_boot = 200,
+                                  fit_scales = character(0))
+  expect_equal(again$table$score_lower, tab$score_lower)
+  expect_output(print(bm), "Score 95%")
+  expect_s3_class(gg_benchmark(bm), "ggplot")
+  expect_s3_class(gg_benchmark(bm, intervals = FALSE), "ggplot")
+  expect_match(summarise_benchmark(bm)$summary[1], "interval runs from")
+  expect_error(authenticity_benchmark(syn, real, beh_items(), conf = 1.2), "conf")
+  expect_error(authenticity_benchmark(syn, real, beh_items(), n_boot = 10), "n_boot")
+})

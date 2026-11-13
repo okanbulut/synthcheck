@@ -18,7 +18,7 @@ authors:
     given-names: Okan
     affiliation: University of Alberta
     orcid: "https://orcid.org/0000-0001-5853-1267"
-version: 0.2.0
+version: 0.3.0
 doi: 10.5281/zenodo.24173113
 identifiers:
   - type: doi

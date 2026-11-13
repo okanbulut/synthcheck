@@ -18,7 +18,8 @@ in the order of the benchmark table. Printing it shows the text.
 \description{
 \code{summarise_benchmark()} writes a few sentences per model
 from a result of \code{\link[=authenticity_benchmark]{authenticity_benchmark()}}: The score and its weakest
-column, how close each anchored column is to real people, the behaviour
+column, its interval and whether it overlaps with the next model's, how
+close each anchored column is to real people, the behaviour
 features that differ most from real people and in which direction, and
 the person fit tails. The text follows fixed rules, so it is the same
 every time and states only values in the table.
