@@ -882,6 +882,39 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
         ggplot2::ggsave(file, gg_interview(s, max_items = 25), width = 8,
                         height = 2 + 0.3 * max(min(nrow(s), 25), 3), dpi = 200, bg = "white")
       })
+    report_input <- shiny::reactive({
+      pretest_path <- identical(input$sc_path, "pretest")
+      run <- if (!is.null(rv$run_dir) && file.exists(file.path(rv$run_dir, "run.json")))
+        tryCatch(jsonlite::read_json(file.path(rv$run_dir, "run.json")), error = function(e) NULL)
+      list(benchmark = if (!pretest_path) rv$benchmark,
+           pretest = if (pretest_path) rv$pretest,
+           interviews = if (pretest_path) rv$interviews,
+           synthetic = rv$run_data %||% current_syn(), path = input$sc_path,
+           instrument = tryCatch(instrument(), error = function(e) NULL),
+           personas = tryCatch(persona_table(), error = function(e) NULL),
+           models = if (length(rv$models)) rv$models, run = run)
+    })
+    report_ready <- shiny::reactive({
+      x <- report_input()
+      !is.null(x$benchmark) || !is.null(x$pretest) || !is.null(x$interviews)
+    })
+    output$exp_report_status <- shiny::renderUI({
+      if (report_ready()) return(NULL)
+      shiny::p(class = "small text-muted",
+               if (identical(input$sc_path, "pretest")) "Run the pretest or the interviews first." else
+                 "Run the benchmark on the Compare tab first.")
+    })
+    output$dl_report <- shiny::downloadHandler(
+      filename = function() paste0("synthcheck-report-", format(Sys.Date()), ".",
+                                   input$exp_report_format %||% "html"),
+      content = function(file) {
+        shiny::validate(shiny::need(report_ready(), "Run the analysis first."))
+        title <- trimws(input$exp_report_title %||% "")
+        shiny::withProgress(message = "Writing the report", {
+          write_report(report_input(), file, format = input$exp_report_format %||% "html",
+                       title = if (nzchar(title)) title else NULL, script = script())
+        })
+      })
     bm_script <- shiny::reactive(sc_app_script(
       run_dir = rv$run_dir, syn_source = input$syn_source, real_source = input$real_source,
       country = input$real_country, score = input$bm_score, clean = isTRUE(input$bm_clean),

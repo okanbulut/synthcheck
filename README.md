@@ -117,7 +117,9 @@ path.
   temperatures, and the Interviews tab runs cognitive interviews in which
   the models play your personas.
 
-The Export tab saves the results and an R script that repeats them. The
+The Export tab saves a results report (one HTML or PDF file with the plots,
+tables, summaries and run settings), the results and an R script that
+repeats them. The
 answer can be changed at any time, so the same synthetic data can be
 benchmarked once real responses come in.
 
