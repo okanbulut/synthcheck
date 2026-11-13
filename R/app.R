@@ -48,7 +48,7 @@
 #'   summary ([summarise_interviews()]), the plot ([gg_interview()]) and the
 #'   transcripts. A screening aid, not a substitute for cognitive
 #'   interviews with real people.
-#' * **Export** (5 with real data, 6 without): Download the synthetic data
+#' * **Export:** Download the synthetic data
 #'   (CSV, JSON, RDS or Excel), the benchmark or the pretest and interviews,
 #'   and an R script that repeats the analysis.
 #'

@@ -81,7 +81,7 @@ flagged or on items you choose (the pretest is optional), and read the
 summary (\code{\link[=summarise_interviews]{summarise_interviews()}}), the plot (\code{\link[=gg_interview]{gg_interview()}}) and the
 transcripts. A screening aid, not a substitute for cognitive
 interviews with real people.
-\item \strong{Export} (5 with real data, 6 without): Download the synthetic data
+\item \strong{Export:} Download the synthetic data
 (CSV, JSON, RDS or Excel), the benchmark or the pretest and interviews,
 and an R script that repeats the analysis.
 }
