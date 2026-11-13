@@ -22,6 +22,8 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
     })
 
     # the first step: With real data, the fourth tab is Compare; without, Pretest
+    # and then Interviews, so Export is tab 5 or 6
+    output$exp_num <- shiny::renderText(if (identical(input$sc_path, "pretest")) "6. " else "5. ")
     shiny::observeEvent(input$sc_path, {
       for (p in names(sc_path_tabs)) for (tab in sc_path_tabs[[p]]) {
         if (p == input$sc_path) bslib::nav_show("sc_nav", tab, session = session) else
@@ -497,7 +499,7 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
                  check.names = FALSE)
     })
 
-    # ---- 4b. Cognitive interviews (without real data) ---------------------------
+    # ---- 5. Cognitive interviews (without real data) ---------------------------
     shiny::observe({
       it <- tryCatch(as.data.frame(instrument()$items), error = function(e) NULL)
       if (is.null(it)) return()

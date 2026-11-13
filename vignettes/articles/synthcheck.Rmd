@@ -83,6 +83,40 @@ written by fixed rules from the values in the table:
 summarise_benchmark(bm)
 ```
 
+## No real data yet?
+
+The benchmark needs real answers to compare with. For a new scale that has
+not been fielded, two tools screen the items on synthetic respondents alone:
+
+- `synthetic_pretest()` flags items that barely vary, link weakly to their
+  scale, duplicate another item or work against their reverse key, checks
+  whether the scales you designed come back, and shows whether the flags
+  hold across models, temperatures or personas.
+- `cognitive_interview()` has language models play your personas, think
+  aloud on each item and answer verbal probes, and codes the transcripts
+  for problems.
+
+Both are screening aids: They point to items worth a second look before a
+field test, and do not show that a scale works in people.
+
+```{r}
+pt <- synthetic_pretest(synthetic, h, irt = FALSE, n_pa = 10)
+summarise_pretest(pt)
+```
+
+## Using the app
+
+`run_synthcheck_app()` does the same work on screen. It starts with one
+question: **Do you already have real responses to this instrument?** With
+real data, the app generates synthetic respondents and benchmarks them in
+the Compare tab. Without real data, it generates them the same way, pretests
+the scale in the Pretest tab and runs cognitive interviews in the Interviews
+tab.
+
+```{r, eval = FALSE}
+run_synthcheck_app()
+```
+
 ## Where to go next
 
 - [Overlap and Structure](overlap-structure.html): The coverage strip, item
@@ -91,7 +125,11 @@ summarise_benchmark(bm)
   careless real respondents.
 - [The benchmark](benchmark.html): Anchors, scores and the choices behind
   the table.
+- [Pretesting a scale without real data](pretest.html) and
+  [cognitive interviews](cognitive-interviews.html): Screening a new scale
+  before it is fielded.
 - [Generating synthetic respondents](generate.html): Your own instrument,
   personas and models, in R code.
 - [A tour of the app](app-tour.html) and the
-  [app demo](app-demo.html): The same workflow without writing code.
+  [app demos](app-demo.html): The same workflow without writing code, on
+  both paths.

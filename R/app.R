@@ -1,52 +1,56 @@
 # The synthcheck app: Generate synthetic respondents with several language
-# models and compare them with real data, in five tabs.
+# models and compare them with real data, or pretest a scale without it.
 
 #' Generate and benchmark synthetic data in a Shiny app
 #'
 #' **Experimental.** `run_synthcheck_app()` opens an app that walks through
-#' the whole workflow in five tabs. It opens on an **About** tab that
+#' the whole workflow without code. It opens on an **About** tab that
 #' explains the purpose of the app, lists what it can do and produce, shows
 #' an animated picture of a language model answering survey items and starts
-#' a guided tour of the five tabs (the tour needs the cicerone package).
+#' a guided tour (the tour needs the cicerone package). The tour follows the
+#' path chosen in the first step.
 #'
-#' The About tab starts with one question: **Do you already have real
-#' responses to this instrument?** With real data, the fourth tab is
-#' **Compare** (the benchmark below). Without real data, it is **Pretest**:
-#' Pilot screening of the items on synthetic respondents alone, with the
-#' agreement across models or temperatures and a check of the structure you
-#' designed ([synthetic_pretest()]). The answer can be changed at any time,
-#' so you can come back with real data later and compare the same synthetic
-#' data.
+#' **First step:** The About tab asks one question: **Do you already have
+#' real responses to this instrument?** The answer chooses one of two paths,
+#' and it can be changed at any time, so you can come back with real data
+#' later and benchmark the same synthetic data.
 #'
-#' 1. **Instrument:** Upload an item table or use the IPIP-HEXACO items,
-#'    and set the response scale and instructions ([sc_instrument()]).
-#' 2. **Personas:** Type, upload or build the personas that take the
-#'    instrument ([sc_personas()], [sc_persona_grid()]).
+#' * **Yes, I have real data:** The fourth tab is **Compare**, the benchmark
+#'   against real people.
+#' * **No, not yet:** The fourth tab is **Pretest**, followed by
+#'   **Interviews**, so Export becomes the sixth tab. Compare is hidden.
 #'
-#' Both upload panels offer a template to fill in. The templates are also
-#' in the package: `system.file("templates", "instrument_template.csv",
-#' package = "synthcheck")` and `"personas_template.csv"`.
+#' The tabs, in order (with real data: 1 to 4 and 5. Export; without: 1 to
+#' 3, 4. Pretest, 5. Interviews and 6. Export):
 #'
-#' 3. **Models:** Add Anthropic, OpenAI or local Ollama models with their
-#'    temperature, enter API keys, choose the number of attempts and
-#'    respondents, and run [generate_synthetic()] with a progress bar and
-#'    the time left.
-#' 4. **Compare:** Load real data and run [authenticity_benchmark()], with
-#'    [gg_benchmark()], [gg_behaviour()] and a plain-language summary per
-#'    model ([summarise_benchmark()]).
-#' 4. **Pretest** (without real data): Run [synthetic_pretest()] on the
-#'    generated data, with [gg_pretest()] and a plain-language summary
-#'    ([summarise_pretest()]). Add the same model at several temperatures in
-#'    the Models tab to check whether the flags hold.
-#' 4. **Interviews** (tab 4b, without real data): Run [cognitive_interview()] with
-#'    the personas and models of tabs 2 and 3, on the items the pretest
-#'    flagged or on items you choose (the pretest is optional), and read the
-#'    summary ([summarise_interviews()]), the plot ([gg_interview()]) and the
-#'    transcripts. A screening aid, not a substitute for cognitive
-#'    interviews with real people.
-#' 5. **Export:** Download the data (CSV, JSON, RDS or Excel), the
-#'    benchmark, the pretest or the interviews, and an R script that repeats
-#'    the analysis.
+#' * **1. Instrument:** Upload an item table or use the IPIP-HEXACO items,
+#'   and set the response scale and instructions ([sc_instrument()]).
+#' * **2. Personas:** Type, upload or build the personas that take the
+#'   instrument ([sc_personas()], [sc_persona_grid()]). Both upload panels
+#'   offer a template to fill in. The templates are also in the package:
+#'   `system.file("templates", "instrument_template.csv", package =
+#'   "synthcheck")` and `"personas_template.csv"`.
+#' * **3. Models:** Add Anthropic, OpenAI or local Ollama models with their
+#'   temperature (or several temperatures, one model each), enter API keys,
+#'   choose the number of attempts and respondents, and run
+#'   [generate_synthetic()] with a progress bar and the time left.
+#' * **4. Compare** (with real data): Load real data and run
+#'   [authenticity_benchmark()], with [gg_benchmark()], [gg_behaviour()]
+#'   and a plain-language summary per model ([summarise_benchmark()]).
+#' * **4. Pretest** (without real data): Run [synthetic_pretest()] on the
+#'   generated data, with [gg_pretest()] and a plain-language summary
+#'   ([summarise_pretest()]). Compare the flags across models,
+#'   temperatures or personas to see whether they hold. It is pilot
+#'   screening, not validation.
+#' * **5. Interviews** (without real data): Run [cognitive_interview()]
+#'   with the personas and models of tabs 2 and 3, on the items the pretest
+#'   flagged or on items you choose (the pretest is optional), and read the
+#'   summary ([summarise_interviews()]), the plot ([gg_interview()]) and the
+#'   transcripts. A screening aid, not a substitute for cognitive
+#'   interviews with real people.
+#' * **Export** (5 with real data, 6 without): Download the synthetic data
+#'   (CSV, JSON, RDS or Excel), the benchmark or the pretest and interviews,
+#'   and an R script that repeats the analysis.
 #'
 #' **API keys** typed into the app stay in memory for that session only:
 #' They are never written to the saved data, the run settings or the R
@@ -63,10 +67,11 @@
 #' replace a field test.
 #'
 #' @param real optional data frame of real responses, loaded into the
-#'   Compare tab.
+#'   Compare tab. With real data given, the first step starts on "Yes, I
+#'   have real data".
 #' @param synthetic optional data frame of synthetic respondents (for
 #'   example from [generate_synthetic()] or [read_synthetic()]), loaded into
-#'   the Compare tab.
+#'   the Compare and Pretest tabs.
 #' @param host,port where to serve the app. The default serves it on your
 #'   own computer only.
 #' @param launch.browser open the app in a browser?
@@ -349,7 +354,7 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
   )
 
   interviews <- bslib::nav_panel(
-    "4b. Interviews", value = "interviews", icon = shiny::icon("comments"),
+    "5. Interviews", value = "interviews", icon = shiny::icon("comments"),
     shiny::div(
       class = "alert alert-warning py-2 mb-3",
       shiny::strong("A screening aid, not a substitute for cognitive interviews with real people. "),
@@ -395,7 +400,7 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
   )
 
   export <- bslib::nav_panel(
-    "5. Export", value = "export", icon = shiny::icon("download"),
+    shiny::tagList(shiny::textOutput("exp_num", inline = TRUE), "Export"), value = "export", icon = shiny::icon("download"),
     bslib::layout_columns(
       col_widths = c(6, 6), fill = FALSE,
       card("Download", id = "exp_dl_card",

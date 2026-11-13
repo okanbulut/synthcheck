@@ -31,12 +31,20 @@
   models" walks through it. It is a screening aid, not a substitute for
   cognitive interviews with real people.
 
-* The app has a new Interviews tab (4b) on the path without real data. It
+* The app has a new Interviews tab (5) on the path without real data, so
+  Export is tab 6 there and tab 5 with real data. It
   runs `cognitive_interview()` with the personas and models of tabs 2 and 3,
   on the items the pretest flagged or on items you choose (the pretest is
   optional), with editable probes, a choice of coder, a progress bar and a
   Stop button. It shows the summary, the heatmap and the transcripts, and
   Export saves the interviews, the transcripts and the plot.
+
+* The app's guided tour follows the path chosen in the first step and now
+  covers every tab on both paths, including the designed structure on the
+  Pretest tab and the interview settings and transcripts. The tour of the
+  app, the app demos (with a new demo of the path without real data), Get
+  started, the README and the help page of `run_synthcheck_app()` describe
+  the final design.
 
 * The app has a new look in the logo colours, with the logo in the navbar
   and a coverage strip under it. A new About tab opens the app: It explains

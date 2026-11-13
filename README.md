@@ -101,15 +101,25 @@ gg_respondent_coverage(respondent_coverage(synthetic, real, hexaco_items))
 
 ## Generating synthetic data in an app
 
-`run_synthcheck_app()` opens an app that starts on an About tab with a
-guided tour and one question: Do you already have real responses? With real
-data, the app benchmarks the models; without it, the app pretests the scale
-on synthetic respondents. Then it does the whole workflow: Define an instrument and
-personas, generate synthetic respondents with Anthropic, OpenAI or local
-Ollama models (with their temperature and the number of attempts), watch a
-progress bar with the time left, save the data as CSV, JSON, RDS or Excel,
-and benchmark the models against real data with a plain-language summary
-for each one.
+`run_synthcheck_app()` opens an app that does the whole workflow without
+code. It starts on an About tab with a guided tour and one question: **Do you
+already have real responses to this instrument?** The answer chooses the
+path.
+
+- **Both paths:** Define an instrument and personas, generate synthetic
+  respondents with Anthropic, OpenAI or local Ollama models (with their
+  temperature and the number of attempts), watch a progress bar with the
+  time left, and save the data as CSV, JSON, RDS or Excel.
+- **With real data:** The Compare tab benchmarks the models against the real
+  data, with a plain-language summary for each one.
+- **Without real data:** The Pretest tab screens the items on the synthetic
+  respondents and checks whether the flags hold across models or
+  temperatures, and the Interviews tab runs cognitive interviews in which
+  the models play your personas.
+
+The Export tab saves the results and an R script that repeats them. The
+answer can be changed at any time, so the same synthetic data can be
+benchmarked once real responses come in.
 
 ```r
 install.packages(c("shiny", "bslib", "ellmer", "callr", "jsonlite"))
@@ -134,7 +144,10 @@ summarise_benchmark(bm)
 ```
 
 See the [website](https://www.okanbulut.com/synthcheck/) for a Get started
-article, tutorials on each step and a tour of the app with demos.
+article, tutorials on each step and a
+[tour of the app](https://www.okanbulut.com/synthcheck/articles/app-tour.html)
+with [demos](https://www.okanbulut.com/synthcheck/articles/app-demo.html) of
+both paths.
 
 ## Data
 
