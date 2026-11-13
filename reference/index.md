@@ -85,6 +85,22 @@ Define an instrument and personas, call language models, save the data.
 - [`as_synthetic_list()`](https://www.okanbulut.com/synthcheck/reference/as_synthetic_list.md)
   : Turn a table of synthetic respondents into benchmark input
 
+## Cognitive interviews
+
+Screen item wording with language models playing personas, when there
+are no real respondents yet.
+
+- [`cognitive_interview()`](https://www.okanbulut.com/synthcheck/reference/cognitive_interview.md)
+  : Run cognitive interviews with language models playing personas
+- [`sc_probes()`](https://www.okanbulut.com/synthcheck/reference/sc_probes.md)
+  : Probes for cognitive interviews
+- [`sc_interview_prompts()`](https://www.okanbulut.com/synthcheck/reference/sc_interview_prompts.md)
+  : Show the prompts of a cognitive interview
+- [`summarise_interviews()`](https://www.okanbulut.com/synthcheck/reference/summarise_interviews.md)
+  : Summarise cognitive interviews per item
+- [`gg_interview()`](https://www.okanbulut.com/synthcheck/reference/gg_interview.md)
+  : Plot cognitive interview problems per item
+
 ## Data
 
 - [`hexaco_real`](https://www.okanbulut.com/synthcheck/reference/hexaco_real.md)

@@ -39,6 +39,15 @@ screening, not validation: Language models answer more tidily than
 people, so the pretest points to items to read again, and a field test
 still decides.
 
+Next to the pretest,
+[`cognitive_interview()`](https://www.okanbulut.com/synthcheck/reference/cognitive_interview.md)
+runs simulated cognitive interviews: A language model plays each persona
+you define, thinks aloud while it answers each item and answers standard
+verbal probes, and a separate call codes the transcripts for
+comprehension, retrieval, judgement, response-mapping and sensitivity
+problems. It is a screening aid that points to wording to look at. It is
+not a substitute for cognitive interviews with real people.
+
 The package compares models and supports decisions about them. It does
 not show that synthetic respondents can replace a field test.
 

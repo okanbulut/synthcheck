@@ -32,6 +32,7 @@ a guided tour of the five tabs (the tour needs the cicerone package)."><meta pro
     <li><a class="dropdown-item" href="../articles/diagnostics.html">Diagnostics beside the benchmark</a></li>
     <li><a class="dropdown-item" href="../articles/pretest.html">Pretesting a scale without real data</a></li>
     <li><a class="dropdown-item" href="../articles/generate.html">Generating synthetic respondents in R</a></li>
+    <li><a class="dropdown-item" href="../articles/cognitive-interviews.html">Cognitive interviews with language models</a></li>
   </ul></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-the-app" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">The app</button>
@@ -103,7 +104,8 @@ own computer only.</p></dd>
     <p>Invisibly, when the app is closed with its Close button: A list
 with <code>synthetic</code> (the generated data), <code>benchmark</code> (the
 <code><a href="authenticity_benchmark.html">authenticity_benchmark()</a></code> result, if one was run), <code>pretest</code> (the
-<code><a href="synthetic_pretest.html">synthetic_pretest()</a></code> result, if one was run), <code>path</code> (<code>"real"</code>,
+<code><a href="synthetic_pretest.html">synthetic_pretest()</a></code> result, if one was run), <code>interviews</code> (the
+<code><a href="cognitive_interview.html">cognitive_interview()</a></code> result, if one was run), <code>path</code> (<code>"real"</code>,
 <code>"pretest"</code> or <code>NULL</code>), <code>instrument</code> and <code>personas</code>.</p>
     </div>
     <div class="section level2">
@@ -131,8 +133,15 @@ model (<code><a href="summarise_benchmark.html">summarise_benchmark()</a></code>
 generated data, with <code><a href="gg_pretest.html">gg_pretest()</a></code> and a plain-language summary
 (<code><a href="summarise_pretest.html">summarise_pretest()</a></code>). Add the same model at several temperatures in
 the Models tab to check whether the flags hold.</p></li>
+<li><p><strong>Interviews</strong> (tab 4b, without real data): Run <code><a href="cognitive_interview.html">cognitive_interview()</a></code> with
+the personas and models of tabs 2 and 3, on the items the pretest
+flagged or on items you choose (the pretest is optional), and read the
+summary (<code><a href="summarise_interviews.html">summarise_interviews()</a></code>), the plot (<code><a href="gg_interview.html">gg_interview()</a></code>) and the
+transcripts. A screening aid, not a substitute for cognitive
+interviews with real people.</p></li>
 <li><p><strong>Export:</strong> Download the data (CSV, JSON, RDS or Excel), the
-benchmark or the pretest, and an R script that repeats the analysis.</p></li>
+benchmark, the pretest or the interviews, and an R script that repeats
+the analysis.</p></li>
 </ol><p><strong>API keys</strong> typed into the app stay in memory for that session only:
 They are never written to the saved data, the run settings or the R
 script. Keys set as <code>ANTHROPIC_API_KEY</code> or <code>OPENAI_API_KEY</code> (for example

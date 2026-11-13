@@ -49,6 +49,8 @@ Invisibly, when the app is closed with its Close button: A list with
 [`authenticity_benchmark()`](https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.md)
 result, if one was run), `pretest` (the
 [`synthetic_pretest()`](https://www.okanbulut.com/synthcheck/reference/synthetic_pretest.md)
+result, if one was run), `interviews` (the
+[`cognitive_interview()`](https://www.okanbulut.com/synthcheck/reference/cognitive_interview.md)
 result, if one was run), `path` (`"real"`, `"pretest"` or `NULL`),
 `instrument` and `personas`.
 
@@ -101,8 +103,20 @@ and `"personas_template.csv"`.
     Add the same model at several temperatures in the Models tab to
     check whether the flags hold.
 
-4.  **Export:** Download the data (CSV, JSON, RDS or Excel), the
-    benchmark or the pretest, and an R script that repeats the analysis.
+4.  **Interviews** (tab 4b, without real data): Run
+    [`cognitive_interview()`](https://www.okanbulut.com/synthcheck/reference/cognitive_interview.md)
+    with the personas and models of tabs 2 and 3, on the items the
+    pretest flagged or on items you choose (the pretest is optional),
+    and read the summary
+    ([`summarise_interviews()`](https://www.okanbulut.com/synthcheck/reference/summarise_interviews.md)),
+    the plot
+    ([`gg_interview()`](https://www.okanbulut.com/synthcheck/reference/gg_interview.md))
+    and the transcripts. A screening aid, not a substitute for cognitive
+    interviews with real people.
+
+5.  **Export:** Download the data (CSV, JSON, RDS or Excel), the
+    benchmark, the pretest or the interviews, and an R script that
+    repeats the analysis.
 
 **API keys** typed into the app stay in memory for that session only:
 They are never written to the saved data, the run settings or the R

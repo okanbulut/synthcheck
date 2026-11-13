@@ -5,6 +5,7 @@
 <url><loc>https://www.okanbulut.com/synthcheck/articles/app-tour.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/articles/behaviour.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/articles/benchmark.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/articles/cognitive-interviews.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/articles/diagnostics.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/articles/generate.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/articles/index.html</loc></url>
@@ -18,12 +19,14 @@
 <url><loc>https://www.okanbulut.com/synthcheck/reference/authenticity_benchmark.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/behaviour_features.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/blend_llms.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/cognitive_interview.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/flag_careless.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/generate_synthetic.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/gg_behaviour.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/gg_benchmark.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/gg_construct.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/gg_coverage.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/gg_interview.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/gg_pretest.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/gg_respondent_coverage.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/hexaco_items.html</loc></url>
@@ -35,10 +38,13 @@
 <url><loc>https://www.okanbulut.com/synthcheck/reference/run_synthcheck_app.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/sc_default_models.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/sc_instrument.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/sc_interview_prompts.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/sc_model.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/sc_personas.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/sc_probes.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/sc_prompt.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/summarise_benchmark.html</loc></url>
+<url><loc>https://www.okanbulut.com/synthcheck/reference/summarise_interviews.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/summarise_pretest.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/synthcheck-package.html</loc></url>
 <url><loc>https://www.okanbulut.com/synthcheck/reference/synthetic_behaviour.html</loc></url>

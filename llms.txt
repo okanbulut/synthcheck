@@ -39,6 +39,15 @@ screening, not validation: Language models answer more tidily than
 people, so the pretest points to items to read again, and a field test
 still decides.
 
+Next to the pretest,
+[`cognitive_interview()`](https://www.okanbulut.com/synthcheck/reference/cognitive_interview.md)
+runs simulated cognitive interviews: A language model plays each persona
+you define, thinks aloud while it answers each item and answers standard
+verbal probes, and a separate call codes the transcripts for
+comprehension, retrieval, judgement, response-mapping and sensitivity
+problems. It is a screening aid that points to wording to look at. It is
+not a substitute for cognitive interviews with real people.
+
 The package compares models and supports decisions about them. It does
 not show that synthetic respondents can replace a field test.
 
@@ -244,6 +253,22 @@ Define an instrument and personas, call language models, save the data.
 - [`as_synthetic_list()`](https://www.okanbulut.com/synthcheck/reference/as_synthetic_list.md)
   : Turn a table of synthetic respondents into benchmark input
 
+## Cognitive interviews
+
+Screen item wording with language models playing personas, when there
+are no real respondents yet.
+
+- [`cognitive_interview()`](https://www.okanbulut.com/synthcheck/reference/cognitive_interview.md)
+  : Run cognitive interviews with language models playing personas
+- [`sc_probes()`](https://www.okanbulut.com/synthcheck/reference/sc_probes.md)
+  : Probes for cognitive interviews
+- [`sc_interview_prompts()`](https://www.okanbulut.com/synthcheck/reference/sc_interview_prompts.md)
+  : Show the prompts of a cognitive interview
+- [`summarise_interviews()`](https://www.okanbulut.com/synthcheck/reference/summarise_interviews.md)
+  : Summarise cognitive interviews per item
+- [`gg_interview()`](https://www.okanbulut.com/synthcheck/reference/gg_interview.md)
+  : Plot cognitive interview problems per item
+
 ## Data
 
 - [`hexaco_real`](https://www.okanbulut.com/synthcheck/reference/hexaco_real.md)
@@ -284,6 +309,8 @@ One step of the workflow at a time, with the functions behind it.
   data](https://www.okanbulut.com/synthcheck/articles/pretest.md):
 - [Generating synthetic respondents in
   R](https://www.okanbulut.com/synthcheck/articles/generate.md):
+- [Cognitive interviews with language
+  models](https://www.okanbulut.com/synthcheck/articles/cognitive-interviews.md):
 
 ### The synthcheck app
 
