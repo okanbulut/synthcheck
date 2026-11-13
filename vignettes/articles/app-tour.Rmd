@@ -288,7 +288,7 @@ think-aloud, answer and probe answers, with the coding. The
 probes and the coding. It is a screening aid, not a substitute for cognitive
 interviews with real people.
 
-## Export (5 with real data, 6 without)
+## Export
 
 ![The Export tab with downloads and the R script.](figures/app-export.png)
 
