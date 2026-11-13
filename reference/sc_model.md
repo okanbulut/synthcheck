@@ -55,7 +55,8 @@ API keys are read from the `ANTHROPIC_API_KEY` and `OPENAI_API_KEY`
 environment variables (set them in `.Renviron`, or with
 [`Sys.setenv()`](https://rdrr.io/r/base/Sys.setenv.html) for one
 session). They are never stored in the model specification or in the
-saved data.
+saved data. To get a key, see the article [Getting an API
+key](https://www.okanbulut.com/synthcheck/articles/api-keys.html).
 
 ## See also
 

@@ -48,6 +48,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-the-app">
 <li><a class="dropdown-item" href="../articles/app-tour.html">A tour of the synthcheck app</a></li>
     <li><a class="dropdown-item" href="../articles/app-demo.html">App demos: Four ways to use the app</a></li>
+    <li><a class="dropdown-item" href="../articles/api-keys.html">Getting an API key for OpenAI or Claude</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -306,6 +307,13 @@ it generates them the same way, pretests the scale in the Pretest tab
 and runs cognitive interviews in the Interviews tab.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/run_synthcheck_app.html">run_synthcheck_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Before a run with paid models, the app shows what it is likely to
+cost and asks you to confirm. Every answer is kept in a response cache,
+so the same run again is repeatable and free. The Export tab saves a
+results report (one HTML or PDF file) with the plots, summaries and run
+settings. OpenAI and Anthropic models need an API key, and <a href="api-keys.html">Getting an API key</a> shows how to get one, step
+by step. Ollama models, the <strong>Mock</strong> provider and the
+built-in data need no key.</p>
 </div>
 <div class="section level2">
 <h2 id="where-to-go-next">Where to go next<a class="anchor" aria-label="anchor" href="#where-to-go-next"></a>
@@ -325,11 +333,21 @@ choices behind the table.</li>
 <a href="cognitive-interviews.html">cognitive interviews</a>: Screening
 a new scale before it is fielded.</li>
 <li>
+<a href="instruments.html">Short instruments with known item
+problems</a>: The Rosenberg Self-Esteem Scale, the DASS-21 and the
+Mini-IPIP, with real responses, to see whether the checks find what the
+literature knows.</li>
+<li>
 <a href="generate.html">Generating synthetic respondents</a>: Your
-own instrument, personas and models, in R code.</li>
+own instrument, personas and models, in R code, with cost estimates, the
+response cache and a report.</li>
 <li>
 <a href="app-tour.html">A tour of the app</a> and the <a href="app-demo.html">app demos</a>: The same workflow without writing
 code, on both paths.</li>
+<li>
+<a href="api-keys.html">Getting an API key</a>: Signing up with
+OpenAI or Anthropic, adding credit, keeping the key private and setting
+a spending limit.</li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

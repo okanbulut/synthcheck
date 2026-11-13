@@ -48,6 +48,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-the-app">
 <li><a class="dropdown-item" href="../articles/app-tour.html">A tour of the synthcheck app</a></li>
     <li><a class="dropdown-item" href="../articles/app-demo.html">App demos: Four ways to use the app</a></li>
+    <li><a class="dropdown-item" href="../articles/api-keys.html">Getting an API key for OpenAI or Claude</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -226,8 +227,8 @@ shows the pretest and the interviews. To see the other path, change the
 answer and start the tour again. The tour needs the cicerone package
 (<code>install.packages("cicerone")</code>).</p>
 <div class="float">
-<img src="figures/app-tour-step.png" alt="The guided tour pointing to the items on the Instrument tab."><div class="figcaption">The guided tour pointing to the items on the
-Instrument tab.</div>
+<img src="figures/app-tour-step.png" alt="The guided tour pointing to the API keys on the Models tab."><div class="figcaption">The guided tour pointing to the API keys on the
+Models tab.</div>
 </div>
 <p><strong>Start with the instrument</strong> skips the tour and opens
 the first tab.</p>
@@ -240,10 +241,30 @@ the first tab.</p>
 <img src="figures/app-instrument.png" alt="The Instrument tab with two HEXACO traits selected."><div class="figcaption">The Instrument tab with two HEXACO traits
 selected.</div>
 </div>
-<p>Choose the items on the left: The built-in IPIP-HEXACO items (pick
-the traits; two traits give 80 items, all six give 240), or your own
-item table. Set the lowest and highest category, the category labels and
-the instructions.</p>
+<p>Choose the items on the left from the list:</p>
+<ul>
+<li>
+<strong>IPIP-HEXACO (built in):</strong> Pick the traits. Two traits
+give 80 items, all six give 240.</li>
+<li>
+<strong>Rosenberg Self-Esteem Scale</strong>,
+<strong>DASS-21</strong> or <strong>Mini-IPIP (built in):</strong> Short
+scales whose item problems are well documented, such as the
+negative-wording method factor of the Rosenberg scale. Pick the
+subscales where there are several. The response scale, labels and
+instructions are filled in for you, and each comes with real responses
+for the Compare tab. See <a href="instruments.html">Short instruments
+with known item problems</a>.</li>
+<li>
+<strong>Upload an item table:</strong> Your own questionnaire
+(below).</li>
+</ul>
+<div class="float">
+<img src="figures/app-instrument-rses.png" alt="The Rosenberg Self-Esteem Scale chosen on the Instrument tab."><div class="figcaption">The Rosenberg Self-Esteem Scale chosen on the
+Instrument tab.</div>
+</div>
+<p>Set the lowest and highest category, the category labels and the
+instructions.</p>
 <p>The right side checks the instrument and shows the <strong>prompt
 sent for each respondent</strong>, so you see exactly what a model will
 read.</p>
@@ -295,15 +316,18 @@ the cognitive interviews.</p>
 <h2 id="models">3. Models<a class="anchor" aria-label="anchor" href="#models"></a>
 </h2>
 <div class="float">
-<img src="figures/app-models.png" alt="The Models tab with two models, the run plan and the time estimate."><div class="figcaption">The Models tab with two models, the run plan and
-the time estimate.</div>
+<img src="figures/app-models.png" alt="The Models tab with two models, the run plan and the estimated cost."><div class="figcaption">The Models tab with two models, the run plan and
+the estimated cost.</div>
 </div>
 <p><strong>API keys.</strong> Type an Anthropic or OpenAI key, or set
 <code>ANTHROPIC_API_KEY</code> and <code>OPENAI_API_KEY</code> in
 <code>.Renviron</code>, and the app uses them without showing them.
 Typed keys stay in memory for this session only. They are never written
-to the saved data, the run settings or the R script. Ollama models run
-on your own computer and need no key.</p>
+to the saved data, the run settings, the report or the R script. Ollama
+models run on your own computer and need no key. <strong>No key
+yet?</strong> The link under the key fields opens <a href="api-keys.html">Getting an API key</a>, which walks through signing
+up with OpenAI or Anthropic, adding credit, keeping the key private and
+setting a spending limit.</p>
 <p><strong>Add a model.</strong> Pick a provider and a model id (or type
 one), set the temperature and an optional label, and click <strong>Add
 model</strong>. Add as many as you want to compare.
@@ -333,6 +357,25 @@ blocks.</li>
 tells you how long the whole run should take. It is also a quick check
 that the keys and model ids work.</li>
 </ul>
+<p><strong>What it costs.</strong> Under the plan, the app shows the
+<strong>estimated cost</strong> of the run, from the number of calls, a
+guess of their length and a dated price table
+(<code><a href="../reference/estimate_cost.html">estimate_cost()</a></code> in R). Ollama and mock models are free.
+Before a run with paid models, <strong>Generate data</strong> first
+opens a box with the cost per model and asks you to confirm.</p>
+<div class="float">
+<img src="figures/app-cost.png" alt="The box that asks before a run with paid models."><div class="figcaption">The box that asks before a run with paid
+models.</div>
+</div>
+<p><strong>Saved answers (cache).</strong> Every answer is saved on
+disk. With <strong>Reuse saved answers</strong> (the default), the same
+run again reads them back: It gives the same data and costs nothing, and
+more attempts or respondents call the models only for the new ones.
+<strong>Ask again and replace them</strong> calls the models again, and
+<strong>Do not save or reuse</strong> turns the cache off. The line
+under the setting says how many answers are saved, and <strong>Clear the
+cache</strong> deletes them. Failed calls and mock answers are never
+saved. The cache holds answers only, never keys.</p>
 <div class="float">
 <img src="figures/app-progress.png" alt="A run in progress, with the time left for each model."><div class="figcaption">A run in progress, with the time left for each
 model.</div>
@@ -350,11 +393,12 @@ attempts.</p>
 <div class="float">
 <img src="figures/demo-builtin.png" alt="The Compare tab after a benchmark."><div class="figcaption">The Compare tab after a benchmark.</div>
 </div>
-<p>Choose the real data (the built-in <code>hexaco_real</code> for one
-country, data you passed to <code><a href="../reference/run_synthcheck_app.html">run_synthcheck_app()</a></code>, or an
-upload) and the synthetic data (this session’s run, the built-in
-<code>hexaco_llm</code>, or files saved by an earlier run). Then click
-<strong>Run the benchmark</strong>.</p>
+<p>Choose the real data (the built-in real responses to the instrument
+of tab 1, for one country or all, data you passed to
+<code><a href="../reference/run_synthcheck_app.html">run_synthcheck_app()</a></code>, or an upload) and the synthetic data
+(this session’s run, the built-in <code>hexaco_llm</code>, or files
+saved by an earlier run). Then click <strong>Run the
+benchmark</strong>.</p>
 <p>The right side shows a plain-language summary per model, the
 synthetic authenticity benchmark with its table, and the behaviour
 strip. In the benchmark, tiles run from red (-100 or lower) through pale
@@ -451,7 +495,9 @@ requests (three per interview: Think-aloud, probes and coding).</li>
 <strong>Probes:</strong> One per line, as <code>stage: probe</code>.
 Edit them, add your own or remove the ones you do not need.</li>
 </ul>
-<p>Click <strong>Run the interviews</strong>. A progress bar counts the
+<p>Click <strong>Run the interviews</strong>. As on the Models tab, the
+plan shows the estimated cost, the app asks before a run with paid
+models, and saved answers are reused. A progress bar counts the
 interviews, and <strong>Stop</strong> ends the run.</p>
 <p>The right side shows a plain-language summary, the <strong>problems
 per item</strong> (one row per item, one column per kind of problem,
@@ -467,8 +513,8 @@ not a substitute for cognitive interviews with real people.</p>
 <h2 id="export">Export<a class="anchor" aria-label="anchor" href="#export"></a>
 </h2>
 <div class="float">
-<img src="figures/app-export.png" alt="The Export tab with downloads and the R script."><div class="figcaption">The Export tab with downloads and the R
-script.</div>
+<img src="figures/app-export.png" alt="The Export tab with the results report, the downloads and the R script."><div class="figcaption">The Export tab with the results report, the
+downloads and the R script.</div>
 </div>
 <p><strong>Results report</strong> saves one file with the plots, tables
 and plain-language summaries of the session, and the settings needed to

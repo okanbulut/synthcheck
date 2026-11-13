@@ -48,6 +48,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-the-app">
 <li><a class="dropdown-item" href="../articles/app-tour.html">A tour of the synthcheck app</a></li>
     <li><a class="dropdown-item" href="../articles/app-demo.html">App demos: Four ways to use the app</a></li>
+    <li><a class="dropdown-item" href="../articles/api-keys.html">Getting an API key for OpenAI or Claude</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -111,8 +112,9 @@ in)</strong> and the traits Honesty-Humility and Conscientiousness (80
 items).</li>
 <li>
 <strong>Compare:</strong> Under <em>Real data</em>, choose
-<strong>hexaco_real (built in)</strong> and <em>Canada</em>. Under
-<em>Synthetic data</em>, choose <strong>hexaco_llm (built in)</strong>,
+<strong>Built in, for the instrument in tab 1</strong> (for HEXACO, that
+is <code>hexaco_real</code>) and <em>Canada</em>. Under <em>Synthetic
+data</em>, choose <strong>hexaco_llm (built in)</strong>,
 <em>Canada</em> and 3 attempts per model.</li>
 <li>Switch off <strong>Include person fit</strong> for a faster first
 run, and click <strong>Run the benchmark</strong>.</li>
@@ -169,9 +171,8 @@ run finished.</div>
 </div>
 <ol start="7" style="list-style-type: decimal">
 <li>
-<strong>Compare:</strong> Keep <em>This session’s run</em> and real
-data from <strong>hexaco_real</strong>, <em>Canada</em>, and run the
-benchmark.</li>
+<strong>Compare:</strong> Keep <em>This session’s run</em> and the
+built-in real data, <em>Canada</em>, and run the benchmark.</li>
 </ol>
 <div class="float">
 <img src="figures/demo-mock-compare.png" alt="Demo 2: Random answers score near the floor on every column."><div class="figcaption">Demo 2: Random answers score near the floor on
@@ -186,9 +187,14 @@ telltale sign of random answers: More extreme answers and more
 variability than real people (blue).</p>
 <ol start="8" style="list-style-type: decimal">
 <li>
-<strong>Export:</strong> Download the data in the format you need,
-and the R script that repeats the comparison.</li>
+<strong>Export:</strong> Download the results report (HTML or PDF),
+the data in the format you need, and the R script that repeats the
+comparison.</li>
 </ol>
+<p>To try the same practice run on a short scale with known item
+problems, choose the <strong>Rosenberg Self-Esteem Scale</strong>, the
+<strong>DASS-21</strong> or the <strong>Mini-IPIP</strong> in step 2.
+The built-in real data in step 7 follow the instrument.</p>
 </div>
 <div class="section level2">
 <h2 id="demo-3-your-own-questionnaire-with-real-models">Demo 3: Your own questionnaire, with real models<a class="anchor" aria-label="anchor" href="#demo-3-your-own-questionnaire-with-real-models"></a>
@@ -213,9 +219,10 @@ matter in your population, such as age, gender and region.</li>
 <li>
 <strong>Models:</strong> Enter your API keys, or set
 <code>ANTHROPIC_API_KEY</code> and <code>OPENAI_API_KEY</code> in
-<code>.Renviron</code> before you start R. Add the models to compare,
-for example <code>claude-haiku-5-5</code> and <code>gpt-4.1-nano</code>
-at temperature
+<code>.Renviron</code> before you start R. If you do not have a key yet,
+<a href="api-keys.html">Getting an API key</a> shows how to get one. Add
+the models to compare, for example <code>claude-haiku-5-5</code> and
+<code>gpt-4.1-nano</code> at temperature
 <ol style="list-style-type: decimal">
 <li>For a local model, start Ollama, choose <em>Ollama (local)</em> and
 click <strong>Refresh the model list</strong>.</li>
@@ -223,14 +230,16 @@ click <strong>Refresh the model list</strong>.</li>
 </li>
 <li>Start small: 1 attempt and 2 respondents per persona. Click
 <strong>Estimate run time</strong> to check the keys and see the time
-for a full run. Then raise the attempts (5 or more give a sense of
-stability) and generate.</li>
+for a full run. The plan shows the estimated cost, and <strong>Generate
+data</strong> asks you to confirm it. Then raise the attempts (5 or more
+give a sense of stability) and generate again: The answers you already
+have come from the cache and cost nothing.</li>
 <li>
 <strong>Compare:</strong> Upload your real data (CSV, Excel or RDS,
 one row per person, the items as columns) and run the benchmark.</li>
 <li>
-<strong>Export:</strong> Save the data and the R script with your
-results.</li>
+<strong>Export:</strong> Save the results report, the data and the R
+script with your results.</li>
 </ol>
 <p>The same run in code:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -304,11 +313,11 @@ transcripts of the flagged items and the suggested rewordings, and
 decide which items to reword before the field test.</p>
 <ol start="7" style="list-style-type: decimal">
 <li>
-<strong>Export:</strong> Download the pretest, the interviews and
-the transcripts, and the R script that repeats them. Once real responses
-come in, go back to the About tab, answer <strong>Yes, I have real
-data</strong>, and benchmark the same synthetic data in the Compare
-tab.</li>
+<strong>Export:</strong> Download the results report with the
+pretest and the interviews, the transcripts and the R script that
+repeats them. Once real responses come in, go back to the About tab,
+answer <strong>Yes, I have real data</strong>, and benchmark the same
+synthetic data in the Compare tab.</li>
 </ol>
 <p>The same steps in code:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -329,15 +338,18 @@ tab.</li>
 <ul>
 <li>
 <strong>Cost.</strong> The number of calls is models × attempts ×
-personas × respondents. Check the plan and the time estimate before a
-large run.</li>
+personas × respondents. Check the plan, the estimated cost and the time
+estimate before a large run, and set a spending limit with the provider
+(<a href="api-keys.html">Getting an API key</a>). The same settings
+again come from the cache for free.</li>
 <li>
 <strong>Independence.</strong> Keep one respondent per call unless
 cost forces a larger batch. Respondents in the same call see each
 other’s answers.</li>
 <li>
 <strong>Keys.</strong> Run the app on your own computer. Do not
-deploy it on a shared server with keys typed in.</li>
+deploy it on a shared server with keys typed in, and keep keys out of
+scripts and Git.</li>
 <li>
 <strong>What the benchmark says.</strong> It tells you which model
 resembles your real respondents most, and on which side it falls short.

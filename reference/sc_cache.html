@@ -47,6 +47,7 @@ and costs nothing the second time."><meta property="og:image" content="https://w
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-the-app" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">The app</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-the-app"><li><a class="dropdown-item" href="../articles/app-tour.html">A tour of the synthcheck app</a></li>
     <li><a class="dropdown-item" href="../articles/app-demo.html">App demos: Four ways to use the app</a></li>
+    <li><a class="dropdown-item" href="../articles/api-keys.html">Getting an API key for OpenAI or Claude</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -127,7 +128,7 @@ with <code><a href="sc_cache_info.html">sc_cache_info()</a></code> and delete it
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">sc_cache</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Response cache in /home/runner/.cache/R/synthcheck: reuses saved answers and saves new ones.</span>
 <span class="r-in"><span><span class="fu">sc_cache</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"cache"</span><span class="op">)</span>, mode <span class="op">=</span> <span class="st">"refresh"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Response cache in /tmp/RtmpZzJ2ik/cache18733b91b4d6: asks the models again and replaces saved answers.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Response cache in /tmp/Rtmp1A1ze4/cache1917490d0627: asks the models again and replaces saved answers.</span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co"># needs ANTHROPIC_API_KEY</span></span></span>
 <span class="r-in"><span><span class="va">ins</span> <span class="op">&lt;-</span> <span class="fu"><a href="sc_instrument.html">sc_instrument</a></span><span class="op">(</span><span class="va">hexaco_items</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="op">]</span>, scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">7</span><span class="op">)</span><span class="op">)</span></span></span>

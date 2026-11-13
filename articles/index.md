@@ -28,9 +28,12 @@ One step of the workflow at a time, with the functions behind it.
 
 ### The synthcheck app
 
-The whole workflow on screen, from an instrument to a benchmark.
+The whole workflow on screen, from an instrument to a benchmark, and how
+to get an API key for real models.
 
 - [A tour of the synthcheck
   app](https://www.okanbulut.com/synthcheck/articles/app-tour.md):
 - [App demos: Four ways to use the
   app](https://www.okanbulut.com/synthcheck/articles/app-demo.md):
+- [Getting an API key for OpenAI or
+  Claude](https://www.okanbulut.com/synthcheck/articles/api-keys.md):

@@ -30,9 +30,10 @@ generating anything.
 1.  **About:** Answer **Yes, I have real data**.
 2.  **Instrument:** Keep **IPIP-HEXACO (built in)** and the traits
     Honesty-Humility and Conscientiousness (80 items).
-3.  **Compare:** Under *Real data*, choose **hexaco_real (built in)**
-    and *Canada*. Under *Synthetic data*, choose **hexaco_llm (built
-    in)**, *Canada* and 3 attempts per model.
+3.  **Compare:** Under *Real data*, choose **Built in, for the
+    instrument in tab 1** (for HEXACO, that is `hexaco_real`) and
+    *Canada*. Under *Synthetic data*, choose **hexaco_llm (built in)**,
+    *Canada* and 3 attempts per model.
 4.  Switch off **Include person fit** for a faster first run, and click
     **Run the benchmark**.
 
@@ -84,8 +85,8 @@ finished.](figures/demo-mock-run.png)
 
 Demo 2: Two mock models in the run, after the run finished.
 
-7.  **Compare:** Keep *This session’s run* and real data from
-    **hexaco_real**, *Canada*, and run the benchmark.
+7.  **Compare:** Keep *This session’s run* and the built-in real data,
+    *Canada*, and run the benchmark.
 
 ![Demo 2: Random answers score near the floor on every
 column.](figures/demo-mock-compare.png)
@@ -100,8 +101,13 @@ middle score deciles. The behaviour strip shows the other telltale sign
 of random answers: More extreme answers and more variability than real
 people (blue).
 
-8.  **Export:** Download the data in the format you need, and the R
-    script that repeats the comparison.
+8.  **Export:** Download the results report (HTML or PDF), the data in
+    the format you need, and the R script that repeats the comparison.
+
+To try the same practice run on a short scale with known item problems,
+choose the **Rosenberg Self-Esteem Scale**, the **DASS-21** or the
+**Mini-IPIP** in step 2. The built-in real data in step 7 follow the
+instrument.
 
 ## Demo 3: Your own questionnaire, with real models
 
@@ -118,18 +124,23 @@ real answers to the same items.
     same tab), or build a grid from the attributes that matter in your
     population, such as age, gender and region.
 4.  **Models:** Enter your API keys, or set `ANTHROPIC_API_KEY` and
-    `OPENAI_API_KEY` in `.Renviron` before you start R. Add the models
-    to compare, for example `claude-haiku-5-5` and `gpt-4.1-nano` at
-    temperature
+    `OPENAI_API_KEY` in `.Renviron` before you start R. If you do not
+    have a key yet, [Getting an API
+    key](https://www.okanbulut.com/synthcheck/articles/api-keys.md)
+    shows how to get one. Add the models to compare, for example
+    `claude-haiku-5-5` and `gpt-4.1-nano` at temperature
     1.  For a local model, start Ollama, choose *Ollama (local)* and
         click **Refresh the model list**.
 5.  Start small: 1 attempt and 2 respondents per persona. Click
     **Estimate run time** to check the keys and see the time for a full
-    run. Then raise the attempts (5 or more give a sense of stability)
-    and generate.
+    run. The plan shows the estimated cost, and **Generate data** asks
+    you to confirm it. Then raise the attempts (5 or more give a sense
+    of stability) and generate again: The answers you already have come
+    from the cache and cost nothing.
 6.  **Compare:** Upload your real data (CSV, Excel or RDS, one row per
     person, the items as columns) and run the benchmark.
-7.  **Export:** Save the data and the R script with your results.
+7.  **Export:** Save the results report, the data and the R script with
+    your results.
 
 The same run in code:
 
@@ -196,10 +207,11 @@ text that only show how the tab works. With a real model, read the
 transcripts of the flagged items and the suggested rewordings, and
 decide which items to reword before the field test.
 
-7.  **Export:** Download the pretest, the interviews and the
-    transcripts, and the R script that repeats them. Once real responses
-    come in, go back to the About tab, answer **Yes, I have real data**,
-    and benchmark the same synthetic data in the Compare tab.
+7.  **Export:** Download the results report with the pretest and the
+    interviews, the transcripts and the R script that repeats them. Once
+    real responses come in, go back to the About tab, answer **Yes, I
+    have real data**, and benchmark the same synthetic data in the
+    Compare tab.
 
 The same steps in code:
 
@@ -221,11 +233,16 @@ gg_interview(summarise_interviews(iv))
 ### Things to keep in mind
 
 - **Cost.** The number of calls is models × attempts × personas ×
-  respondents. Check the plan and the time estimate before a large run.
+  respondents. Check the plan, the estimated cost and the time estimate
+  before a large run, and set a spending limit with the provider
+  ([Getting an API
+  key](https://www.okanbulut.com/synthcheck/articles/api-keys.md)). The
+  same settings again come from the cache for free.
 - **Independence.** Keep one respondent per call unless cost forces a
   larger batch. Respondents in the same call see each other’s answers.
 - **Keys.** Run the app on your own computer. Do not deploy it on a
-  shared server with keys typed in.
+  shared server with keys typed in, and keep keys out of scripts and
+  Git.
 - **What the benchmark says.** It tells you which model resembles your
   real respondents most, and on which side it falls short. It does not
   show that synthetic data can replace a field test.

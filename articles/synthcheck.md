@@ -241,6 +241,15 @@ tab.
 run_synthcheck_app()
 ```
 
+Before a run with paid models, the app shows what it is likely to cost
+and asks you to confirm. Every answer is kept in a response cache, so
+the same run again is repeatable and free. The Export tab saves a
+results report (one HTML or PDF file) with the plots, summaries and run
+settings. OpenAI and Anthropic models need an API key, and [Getting an
+API key](https://www.okanbulut.com/synthcheck/articles/api-keys.md)
+shows how to get one, step by step. Ollama models, the **Mock** provider
+and the built-in data need no key.
+
 ## Where to go next
 
 - [Overlap and
@@ -257,11 +266,21 @@ run_synthcheck_app()
   [cognitive
   interviews](https://www.okanbulut.com/synthcheck/articles/cognitive-interviews.md):
   Screening a new scale before it is fielded.
+- [Short instruments with known item
+  problems](https://www.okanbulut.com/synthcheck/articles/instruments.md):
+  The Rosenberg Self-Esteem Scale, the DASS-21 and the Mini-IPIP, with
+  real responses, to see whether the checks find what the literature
+  knows.
 - [Generating synthetic
   respondents](https://www.okanbulut.com/synthcheck/articles/generate.md):
-  Your own instrument, personas and models, in R code.
+  Your own instrument, personas and models, in R code, with cost
+  estimates, the response cache and a report.
 - [A tour of the
   app](https://www.okanbulut.com/synthcheck/articles/app-tour.md) and
   the [app
   demos](https://www.okanbulut.com/synthcheck/articles/app-demo.md): The
   same workflow without writing code, on both paths.
+- [Getting an API
+  key](https://www.okanbulut.com/synthcheck/articles/api-keys.md):
+  Signing up with OpenAI or Anthropic, adding credit, keeping the key
+  private and setting a spending limit.

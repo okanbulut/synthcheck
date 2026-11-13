@@ -40,6 +40,14 @@ ins
 Labels default to agree-disagree labels for 5- and 7-point scales. Give
 your own with `labels`, and your own text with `instructions`.
 
+The bundled instruments come ready to use, with their response scale,
+labels and instructions: `sc_builtin_instrument("rses")` for the
+Rosenberg Self-Esteem Scale, `"dass21"` for the DASS-21, `"mini_ipip"`
+for the Mini-IPIP and `"hexaco"` for the IPIP-HEXACO. Each has real
+responses to compare with, and items with problems the literature
+already reports; see [Short instruments with known item
+problems](https://www.okanbulut.com/synthcheck/articles/instruments.md).
+
 A template item table ships with the package:
 
 ``` r
@@ -154,6 +162,10 @@ The defaults are the cheapest models of each provider that take a
 temperature. `temperature = NULL` sends none, for models that do not
 take one. API keys come from `ANTHROPIC_API_KEY` and `OPENAI_API_KEY`
 (for example in `.Renviron`) and are never written to the saved files.
+New to API keys? [Getting an API
+key](https://www.okanbulut.com/synthcheck/articles/api-keys.md) walks
+through signing up, adding credit, keeping the key private and setting a
+spending limit.
 
 ## 5. Generate
 
@@ -306,3 +318,25 @@ what shuffled real answers score. Real language models are not
 guaranteed to do better. On HEXACO, the six models in `hexaco_llm` often
 fall below 0 because their respondents bunch together; see [the
 benchmark](https://www.okanbulut.com/synthcheck/articles/benchmark.md).
+
+## 8. A report
+
+[`write_report()`](https://www.okanbulut.com/synthcheck/reference/write_report.md)
+puts the results in one file: The plots, the tables, the plain-language
+summaries and the settings needed to repeat the run. HTML (the default)
+is one self-contained file that opens in any browser. PDF uses R’s own
+PDF device, so it needs no LaTeX.
+
+``` r
+
+write_report(list(benchmark = bm, synthetic = syn, instrument = ins,
+                  personas = per, models = models), "my_report.html")
+write_report(bm, "my_report.pdf")
+```
+
+A pretest
+([`synthetic_pretest()`](https://www.okanbulut.com/synthcheck/reference/synthetic_pretest.md))
+and cognitive interviews
+([`cognitive_interview()`](https://www.okanbulut.com/synthcheck/reference/cognitive_interview.md))
+go in the same way, as `pretest` and `interviews`. The app’s Export tab
+downloads the same report.

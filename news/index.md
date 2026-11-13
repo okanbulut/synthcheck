@@ -70,6 +70,21 @@
 - The app’s Export tab has a new **Results report** card that downloads
   the report for the path you chose, in HTML or PDF.
 
+- New article: “Getting an API key for OpenAI or Claude”. It walks
+  through signing up, adding credit, keeping the key private and setting
+  a spending limit. The app’s Models tab links to it and to the
+  providers’ sign-up pages next to the API key fields, and the website
+  links to it from the app menu, Get started and the README.
+
+- The guided tour in the app now shows the API keys, the estimated cost
+  and the response cache. The About tab lists the cost estimate and the
+  cache.
+
+- The tour of the app, the app demos, Get started and the tutorial on
+  generating respondents cover the built-in short instruments, the cost
+  estimate, the response cache and the results report, with new
+  screenshots.
+
 ## synthcheck 0.2.0
 
 Adds a path for scales without real data (a synthetic pretest and

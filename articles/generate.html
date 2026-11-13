@@ -48,6 +48,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-the-app">
 <li><a class="dropdown-item" href="../articles/app-tour.html">A tour of the synthcheck app</a></li>
     <li><a class="dropdown-item" href="../articles/app-demo.html">App demos: Four ways to use the app</a></li>
+    <li><a class="dropdown-item" href="../articles/api-keys.html">Getting an API key for OpenAI or Claude</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -111,6 +112,13 @@ statements, plus the response scale:</p>
 <p>Labels default to agree-disagree labels for 5- and 7-point scales.
 Give your own with <code>labels</code>, and your own text with
 <code>instructions</code>.</p>
+<p>The bundled instruments come ready to use, with their response scale,
+labels and instructions: <code>sc_builtin_instrument("rses")</code> for
+the Rosenberg Self-Esteem Scale, <code>"dass21"</code> for the DASS-21,
+<code>"mini_ipip"</code> for the Mini-IPIP and <code>"hexaco"</code> for
+the IPIP-HEXACO. Each has real responses to compare with, and items with
+problems the literature already reports; see <a href="instruments.html">Short instruments with known item
+problems</a>.</p>
 <p>A template item table ships with the package:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tpl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"templates"</span>, <span class="st">"instrument_template.csv"</span>, package <span class="op">=</span> <span class="st">"synthcheck"</span><span class="op">)</span></span>
@@ -213,7 +221,8 @@ Answers outside the scale and missing items are retried, then stored as
 temperature. <code>temperature = NULL</code> sends none, for models that
 do not take one. API keys come from <code>ANTHROPIC_API_KEY</code> and
 <code>OPENAI_API_KEY</code> (for example in <code>.Renviron</code>) and
-are never written to the saved files.</p>
+are never written to the saved files. New to API keys? <a href="api-keys.html">Getting an API key</a> walks through signing up,
+adding credit, keeping the key private and setting a spending limit.</p>
 </div>
 <div class="section level2">
 <h2 id="generate">5. Generate<a class="anchor" aria-label="anchor" href="#generate"></a>
@@ -354,6 +363,22 @@ what shuffled real answers score. Real language models are not
 guaranteed to do better. On HEXACO, the six models in
 <code>hexaco_llm</code> often fall below 0 because their respondents
 bunch together; see <a href="benchmark.html">the benchmark</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="a-report">8. A report<a class="anchor" aria-label="anchor" href="#a-report"></a>
+</h2>
+<p><code><a href="../reference/write_report.html">write_report()</a></code> puts the results in one file: The plots,
+the tables, the plain-language summaries and the settings needed to
+repeat the run. HTML (the default) is one self-contained file that opens
+in any browser. PDF uses R’s own PDF device, so it needs no LaTeX.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/write_report.html">write_report</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>benchmark <span class="op">=</span> <span class="va">bm</span>, synthetic <span class="op">=</span> <span class="va">syn</span>, instrument <span class="op">=</span> <span class="va">ins</span>,</span>
+<span>                  personas <span class="op">=</span> <span class="va">per</span>, models <span class="op">=</span> <span class="va">models</span><span class="op">)</span>, <span class="st">"my_report.html"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/write_report.html">write_report</a></span><span class="op">(</span><span class="va">bm</span>, <span class="st">"my_report.pdf"</span><span class="op">)</span></span></code></pre></div>
+<p>A pretest (<code><a href="../reference/synthetic_pretest.html">synthetic_pretest()</a></code>) and cognitive interviews
+(<code><a href="../reference/cognitive_interview.html">cognitive_interview()</a></code>) go in the same way, as
+<code>pretest</code> and <code>interviews</code>. The app’s Export tab
+downloads the same report.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

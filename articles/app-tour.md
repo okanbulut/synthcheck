@@ -107,10 +107,10 @@ pretest and the interviews. To see the other path, change the answer and
 start the tour again. The tour needs the cicerone package
 (`install.packages("cicerone")`).
 
-![The guided tour pointing to the items on the Instrument
+![The guided tour pointing to the API keys on the Models
 tab.](figures/app-tour-step.png)
 
-The guided tour pointing to the items on the Instrument tab.
+The guided tour pointing to the API keys on the Models tab.
 
 **Start with the instrument** skips the tour and opens the first tab.
 
@@ -121,9 +121,25 @@ selected.](figures/app-instrument.png)
 
 The Instrument tab with two HEXACO traits selected.
 
-Choose the items on the left: The built-in IPIP-HEXACO items (pick the
-traits; two traits give 80 items, all six give 240), or your own item
-table. Set the lowest and highest category, the category labels and the
+Choose the items on the left from the list:
+
+- **IPIP-HEXACO (built in):** Pick the traits. Two traits give 80 items,
+  all six give 240.
+- **Rosenberg Self-Esteem Scale**, **DASS-21** or **Mini-IPIP (built
+  in):** Short scales whose item problems are well documented, such as
+  the negative-wording method factor of the Rosenberg scale. Pick the
+  subscales where there are several. The response scale, labels and
+  instructions are filled in for you, and each comes with real responses
+  for the Compare tab. See [Short instruments with known item
+  problems](https://www.okanbulut.com/synthcheck/articles/instruments.md).
+- **Upload an item table:** Your own questionnaire (below).
+
+![The Rosenberg Self-Esteem Scale chosen on the Instrument
+tab.](figures/app-instrument-rses.png)
+
+The Rosenberg Self-Esteem Scale chosen on the Instrument tab.
+
+Set the lowest and highest category, the category labels and the
 instructions.
 
 The right side checks the instrument and shows the **prompt sent for
@@ -172,16 +188,21 @@ cognitive interviews.
 
 ## 3. Models
 
-![The Models tab with two models, the run plan and the time
-estimate.](figures/app-models.png)
+![The Models tab with two models, the run plan and the estimated
+cost.](figures/app-models.png)
 
-The Models tab with two models, the run plan and the time estimate.
+The Models tab with two models, the run plan and the estimated cost.
 
 **API keys.** Type an Anthropic or OpenAI key, or set
 `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` in `.Renviron`, and the app
 uses them without showing them. Typed keys stay in memory for this
-session only. They are never written to the saved data, the run settings
-or the R script. Ollama models run on your own computer and need no key.
+session only. They are never written to the saved data, the run
+settings, the report or the R script. Ollama models run on your own
+computer and need no key. **No key yet?** The link under the key fields
+opens [Getting an API
+key](https://www.okanbulut.com/synthcheck/articles/api-keys.md), which
+walks through signing up with OpenAI or Anthropic, adding credit,
+keeping the key private and setting a spending limit.
 
 **Add a model.** Pick a provider and a model id (or type one), set the
 temperature and an optional label, and click **Add model**. Add as many
@@ -206,6 +227,28 @@ tells you how many respondents the run will make.
   long the whole run should take. It is also a quick check that the keys
   and model ids work.
 
+**What it costs.** Under the plan, the app shows the **estimated cost**
+of the run, from the number of calls, a guess of their length and a
+dated price table
+([`estimate_cost()`](https://www.okanbulut.com/synthcheck/reference/estimate_cost.md)
+in R). Ollama and mock models are free. Before a run with paid models,
+**Generate data** first opens a box with the cost per model and asks you
+to confirm.
+
+![The box that asks before a run with paid
+models.](figures/app-cost.png)
+
+The box that asks before a run with paid models.
+
+**Saved answers (cache).** Every answer is saved on disk. With **Reuse
+saved answers** (the default), the same run again reads them back: It
+gives the same data and costs nothing, and more attempts or respondents
+call the models only for the new ones. **Ask again and replace them**
+calls the models again, and **Do not save or reuse** turns the cache
+off. The line under the setting says how many answers are saved, and
+**Clear the cache** deletes them. Failed calls and mock answers are
+never saved. The cache holds answers only, never keys.
+
 ![A run in progress, with the time left for each
 model.](figures/app-progress.png)
 
@@ -223,8 +266,8 @@ stopped run keeps its finished attempts.
 
 The Compare tab after a benchmark.
 
-Choose the real data (the built-in `hexaco_real` for one country, data
-you passed to
+Choose the real data (the built-in real responses to the instrument of
+tab 1, for one country or all, data you passed to
 [`run_synthcheck_app()`](https://www.okanbulut.com/synthcheck/reference/run_synthcheck_app.md),
 or an upload) and the synthetic data (this session’s run, the built-in
 `hexaco_llm`, or files saved by an earlier run). Then click **Run the
@@ -323,8 +366,10 @@ models from the Models tab.
 - **Probes:** One per line, as `stage: probe`. Edit them, add your own
   or remove the ones you do not need.
 
-Click **Run the interviews**. A progress bar counts the interviews, and
-**Stop** ends the run.
+Click **Run the interviews**. As on the Models tab, the plan shows the
+estimated cost, the app asks before a run with paid models, and saved
+answers are reused. A progress bar counts the interviews, and **Stop**
+ends the run.
 
 The right side shows a plain-language summary, the **problems per item**
 (one row per item, one column per kind of problem, from pale to red as
@@ -338,10 +383,10 @@ substitute for cognitive interviews with real people.
 
 ## Export
 
-![The Export tab with downloads and the R
+![The Export tab with the results report, the downloads and the R
 script.](figures/app-export.png)
 
-The Export tab with downloads and the R script.
+The Export tab with the results report, the downloads and the R script.
 
 **Results report** saves one file with the plots, tables and
 plain-language summaries of the session, and the settings needed to

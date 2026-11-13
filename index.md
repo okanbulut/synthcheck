@@ -144,7 +144,12 @@ do the same in code).
 
 API keys typed into the app stay in memory for that session only. Keys
 set as `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` in `.Renviron` are used
-without being shown. The same steps work in code:
+without being shown. New to API keys? The article [Getting an API
+key](https://www.okanbulut.com/synthcheck/articles/api-keys.html) walks
+through signing up with [OpenAI](https://openai.com/api/) or
+[Claude](https://platform.claude.com/dashboard), adding credit, keeping
+the key private and setting a spending limit. The Mock provider, Ollama
+models and the built-in data need no key. The same steps work in code:
 
 ``` r
 
@@ -163,7 +168,8 @@ See the [website](https://www.okanbulut.com/synthcheck/) for a Get
 started article, tutorials on each step and a [tour of the
 app](https://www.okanbulut.com/synthcheck/articles/app-tour.html) with
 [demos](https://www.okanbulut.com/synthcheck/articles/app-demo.html) of
-both paths.
+both paths, and a guide to [getting an API
+key](https://www.okanbulut.com/synthcheck/articles/api-keys.html).
 
 ## Data
 
