@@ -2,6 +2,7 @@
 % Please edit documentation in R/app.R
 \name{run_synthcheck_app}
 \alias{run_synthcheck_app}
+\alias{synthcheck_app}
 \title{Generate and benchmark synthetic data in a Shiny app}
 \usage{
 run_synthcheck_app(
@@ -11,6 +12,8 @@ run_synthcheck_app(
   port = NULL,
   launch.browser = TRUE
 )
+
+synthcheck_app(real = NULL, synthetic = NULL, hosted = sc_is_hosted())
 }
 \arguments{
 \item{real}{optional data frame of real responses, loaded into the
@@ -25,6 +28,11 @@ the Compare and Pretest tabs.}
 own computer only.}
 
 \item{launch.browser}{open the app in a browser?}
+
+\item{hosted}{run in hosted mode (see above)? The default is \code{TRUE} when
+the option \code{synthcheck.hosted} is \code{TRUE}, the environment variable
+\code{SYNTHCHECK_HOSTED} is \code{"true"}, or the app runs on shinyapps.io or
+Posit Connect.}
 }
 \value{
 Invisibly, when the app is closed with its Close button: A list
@@ -33,6 +41,7 @@ with \code{synthetic} (the generated data), \code{benchmark} (the
 \code{\link[=synthetic_pretest]{synthetic_pretest()}} result, if one was run), \code{interviews} (the
 \code{\link[=cognitive_interview]{cognitive_interview()}} result, if one was run), \code{path} (\code{"real"},
 \code{"pretest"} or \code{NULL}), \code{instrument} and \code{personas}.
+\code{synthcheck_app()} returns a Shiny app object.
 }
 \description{
 \code{run_synthcheck_app()} opens an app that walks through
@@ -97,9 +106,7 @@ the analysis.
 \strong{API keys} typed into the app stay in memory for that session only:
 They are never written to the saved data, the run settings or the R
 script. Keys set as \code{ANTHROPIC_API_KEY} or \code{OPENAI_API_KEY} (for example
-in \code{.Renviron}) are used without being shown. The app runs on your own
-computer; do not deploy it on a shared server with keys typed in. New to
-API keys? The article
+in \code{.Renviron}) are used without being shown. New to API keys? The article
 \href{https://www.okanbulut.com/synthcheck/articles/api-keys.html}{Getting an API key}
 walks through signing up with OpenAI or Anthropic, adding credit, keeping
 the key private and setting a spending limit, and the Models tab links to
@@ -108,6 +115,17 @@ it next to the key fields.
 Runs go to a background R process when callr is installed, so the app
 stays responsive and the Stop button works. Every attempt is written to
 the output folder as soon as it is done.
+
+\strong{Hosting the app:} \code{run_synthcheck_app()} always runs the full app on
+your own computer. \code{synthcheck_app()} returns the same app as an object
+for a server such as Posit Connect Cloud or shinyapps.io. On a server it
+runs in hosted mode: Ollama is not offered (local models need the package
+on your own computer), keys from the server's environment are never used,
+each visitor types their own keys, which stay in that browser session's
+memory, and the generated files go to a temporary folder that is deleted
+when the session ends. The article
+\href{https://www.okanbulut.com/synthcheck/articles/hosting.html}{Hosting the app}
+walks through a deployment.
 
 The benchmark compares models and
 supports decisions about them. It does not show that synthetic data can
@@ -118,6 +136,8 @@ if (interactive()) {
   res <- run_synthcheck_app()
   res$benchmark
 }
+# the app object for a server, as in an app.R file
+app <- synthcheck_app(hosted = TRUE)
 }
 \seealso{
 \code{\link[=generate_synthetic]{generate_synthetic()}}, \code{\link[=authenticity_benchmark]{authenticity_benchmark()}}

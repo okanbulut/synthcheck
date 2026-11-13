@@ -47,6 +47,8 @@ navbar:
         href: articles/app-demo.html
       - text: Getting an API key for OpenAI or Claude
         href: articles/api-keys.html
+      - text: Hosting the app on Posit Connect Cloud
+        href: articles/hosting.html
 
 articles:
 - title: Get started
@@ -70,6 +72,7 @@ articles:
   - articles/app-tour
   - articles/app-demo
   - articles/api-keys
+  - articles/hosting
 
 reference:
 - title: Overlap and Structure
