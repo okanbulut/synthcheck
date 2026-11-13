@@ -5,7 +5,8 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
   function(input, output, session) {
     rv <- shiny::reactiveValues(models = list(), proc = NULL, run_dir = NULL, run_data = NULL,
                                 run_status = NULL, timing = NULL, benchmark = NULL, log = NULL,
-                                pretest = NULL)
+                                pretest = NULL, iv_proc = NULL, iv_dir = NULL, iv_status = NULL,
+                                interviews = NULL)
 
     # ---- About ----------------------------------------------------------------
     shiny::observeEvent(input$about_start, bslib::nav_select("sc_nav", "instrument", session = session))
@@ -496,6 +497,194 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
                  check.names = FALSE)
     })
 
+    # ---- 4b. Cognitive interviews (without real data) ---------------------------
+    shiny::observe({
+      it <- tryCatch(as.data.frame(instrument()$items), error = function(e) NULL)
+      if (is.null(it)) return()
+      shiny::updateSelectizeInput(session, "iv_items", choices = stats::setNames(
+        it$item, sprintf("%s: %s", it$item, substr(it$statement, 1, 60))),
+        selected = shiny::isolate(input$iv_items), server = TRUE)
+    })
+    shiny::observe({
+      labs <- vapply(rv$models, `[[`, character(1), "name")
+      shiny::updateSelectInput(session, "iv_coder",
+                               choices = c("Each model codes its own" = "self", stats::setNames(labs, labs)),
+                               selected = shiny::isolate(input$iv_coder) %||% "self")
+    })
+    iv_items <- shiny::reactive({
+      if (identical(input$iv_items_from, "choose")) return(input$iv_items)
+      pt <- rv$pretest
+      if (is.null(pt)) return(character(0))
+      a <- as.data.frame(pt$agreement)
+      a$item[a$flagged_in > 0]
+    })
+    output$iv_items_status <- shiny::renderUI({
+      it <- iv_items()
+      if (identical(input$iv_items_from, "pretest") && is.null(rv$pretest))
+        return(shiny::div(class = "text-muted small",
+                          "Run the pretest first, or choose the items yourself."))
+      if (!length(it)) return(shiny::div(class = "text-muted small", "No items yet."))
+      sc_ok(sprintf("%d item%s: %s%s", length(it), if (length(it) > 1) "s" else "",
+                    paste(utils::head(it, 8), collapse = ", "), if (length(it) > 8) ", ..." else ""))
+    })
+    iv_n_interviews <- shiny::reactive({
+      p <- personas_ok()
+      np <- if (is.null(p) || inherits(p, "error")) 1L else nrow(p)
+      length(rv$models) * np * length(iv_items()) * max(1, input$iv_n %||% 1)
+    })
+    output$iv_plan <- shiny::renderUI({
+      if (!length(rv$models)) return(shiny::p(class = "text-muted", "Add at least one model in the Models tab."))
+      n <- iv_n_interviews()
+      shiny::p(sprintf("%s interviews, %s requests (think-aloud, probes and coding for each).",
+                       format(n, big.mark = ","), format(3 * n, big.mark = ",")))
+    })
+    iv_args <- function() {
+      items <- iv_items()
+      if (!length(items)) stop(if (identical(input$iv_items_from, "pretest"))
+        "Run the pretest first, or choose the items yourself." else "Choose at least one item.")
+      if (!length(rv$models)) stop("Add at least one model in the Models tab.")
+      coder <- if (is.null(input$iv_coder) || input$iv_coder == "self") NULL else
+        rv$models[[match(input$iv_coder, vapply(rv$models, `[[`, character(1), "name"))]]
+      list(instrument = instrument(), models = rv$models, personas = persona_table(),
+           items = items, probes = sc_parse_probes(input$iv_probes), coder = coder,
+           pretest = rv$pretest,
+           interviews = as.integer(input$iv_n %||% 1), parallel = as.integer(input$iv_parallel %||% 1),
+           output = input$iv_output, progress = FALSE,
+           progress_file = file.path(input$iv_output, "progress.json"),
+           stop_file = file.path(input$iv_output, "STOP"))
+    }
+    shiny::observeEvent(input$iv_run, {
+      if (!is.null(rv$iv_proc) && rv$iv_proc$is_alive())
+        return(shiny::showNotification("The interviews are already running.", type = "warning"))
+      args <- tryCatch(iv_args(), error = function(e) e)
+      if (inherits(args, "error"))
+        return(shiny::showNotification(conditionMessage(args), type = "error"))
+      if (dir.exists(args$output) && length(setdiff(list.files(args$output), c("progress.json", "STOP"))))
+        return(shiny::showNotification("The output folder already holds files. Choose a new folder.",
+                                       type = "warning", duration = 10))
+      dir.create(args$output, showWarnings = FALSE, recursive = TRUE)
+      unlink(args$stop_file)
+      rv$iv_dir <- args$output; rv$iv_status <- NULL
+      if (sc_can_background()) {
+        k <- keys(); k <- k[nzchar(k)]
+        rv$iv_proc <- callr::r_bg(function(args) suppressMessages(do.call(synthcheck::cognitive_interview, args)),
+                                  args = list(args = args), env = c(callr::rcmd_safe_env(), k),
+                                  supervise = TRUE)
+      } else {
+        prog <- shiny::Progress$new(session, min = 0, max = 1)
+        on.exit(prog$close())
+        args$progress <- function(info) {
+          prog$set(value = if (info$total) info$done / info$total else 1,
+                   message = sprintf("%d of %d interviews", info$done, info$total),
+                   detail = sprintf("%s. Time left: %s", info$model, sc_duration(info$eta)))
+          rv$iv_status <- info
+        }
+        res <- tryCatch(sc_with_keys(keys(), suppressMessages(do.call(cognitive_interview, args))),
+                        error = function(e) e)
+        if (inherits(res, "error")) {
+          shiny::showNotification(conditionMessage(res), type = "error", duration = NULL)
+        } else rv$interviews <- res
+      }
+    })
+    shiny::observeEvent(input$iv_stop, {
+      if (!is.null(rv$iv_dir)) writeLines("stop", file.path(rv$iv_dir, "STOP"))
+      shiny::showNotification("Stopping after the interviews in progress.")
+    })
+    shiny::observe({
+      proc <- rv$iv_proc
+      if (is.null(proc)) return()
+      shiny::invalidateLater(500)
+      f <- file.path(rv$iv_dir, "progress.json")
+      if (file.exists(f)) {
+        info <- tryCatch(jsonlite::fromJSON(f, simplifyVector = FALSE), error = function(e) NULL)
+        if (!is.null(info)) rv$iv_status <- info
+      }
+      if (!proc$is_alive()) {
+        res <- tryCatch(proc$get_result(), error = function(e) e)
+        rv$iv_proc <- NULL
+        if (inherits(res, "error")) {
+          msg <- conditionMessage(if (!is.null(res$parent)) res$parent else res)
+          shiny::showNotification(paste("The interviews failed:", msg), type = "error", duration = NULL)
+        } else {
+          rv$interviews <- res
+          shiny::showNotification(sprintf("Done: %d interviews in %s.", nrow(res), rv$iv_dir),
+                                  type = "message", duration = 10)
+        }
+      }
+    })
+    output$iv_progress <- shiny::renderUI({
+      s <- rv$iv_status
+      if (is.null(s)) return(NULL)
+      pct <- if (s$total > 0) round(100 * s$done / s$total) else 0
+      head <- switch(s$status %||% "running",
+                     running = sprintf("Interviewing with %s. Elapsed %s, about %s left.", s$model,
+                                       sc_duration(s$elapsed), sc_duration(s$eta)),
+                     stopped = sprintf("Stopped after %s.", sc_duration(s$elapsed)),
+                     done = sprintf("Done in %s.", sc_duration(s$elapsed)))
+      shiny::div(class = "mt-3",
+                 shiny::p(shiny::strong(head),
+                          if ((s$failed %||% 0) > 0) sprintf(" %d interviews failed.", s$failed)),
+                 shiny::div(class = "d-flex justify-content-between small",
+                            shiny::span("All models"), shiny::span(sprintf("%d / %d", s$done, s$total))),
+                 shiny::div(class = "progress", role = "progressbar", style = "height: 1.1rem;",
+                            shiny::div(class = "progress-bar", style = sprintf("width: %d%%;", pct),
+                                       sprintf("%d%%", pct))))
+    })
+    iv_summary <- shiny::reactive({
+      shiny::req(rv$interviews)
+      if (!nrow(rv$interviews)) return(NULL)
+      summarise_interviews(rv$interviews)
+    })
+    output$iv_summary <- shiny::renderUI({
+      if (is.null(rv$interviews))
+        return(shiny::p(class = "text-muted", "Run the interviews to see the summary."))
+      s <- iv_summary()
+      if (is.null(s)) return(shiny::p("No interview finished."))
+      shiny::p(attr(s, "text"))
+    })
+    output$iv_plot <- shiny::renderPlot({
+      s <- iv_summary(); shiny::req(s); gg_interview(s, max_items = 25)
+    }, res = 96)
+    output$iv_table <- shiny::renderTable({
+      s <- iv_summary(); shiny::req(s)
+      s <- utils::head(as.data.frame(s), 15)
+      data.frame(Item = s$item, Statement = s$statement,
+                 `Any problem` = sprintf("%.0f%%", 100 * s$any),
+                 `Mostly` = ifelse(is.na(s$top_stage), "-", sc_iv_stage_names[s$top_stage]),
+                 Flagged = ifelse(s$flagged, "yes", ""),
+                 `Suggested rewording` = ifelse(is.na(s$revisions), "", s$revisions),
+                 check.names = FALSE)
+    })
+    shiny::observe({
+      s <- iv_summary(); shiny::req(s)
+      shiny::updateSelectInput(session, "iv_view", choices = s$item)
+    })
+    output$iv_transcripts <- shiny::renderUI({
+      iv <- rv$interviews; shiny::req(iv, input$iv_view)
+      d <- as.data.frame(iv)
+      d <- d[d$item == input$iv_view, , drop = FALSE]
+      if (!nrow(d)) return(NULL)
+      shiny::tagList(
+        shiny::p(shiny::strong(d$statement[1])),
+        lapply(seq_len(min(nrow(d), 12)), function(r) {
+          probs <- sc_iv_stages[vapply(sc_iv_stages, function(k) isTRUE(d[[k]][r]), logical(1))]
+          shiny::tags$details(
+            class = "mb-2",
+            shiny::tags$summary(sprintf("%s, persona %s%s: %s", d$model[r], d$persona_id[r],
+                                        if (max(d$interview) > 1) sprintf(", interview %d", d$interview[r]) else "",
+                                        if (length(probs)) paste(sc_iv_stage_names[probs], collapse = ", ")
+                                        else "no problems")),
+            shiny::p(shiny::em("Think-aloud: "), d$think_aloud[r]),
+            shiny::p(shiny::em("Answer: "), d$answer[r]),
+            shiny::tags$ul(lapply(grep("^probe_", names(d), value = TRUE), function(k)
+              shiny::tags$li(shiny::em(sub("^probe_", "", k)), ": ", d[[k]][r]))),
+            if (length(probs)) shiny::p(shiny::em("Coding: "), paste(vapply(probs, function(k)
+              sprintf("%s: %s", sc_iv_stage_names[[k]], d[[paste0(k, "_note")]][r]), ""), collapse = "; ")))
+        }),
+        if (nrow(d) > 12) shiny::p(class = "small text-muted",
+                                   sprintf("Showing 12 of %d interviews. Download the transcripts for all.", nrow(d))))
+    })
+
     # ---- 5. Export -----------------------------------------------------------
     current_syn <- shiny::reactive(tryCatch(syn_data(), error = function(e) NULL))
     output$dl_synthetic <- shiny::downloadHandler(
@@ -544,6 +733,26 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
         ggplot2::ggsave(file, gg_pretest(rv$pretest, max_items = 25), width = 8, height = 2 + 0.3 * max(n, 3),
                         dpi = 200, bg = "white")
       })
+    output$dl_iv_table <- shiny::downloadHandler(
+      filename = function() "interviews.csv",
+      content = function(file) {
+        shiny::validate(shiny::need(rv$interviews, "Run the interviews first."))
+        utils::write.csv(as.data.frame(rv$interviews), file, row.names = FALSE, na = "")
+      })
+    output$dl_iv_transcripts <- shiny::downloadHandler(
+      filename = function() "interview-transcripts.md",
+      content = function(file) {
+        shiny::validate(shiny::need(rv$interviews, "Run the interviews first."))
+        writeLines(sc_iv_markdown(rv$interviews), file)
+      })
+    output$dl_iv_plot <- shiny::downloadHandler(
+      filename = function() "interviews.png",
+      content = function(file) {
+        shiny::validate(shiny::need(rv$interviews, "Run the interviews first."))
+        s <- summarise_interviews(rv$interviews)
+        ggplot2::ggsave(file, gg_interview(s, max_items = 25), width = 8,
+                        height = 2 + 0.3 * max(min(nrow(s), 25), 3), dpi = 200, bg = "white")
+      })
     bm_script <- shiny::reactive(sc_app_script(
       run_dir = rv$run_dir, syn_source = input$syn_source, real_source = input$real_source,
       country = input$real_country, score = input$bm_score, clean = isTRUE(input$bm_clean),
@@ -552,7 +761,12 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
     pt_script <- shiny::reactive(sc_pretest_script(
       run_dir = rv$run_dir, source = input$pt_source, country = input$pt_country,
       attempts = input$pt_attempts, by = input$pt_by, irt = isTRUE(input$pt_irt), n_pa = input$pt_pa,
-      traits = if (input$ins_source == "hexaco") input$ins_traits else NULL))
+      traits = if (input$ins_source == "hexaco") input$ins_traits else NULL,
+      interviews = if (!is.null(rv$interviews)) list(models = rv$models, coder = input$iv_coder,
+                                                     items_from = input$iv_items_from,
+                                                     items = shiny::isolate(iv_items()),
+                                                     n = input$iv_n, scale = tryCatch(c(instrument()$min, instrument()$max),
+                                                                                      error = function(e) c(1, 5)))))
     script <- shiny::reactive(if (identical(input$sc_path, "pretest")) pt_script() else bm_script())
     output$exp_script <- shiny::renderText(script())
     output$dl_script <- shiny::downloadHandler(filename = function() "synthcheck-benchmark.R",
@@ -561,12 +775,14 @@ sc_app_server <- function(real = NULL, synthetic = NULL) {
     result <- function() list(synthetic = shiny::isolate(rv$run_data %||% current_syn()),
                               benchmark = shiny::isolate(rv$benchmark),
                               pretest = shiny::isolate(rv$pretest),
+                              interviews = shiny::isolate(rv$interviews),
                               path = shiny::isolate(input$sc_path),
                               instrument = shiny::isolate(tryCatch(instrument(), error = function(e) NULL)),
                               personas = shiny::isolate(tryCatch(persona_table(), error = function(e) NULL)))
     shiny::observeEvent(input$app_close, shiny::stopApp(result()))
     session$onSessionEnded(function() {
       if (!is.null(shiny::isolate(rv$proc))) shiny::isolate(rv$proc)$kill()
+      if (!is.null(shiny::isolate(rv$iv_proc))) shiny::isolate(rv$iv_proc)$kill()
       shiny::stopApp(result())
     })
   }
@@ -646,7 +862,8 @@ sc_parse_temps <- function(x) {
   as.list(unique(v))
 }
 
-sc_pretest_script <- function(run_dir, source, country, attempts, by, irt, n_pa, traits) {
+sc_pretest_script <- function(run_dir, source, country, attempts, by, irt, n_pa, traits,
+                              interviews = NULL) {
   syn <- switch(source %||% "run",
                 run = sprintf('synthetic <- read_synthetic("%s")', run_dir %||% "path/to/run"),
                 hexaco = sprintf('synthetic <- hexaco_llm[hexaco_llm$country == "%s" & hexaco_llm$attempt <= %d, ]',
@@ -667,10 +884,31 @@ sc_pretest_script <- function(run_dir, source, country, attempts, by, irt, n_pa,
     sprintf("pt <- synthetic_pretest(synthetic, items, by = %s, irt = %s, n_pa = %d)", by,
             if (isTRUE(irt)) "TRUE" else "FALSE", as.integer(n_pa %||% 20)),
     "pt", "summarise_pretest(pt)", "gg_pretest(pt)", 'gg_pretest(pt, "scales")', "",
+    if (!is.null(interviews)) c(sc_interview_script(interviews, run_dir), ""),
     "# Once real data are in, benchmark the same synthetic data:",
     "# real <- read.csv(\"path/to/real_data.csv\")",
     "# authenticity_benchmark(as_synthetic_list(synthetic), real, items)"),
     collapse = "\n")
+}
+
+sc_interview_script <- function(iv, run_dir) {
+  mods <- vapply(iv$models, function(m) sprintf('  sc_model("%s", "%s", temperature = %s, name = "%s")',
+                                                m$provider, m$model,
+                                                if (is.null(m$temperature)) "NULL" else format(m$temperature),
+                                                m$name), "")
+  coder <- if (is.null(iv$coder) || identical(iv$coder, "self")) "NULL" else
+    sprintf("models[[%d]]", match(iv$coder, vapply(iv$models, `[[`, "", "name")))
+  pers <- if (!is.null(run_dir)) sprintf('personas <- jsonlite::read_json("%s", simplifyVector = TRUE)$personas',
+                                         file.path(run_dir, "run.json")) else
+    'personas <- read.csv("path/to/personas.csv")'
+  items <- if (identical(iv$items_from, "pretest")) "pretest = pt" else
+    sprintf("items = c(%s)", paste(sprintf('"%s"', iv$items), collapse = ", "))
+  c("# Cognitive interviews: A screening aid, not a substitute for interviews with real people.",
+    "models <- list(", paste(mods, collapse = ",\n"), ")", pers,
+    sprintf("ins <- sc_instrument(items, scale = c(%d, %d))", as.integer(iv$scale[1]), as.integer(iv$scale[2])),
+    sprintf("iv <- cognitive_interview(ins, models, personas, %s, coder = %s, interviews = %d)", items, coder,
+            as.integer(iv$n %||% 1)),
+    "summarise_interviews(iv)", "gg_interview(iv)")
 }
 
 sc_app_script <- function(run_dir, syn_source, real_source, country, score, clean, fit, splits, traits) {

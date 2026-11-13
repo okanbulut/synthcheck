@@ -34,6 +34,8 @@ navbar:
         href: articles/pretest.html
       - text: Generating synthetic respondents in R
         href: articles/generate.html
+      - text: Cognitive interviews with language models
+        href: articles/cognitive-interviews.html
     app:
       text: The app
       menu:
@@ -56,6 +58,7 @@ articles:
   - articles/diagnostics
   - articles/pretest
   - articles/generate
+  - articles/cognitive-interviews
 - title: The synthcheck app
   desc: The whole workflow on screen, from an instrument to a benchmark.
   contents:
@@ -107,6 +110,14 @@ reference:
   - generate_synthetic
   - write_synthetic
   - as_synthetic_list
+- title: Cognitive interviews
+  desc: Screen item wording with language models playing personas, when there are no real respondents yet.
+  contents:
+  - cognitive_interview
+  - sc_probes
+  - sc_interview_prompts
+  - summarise_interviews
+  - gg_interview
 - title: Data
   contents:
   - hexaco_real

@@ -72,7 +72,7 @@ test_that("the app opens on the About tab with the contact details and the tour"
   expect_s3_class(sc_app_tour("pretest"), "Cicerone")
   expect_match(html, 'id="about_path"', fixed = TRUE)
   expect_match(html, 'data-value="pretest"', fixed = TRUE)
-  ids <- c("about_hero", "about_path", "pt_data_card", "pt_plot_card", "ins_items_card", "ins_prompt_card", "per_card", "mod_add_card",
+  ids <- c("about_hero", "about_path", "pt_data_card", "pt_plot_card", "iv_items_card", "iv_plot_card", "ins_items_card", "ins_prompt_card", "per_card", "mod_add_card",
            "mod_run_card", "cmp_data_card", "cmp_plot_card", "exp_dl_card", "exp_script_card")
   for (id in ids) expect_match(html, paste0('id="', id, '"'), fixed = TRUE)
 })
@@ -113,4 +113,57 @@ test_that("temperatures are parsed for the stability check", {
   expect_s3_class(sc_parse_temps("3"), "error")
   s <- sc_pretest_script("my_run", "run", "Canada", 3, "model", FALSE, 20, "H")
   expect_match(s, 'synthetic_pretest(synthetic, items, by = "model", irt = FALSE, n_pa = 20)', fixed = TRUE)
+})
+
+test_that("without real data, the app runs cognitive interviews with or without a pretest", {
+  skip_if_not_installed("shiny")
+  skip_if_not_installed("bslib")
+  skip_on_cran()
+  withr::local_options(synthcheck.foreground = TRUE)
+  out <- withr::local_tempdir()
+  shiny::testServer(sc_app_server(), {
+    session$setInputs(sc_path = "pretest",
+                      ins_source = "hexaco", ins_traits = "H", ins_min = 1, ins_max = 7,
+                      ins_labels = paste(sc_default_labels(7), collapse = "\n"),
+                      ins_instructions = "Answer.", ins_name = "HEXACO H",
+                      per_source = "grid", per_grid = "age: 25, 65",
+                      per_template = "You are {age} years old.")
+    session$setInputs(mod_provider = "mock", mod_model = "mock", mod_send_temp = TRUE, mod_temp = 1,
+                      mod_name = "Mock A", mod_temps = "", ollama_url = "", mod_add = 1)
+    session$setInputs(mod_name = "Mock B", mod_add = 2)
+    # no pretest yet: Items chosen by hand
+    session$setInputs(iv_items_from = "choose", iv_items = c("HSinc1", "HFair1"), iv_coder = "Mock B",
+                      iv_n = 1, iv_parallel = 1, iv_probes = sc_probe_text(sc_probes()),
+                      iv_output = file.path(out, "iv1"), iv_run = 1)
+    expect_s3_class(rv$interviews, "sc_interview")
+    expect_equal(nrow(rv$interviews), 2 * 2 * 2)
+    expect_equal(unique(rv$interviews$coder), "Mock B")
+    expect_true(file.exists(file.path(out, "iv1", "transcripts", "HSinc1.md")))
+    expect_match(as.character(output$iv_plan$html), "8 interviews")
+    # after a pretest: Its flagged items
+    session$setInputs(run_attempts = 1, run_respondents = 40, run_block = 0, run_retries = 0,
+                      run_shuffle = FALSE, run_parallel = 1, run_batch = 1,
+                      run_output = file.path(out, "run"), run_format = "csv", run_start = 1)
+    session$setInputs(pt_source = "run", pt_by = "model", pt_irt = FALSE, pt_pa = 3, pt_run = 1)
+    flagged <- rv$pretest$agreement$item[rv$pretest$agreement$flagged_in > 0]
+    skip_if(!length(flagged), "the mock pretest flags no items")
+    flagged <- utils::head(flagged, 3)
+    session$setInputs(iv_items_from = "choose", iv_items = flagged, iv_coder = "self",
+                      iv_probes = "comprehension: What does this mean to you?",
+                      iv_output = file.path(out, "iv2"), iv_run = 2)
+    expect_setequal(unique(rv$interviews$item), flagged)
+    expect_true("probe_pretest" %in% names(rv$interviews))
+    expect_equal(sum(grepl("^probe_", names(rv$interviews))), 2)
+    expect_match(output$exp_script, "cognitive_interview(ins, models, personas", fixed = TRUE)
+    expect_s3_class(result()$interviews, "sc_interview")
+  })
+})
+
+test_that("probes typed in the app are parsed", {
+  p <- sc_parse_probes("comprehension: What does it mean?\n\nresponse : Was it easy?")
+  expect_equal(p$stage, c("comprehension", "response"))
+  expect_equal(p$probe[2], "Was it easy?")
+  expect_error(sc_parse_probes("no stage here"), "stage: probe")
+  expect_error(sc_parse_probes("memory: What?"), "Unknown stage")
+  expect_equal(sc_parse_probes(sc_probe_text(sc_probes()))$probe, sc_probes()$probe)
 })

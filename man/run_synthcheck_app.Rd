@@ -29,7 +29,8 @@ own computer only.}
 Invisibly, when the app is closed with its Close button: A list
 with \code{synthetic} (the generated data), \code{benchmark} (the
 \code{\link[=authenticity_benchmark]{authenticity_benchmark()}} result, if one was run), \code{pretest} (the
-\code{\link[=synthetic_pretest]{synthetic_pretest()}} result, if one was run), \code{path} (\code{"real"},
+\code{\link[=synthetic_pretest]{synthetic_pretest()}} result, if one was run), \code{interviews} (the
+\code{\link[=cognitive_interview]{cognitive_interview()}} result, if one was run), \code{path} (\code{"real"},
 \code{"pretest"} or \code{NULL}), \code{instrument} and \code{personas}.
 }
 \description{
@@ -69,8 +70,15 @@ model (\code{\link[=summarise_benchmark]{summarise_benchmark()}}).
 generated data, with \code{\link[=gg_pretest]{gg_pretest()}} and a plain-language summary
 (\code{\link[=summarise_pretest]{summarise_pretest()}}). Add the same model at several temperatures in
 the Models tab to check whether the flags hold.
+\item \strong{Interviews} (tab 4b, without real data): Run \code{\link[=cognitive_interview]{cognitive_interview()}} with
+the personas and models of tabs 2 and 3, on the items the pretest
+flagged or on items you choose (the pretest is optional), and read the
+summary (\code{\link[=summarise_interviews]{summarise_interviews()}}), the plot (\code{\link[=gg_interview]{gg_interview()}}) and the
+transcripts. A screening aid, not a substitute for cognitive
+interviews with real people.
 \item \strong{Export:} Download the data (CSV, JSON, RDS or Excel), the
-benchmark or the pretest, and an R script that repeats the analysis.
+benchmark, the pretest or the interviews, and an R script that repeats
+the analysis.
 }
 
 \strong{API keys} typed into the app stay in memory for that session only:

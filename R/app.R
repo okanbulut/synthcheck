@@ -38,8 +38,15 @@
 #'    generated data, with [gg_pretest()] and a plain-language summary
 #'    ([summarise_pretest()]). Add the same model at several temperatures in
 #'    the Models tab to check whether the flags hold.
+#' 4. **Interviews** (tab 4b, without real data): Run [cognitive_interview()] with
+#'    the personas and models of tabs 2 and 3, on the items the pretest
+#'    flagged or on items you choose (the pretest is optional), and read the
+#'    summary ([summarise_interviews()]), the plot ([gg_interview()]) and the
+#'    transcripts. A screening aid, not a substitute for cognitive
+#'    interviews with real people.
 #' 5. **Export:** Download the data (CSV, JSON, RDS or Excel), the
-#'    benchmark or the pretest, and an R script that repeats the analysis.
+#'    benchmark, the pretest or the interviews, and an R script that repeats
+#'    the analysis.
 #'
 #' **API keys** typed into the app stay in memory for that session only:
 #' They are never written to the saved data, the run settings or the R
@@ -66,7 +73,8 @@
 #' @return Invisibly, when the app is closed with its Close button: A list
 #'   with `synthetic` (the generated data), `benchmark` (the
 #'   [authenticity_benchmark()] result, if one was run), `pretest` (the
-#'   [synthetic_pretest()] result, if one was run), `path` (`"real"`,
+#'   [synthetic_pretest()] result, if one was run), `interviews` (the
+#'   [cognitive_interview()] result, if one was run), `path` (`"real"`,
 #'   `"pretest"` or `NULL`), `instrument` and `personas`.
 #' @seealso [generate_synthetic()], [authenticity_benchmark()]
 #' @examples
@@ -340,6 +348,52 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
              shiny::tableOutput("pt_structure"))))
   )
 
+  interviews <- bslib::nav_panel(
+    "4b. Interviews", value = "interviews", icon = shiny::icon("comments"),
+    shiny::div(
+      class = "alert alert-warning py-2 mb-3",
+      shiny::strong("A screening aid, not a substitute for cognitive interviews with real people. "),
+      "Language models play your personas, think aloud and answer the probes. The coding points",
+      "to wording worth a look; it does not show that an item works in people."),
+    bslib::layout_columns(
+      col_widths = c(4, 8), fill = FALSE,
+      bslib::layout_columns(
+        col_widths = 12, row_heights = "auto", fill = FALSE,
+        card("Items", id = "iv_items_card",
+             shiny::radioButtons("iv_items_from", NULL,
+                                 c("Items flagged by the pretest" = "pretest",
+                                   "Items I choose" = "choose")),
+             shiny::conditionalPanel(
+               "input.iv_items_from == 'choose'",
+               shiny::selectizeInput("iv_items", "Items to interview about", NULL, multiple = TRUE,
+                                     options = list(placeholder = "Pick items from the instrument"))),
+             shiny::uiOutput("iv_items_status"),
+             shiny::helpText("The pretest is optional. When it has run, flagged items get one more",
+                             "probe aimed at the reason for the flag.")),
+        card("Interview settings", id = "iv_settings_card",
+             shiny::helpText("The personas come from the Personas tab and the models from the Models tab."),
+             shiny::selectInput("iv_coder", "Who codes the transcripts", c("Each model codes its own" = "self")),
+             shiny::helpText("Another model as coder means no model grades its own interviews."),
+             row(shiny::numericInput("iv_n", "Interviews per persona and item", 1, min = 1, max = 10),
+                 shiny::numericInput("iv_parallel", "Interviews at the same time", 4, min = 1, max = 32)),
+             shiny::textAreaInput("iv_probes", "Probes (one per line, stage: probe)",
+                                  sc_probe_text(sc_probes()), rows = 7),
+             shiny::textInput("iv_output", "Save to folder",
+                              file.path(getwd(), paste0("synthcheck-interviews-", format(Sys.Date())))),
+             shiny::uiOutput("iv_plan"),
+             shiny::div(shiny::actionButton("iv_run", "Run the interviews", class = "btn-primary"),
+                        shiny::actionButton("iv_stop", "Stop", class = "btn-outline-danger")),
+             shiny::uiOutput("iv_progress"))),
+      bslib::layout_columns(
+        col_widths = 12, row_heights = "auto", fill = FALSE,
+        card("Plain-language summary", shiny::uiOutput("iv_summary")),
+        card("Problems per item", id = "iv_plot_card", shiny::plotOutput("iv_plot", height = "520px"),
+             shiny::tableOutput("iv_table")),
+        card("Transcripts", id = "iv_transcripts_card",
+             shiny::selectInput("iv_view", "Item", NULL),
+             shiny::uiOutput("iv_transcripts"))))
+  )
+
   export <- bslib::nav_panel(
     "5. Export", value = "export", icon = shiny::icon("download"),
     bslib::layout_columns(
@@ -357,7 +411,10 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
              "input.sc_path != 'real'",
              shiny::downloadButton("dl_pt_items", "Pretest items (CSV)"),
              shiny::downloadButton("dl_pt_summary", "Pretest summary (text)"),
-             shiny::downloadButton("dl_pt_plot", "Pretest plot (PNG)"))),
+             shiny::downloadButton("dl_pt_plot", "Pretest plot (PNG)"),
+             shiny::downloadButton("dl_iv_table", "Interviews (CSV)"),
+             shiny::downloadButton("dl_iv_transcripts", "Transcripts (Markdown)"),
+             shiny::downloadButton("dl_iv_plot", "Interview plot (PNG)"))),
       card("Repeat it in R", id = "exp_script_card",
            shiny::verbatimTextOutput("exp_script"),
            shiny::downloadButton("dl_script", "R script"),
@@ -380,13 +437,27 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE) {
       shiny::tags$link(rel = "stylesheet", href = "synthcheck-www/synthcheck.css"),
       shiny::tags$link(rel = "icon", type = "image/png", href = "synthcheck-www/logo.png"),
       if (sc_has_tour()) cicerone::use_cicerone()),
-    sc_app_about(has_real = has_real), instrument, personas, models, compare, pretest, export
+    sc_app_about(has_real = has_real), instrument, personas, models, compare, pretest, interviews, export
   )
 }
 
 # the tabs that belong to one path only: Shown for that path, hidden for the
 # other (tabs in neither list are on both paths)
-sc_path_tabs <- list(real = "compare", pretest = "pretest")
+sc_path_tabs <- list(real = "compare", pretest = c("pretest", "interviews"))
+
+# probes as editable text, one per line ("stage: probe"), and back
+sc_probe_text <- function(p) paste(sprintf("%s: %s", p$stage, p$probe), collapse = "\n")
+
+sc_parse_probes <- function(x) {
+  lines <- trimws(strsplit(x %||% "", "\n")[[1]])
+  lines <- lines[nzchar(lines)]
+  if (!length(lines)) stop("Give at least one probe.", call. = FALSE)
+  m <- regmatches(lines, regexec("^([A-Za-z]+)\\s*:\\s*(.+)$", lines))
+  bad <- lengths(m) != 3L
+  if (any(bad)) stop("Write each probe as stage: probe, for example ",
+                     "\"comprehension: What does this statement mean to you?\"", call. = FALSE)
+  sc_probes(vapply(m, `[`, "", 2L), vapply(m, `[`, "", 3L))
+}
 
 # a Bootstrap 5 theme in the logo colours (navy, the coverage strip blues and reds)
 sc_app_theme <- function() {
