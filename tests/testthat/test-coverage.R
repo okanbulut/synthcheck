@@ -130,3 +130,54 @@ test_that("synthetic_coverage() checks its inputs", {
   expect_error(synthetic_coverage(list(A = bad), dd$real), "item names")
   expect_error(synthetic_coverage(dd$syn, dd$real, slices = "group"), "needs `group`")
 })
+
+test_that("blend_data() draws the blend's respondents, repeatably", {
+  dd <- cov_data()
+  cov <- synthetic_coverage(dd$syn, dd$real)
+  b <- blend_data(cov, seed = 3)
+  expect_s3_class(b, "tbl_df")
+  expect_equal(names(b)[1:3], c("blend", "model", "attempt"))
+  expect_equal(nrow(b), 4 * 150)
+  expect_true(all(b$blend == cov$blend$recipe))
+  # each attempt holds the models in the blend's proportions
+  w <- cov$blend$weights
+  for (a in 1:4) {
+    k <- table(factor(b$model[b$attempt == a], levels = names(w)))
+    expect_equal(as.numeric(k), as.numeric(blend_counts(w, 150)))
+  }
+  expect_equal(sum(blend_counts(c(1, 1, 1) / 3, 100)), 100)
+  expect_identical(attr(b, "weights"), w)
+  # every row is a row of its source model's attempt
+  r1 <- b[b$model == "LLM A" & b$attempt == 2, names(dd$real)]
+  src <- do.call(paste, dd$syn[["LLM A"]][[2]])
+  expect_true(all(do.call(paste, as.data.frame(r1)) %in% src))
+  # the same seed gives the same rows, another seed others
+  expect_identical(blend_data(cov, seed = 3), b)
+  expect_false(identical(blend_data(cov, seed = 4), b))
+  # the caller's random numbers are not touched
+  set.seed(9); x1 <- runif(1); set.seed(9); invisible(blend_data(cov)); x2 <- runif(1)
+  expect_equal(x1, x2)
+  # n and attempts
+  b2 <- blend_data(cov, n = 40, attempts = 3)
+  expect_equal(nrow(b2), 40)
+  expect_equal(unique(b2$attempt), 3)
+  expect_warning(blend_data(cov, n = 400), "with replacement")
+  expect_error(blend_data(cov, attempts = 9), "1 to 4")
+  # the file round trip keeps the rows
+  f <- withr::local_tempfile(fileext = ".csv")
+  write_synthetic(b, f)
+  expect_equal(nrow(read_synthetic(f)), nrow(b))
+  expect_length(as_synthetic_list(b, model = "blend"), 1)
+})
+
+test_that("blend_data() takes the rows from fuller data and needs a blend", {
+  dd <- cov_data(n_att = 2)
+  full <- lapply(dd$syn, function(m) lapply(m, function(d) cbind(d, persona = seq_len(nrow(d)))))
+  cov <- synthetic_coverage(dd$syn, dd$real)
+  b <- blend_data(cov, synthetic = full)
+  expect_true("persona" %in% names(b))
+  short <- lapply(full, function(m) m[1])
+  expect_error(blend_data(cov, synthetic = short), "same attempts")
+  expect_error(blend_data(synthetic_coverage(dd$syn, dd$real, blend = FALSE)), "no blend")
+  expect_error(blend_data(list()), "synthetic_coverage")
+})

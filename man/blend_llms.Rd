@@ -43,5 +43,6 @@ cov <- synthetic_coverage(list(A = llm(0.8, 0.7), B = llm(-0.6, 0.9)), real,
 blend_llms(cov, holdout = FALSE)$blend$recipe
 }
 \seealso{
-\code{\link[=synthetic_coverage]{synthetic_coverage()}}, \code{\link[=gg_coverage]{gg_coverage()}}
+\code{\link[=synthetic_coverage]{synthetic_coverage()}}, \code{\link[=gg_coverage]{gg_coverage()}}, \code{\link[=blend_data]{blend_data()}} for the
+blended respondents themselves
 }

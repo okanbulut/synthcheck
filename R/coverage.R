@@ -226,7 +226,8 @@ synthetic_coverage <- function(synthetic, real = NULL,
 #'   `recipe` (text), `train` and `test` (the attempts used) and
 #'   `in_sample` (the mean overlap on the attempts the recipe was chosen
 #'   on).
-#' @seealso [synthetic_coverage()], [gg_coverage()]
+#' @seealso [synthetic_coverage()], [gg_coverage()], [blend_data()] for the
+#'   blended respondents themselves
 #' @examples
 #' set.seed(1)
 #' a <- matrix(rlnorm(8, 0.2, 0.3)); d <- matrix(rnorm(8))
@@ -306,6 +307,122 @@ blend_llms <- function(x, holdout = NULL, step = 0.05, seed = 1) {
                   in_sample = score[best], holdout = holdout)
   x$summary <- coverage_summary(x$attempts, blend_test = test)
   x
+}
+
+#' Get the blended respondents
+#'
+#' `blend_data()` draws the synthetic respondents behind the best blend of
+#' an [synthetic_coverage()] or [blend_llms()] result: For each attempt, it
+#' takes from each model a share of its respondents that matches the blend
+#' weights and stacks them into one data frame. The `model` column names the
+#' model each respondent came from. Save the result with
+#' [write_synthetic()], or benchmark it like any other synthetic data with
+#' `as_synthetic_list(blended, model = "blend")`.
+#'
+#' The draw is random, so `seed` makes it repeatable. Each model's
+#' respondents are drawn without replacement unless `n` asks for more than
+#' a model has.
+#'
+#' @param x an `sc_coverage` object with a blend, from
+#'   [synthetic_coverage()] or [blend_llms()].
+#' @param n respondents per attempt. `NULL` (the default) takes the smallest
+#'   attempt among the models, as the blend's Structure does.
+#' @param attempts the attempts to draw from. `NULL` takes all of them.
+#' @param seed random seed for the draw.
+#' @param synthetic optional: The full synthetic data, as a named list in
+#'   the form [synthetic_coverage()] takes, to draw the rows from, for
+#'   example when the coverage was run on the item columns only and you
+#'   want the persona columns too. It needs the same models, and each
+#'   attempt the same number of rows in the same order. `NULL` uses the
+#'   data stored in `x`.
+#' @return A tibble with one row per blended respondent: `blend` (the
+#'   recipe, the same in every row), `model` (the source model), `attempt`,
+#'   and the columns of the synthetic data. The weights are in the
+#'   `"weights"` attribute.
+#' @seealso [blend_llms()], [synthetic_coverage()], [write_synthetic()]
+#' @examples
+#' set.seed(1)
+#' a <- matrix(rlnorm(8, 0.2, 0.3)); d <- matrix(rnorm(8))
+#' real <- as.data.frame(mirt::simdata(a, d, 600, itemtype = "dich"))
+#' llm <- function(mu, s) lapply(1:4, function(i) as.data.frame(
+#'   mirt::simdata(a, d, 150, itemtype = "dich", Theta = matrix(rnorm(150, mu, s)))))
+#' cov <- synthetic_coverage(list(A = llm(0.8, 0.7), B = llm(-0.6, 0.9)), real)
+#' blended <- blend_data(cov, seed = 2)
+#' table(blended$model, blended$attempt)
+#' f <- tempfile(fileext = ".csv")
+#' write_synthetic(blended, f)
+#' @export
+blend_data <- function(x, n = NULL, attempts = NULL, seed = 1, synthetic = NULL) {
+  if (!inherits(x, "sc_coverage"))
+    stop("`x` must come from synthetic_coverage() or blend_llms().", call. = FALSE)
+  if (is.null(x$blend))
+    stop("`x` has no blend. Run blend_llms() on it first.", call. = FALSE)
+  w <- x$blend$weights
+  models <- names(w)
+  syn <- x$data$synthetic
+  if (!is.null(synthetic)) {
+    full <- coverage_inputs(synthetic)
+    miss <- setdiff(models, names(full))
+    if (length(miss))
+      stop("`synthetic` has no model ", paste0("\"", miss, "\"", collapse = ", "), ".", call. = FALSE)
+    for (m in models) {
+      same <- length(full[[m]]) == length(syn[[m]]) &&
+        all(vapply(full[[m]], nrow, numeric(1)) == vapply(syn[[m]], nrow, numeric(1)))
+      if (!same)
+        stop("`synthetic` must have the same attempts and rows as the data in `x`; it differs for \"",
+             m, "\".", call. = FALSE)
+    }
+    syn <- full
+  }
+  n_att <- min(vapply(syn[models], length, numeric(1)))
+  if (is.null(attempts)) attempts <- seq_len(n_att)
+  if (!is.numeric(attempts) || any(attempts < 1 | attempts > n_att | attempts != round(attempts)))
+    stop("`attempts` must be whole numbers from 1 to ", n_att, ".", call. = FALSE)
+  if (!is.null(n) && (!is.numeric(n) || length(n) != 1L || n < 1))
+    stop("`n` must be a positive number.", call. = FALSE)
+  group <- x$settings$group
+  recipe <- x$blend$recipe
+  short <- FALSE
+  out <- with_seed(seed, lapply(attempts, function(a) {
+    sets <- lapply(models, function(m) as.data.frame(syn[[m]][[a]]))
+    na <- if (is.null(n)) min(vapply(sets, nrow, numeric(1))) else round(n)
+    k <- blend_counts(w, na)
+    parts <- Map(function(d, ki, m) {
+      if (ki <= 0) return(NULL)
+      if (ki > nrow(d)) short <<- TRUE
+      d <- d[sample.int(nrow(d), ki, replace = ki > nrow(d)), , drop = FALSE]
+      if (!is.null(group) && ".group" %in% names(d)) {
+        d[[group]] <- d$.group
+        d$.group <- NULL
+      }
+      d$model <- NULL; d$attempt <- NULL; d$blend <- NULL
+      cbind(data.frame(blend = recipe, model = m, attempt = a, stringsAsFactors = FALSE), d)
+    }, sets, k, models)
+    parts <- Filter(Negate(is.null), parts)
+    cols <- unique(unlist(lapply(parts, names)))
+    parts <- lapply(parts, function(d) { d[setdiff(cols, names(d))] <- NA; d[cols] })
+    do.call(rbind, parts)
+  }))
+  if (short)
+    warning("`n` is larger than some attempts, so their respondents were drawn with replacement.",
+            call. = FALSE)
+  out <- do.call(rbind, out)
+  rownames(out) <- NULL
+  out <- as_tbl(out)
+  attr(out, "weights") <- w
+  out
+}
+
+# respondents per model: Weights times n, rounded so that they add up to n
+blend_counts <- function(w, n) {
+  raw <- w * n
+  k <- floor(raw)
+  left <- n - sum(k)
+  if (left > 0) {
+    o <- order(raw - k, decreasing = TRUE)[seq_len(left)]
+    k[o] <- k[o] + 1
+  }
+  k
 }
 
 #' Draw the coverage strip
