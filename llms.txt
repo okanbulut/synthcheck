@@ -236,6 +236,8 @@ Where synthetic respondents land and how their items relate.
   : Draw the coverage strip
 - [`blend_llms()`](https://www.okanbulut.com/synthcheck/reference/blend_llms.md)
   : Find the best blend of language models
+- [`blend_data()`](https://www.okanbulut.com/synthcheck/reference/blend_data.md)
+  : Get the blended respondents
 
 ## Behaviour
 

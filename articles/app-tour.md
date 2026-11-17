@@ -422,7 +422,13 @@ Download the synthetic data in CSV, JSON, RDS or Excel. The other
 downloads follow the path:
 
 - **With real data:** The benchmark table, the summary and the benchmark
-  plot.
+  plot, and with two or more models the blended data: The mix of models
+  whose answers match each item’s real answers best
+  ([`blend_llms()`](https://www.okanbulut.com/synthcheck/reference/blend_llms.md)),
+  drawn with
+  [`blend_data()`](https://www.okanbulut.com/synthcheck/reference/blend_data.md),
+  in the same format as the synthetic data and with a `model` column for
+  the model each respondent came from.
 - **Without real data:** The pretest items, the pretest summary and the
   pretest plot, and the interviews (CSV), the transcripts (Markdown) and
   the interview plot.

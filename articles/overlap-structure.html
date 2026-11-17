@@ -212,6 +212,21 @@ searches again with other settings:</p>
 <p>With four or more attempts per model, the recipe is chosen on half of
 the attempts and reported on the other half, so the blend’s numbers are
 not flattered by the search.</p>
+<p><code><a href="../reference/blend_data.html">blend_data()</a></code> draws the blended respondents themselves:
+For each attempt, it takes each model’s share of respondents from the
+recipe and stacks them, with a <code>model</code> column for the model
+each respondent came from. The draw is random, so <code>seed</code>
+makes it repeatable. Save the blend with <code><a href="../reference/write_synthetic.html">write_synthetic()</a></code>,
+or benchmark it like any other model:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">blended</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/blend_data.html">blend_data</a></span><span class="op">(</span><span class="va">cov</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">blended</span><span class="op">$</span><span class="va">model</span>, <span class="va">blended</span><span class="op">$</span><span class="va">attempt</span><span class="op">)</span></span>
+<span><span class="co">#&gt;               </span></span>
+<span><span class="co">#&gt;                  1   2   3   4</span></span>
+<span><span class="co">#&gt;   Gemma 4 26B  428 475 475 474</span></span>
+<span><span class="co">#&gt;   GPT-OSS-120B  22  25  25  25</span></span>
+<span><span class="co"># write_synthetic(blended, "blend.csv")</span></span>
+<span><span class="co"># as_synthetic_list(blended, model = "blend")</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="next">Next<a class="anchor" aria-label="anchor" href="#next"></a>

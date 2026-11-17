@@ -149,6 +149,26 @@ With four or more attempts per model, the recipe is chosen on half of
 the attempts and reported on the other half, so the blend’s numbers are
 not flattered by the search.
 
+[`blend_data()`](https://www.okanbulut.com/synthcheck/reference/blend_data.md)
+draws the blended respondents themselves: For each attempt, it takes
+each model’s share of respondents from the recipe and stacks them, with
+a `model` column for the model each respondent came from. The draw is
+random, so `seed` makes it repeatable. Save the blend with
+[`write_synthetic()`](https://www.okanbulut.com/synthcheck/reference/write_synthetic.md),
+or benchmark it like any other model:
+
+``` r
+
+blended <- blend_data(cov, seed = 1)
+table(blended$model, blended$attempt)
+#>               
+#>                  1   2   3   4
+#>   Gemma 4 26B  428 475 475 474
+#>   GPT-OSS-120B  22  25  25  25
+# write_synthetic(blended, "blend.csv")
+# as_synthetic_list(blended, model = "blend")
+```
+
 ## Next
 
 [Behaviour](https://www.okanbulut.com/synthcheck/articles/behaviour.md)

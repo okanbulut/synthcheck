@@ -44,7 +44,9 @@ overlap on the attempts the recipe was chosen on).
 ## See also
 
 [`synthetic_coverage()`](https://www.okanbulut.com/synthcheck/reference/synthetic_coverage.md),
-[`gg_coverage()`](https://www.okanbulut.com/synthcheck/reference/gg_coverage.md)
+[`gg_coverage()`](https://www.okanbulut.com/synthcheck/reference/gg_coverage.md),
+[`blend_data()`](https://www.okanbulut.com/synthcheck/reference/blend_data.md)
+for the blended respondents themselves
 
 ## Examples
 
