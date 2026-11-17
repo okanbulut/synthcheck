@@ -236,7 +236,8 @@ sc_app_tour <- function(path = NULL, hosted = FALSE) {
          "compare", "left"))
   export_text <- if (path == "pretest") {
     "Download the synthetic data, the pretest items, summary and plot, and the interviews with their transcripts."
-  } else "Download the synthetic data, the benchmark table, the summary and the plot."
+  } else paste("Download the synthetic data, the benchmark table, the summary and the plot,",
+               "and with two or more models, the blended data: The mix of models that matches real people best.")
   steps <- c(list(
     list("about_hero", "Welcome to synthcheck",
          paste("This tour walks through the app one step at a time.",

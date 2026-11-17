@@ -496,7 +496,11 @@ sc_app_ui <- function(has_real = FALSE, has_syn = FALSE, hosted = FALSE) {
              "input.sc_path != 'pretest'",
              shiny::downloadButton("dl_benchmark", "Benchmark table (CSV)"),
              shiny::downloadButton("dl_summary", "Summary (text)"),
-             shiny::downloadButton("dl_plot", "Benchmark plot (PNG)")),
+             shiny::downloadButton("dl_plot", "Benchmark plot (PNG)"),
+             shiny::downloadButton("dl_blend", "Blended data"),
+             shiny::helpText("Blended data: The mix of models whose answers match the real data best,",
+                             "with a column for the model each respondent came from. It needs real data",
+                             "and synthetic data from two or more models, and uses the format above.")),
            shiny::conditionalPanel(
              "input.sc_path != 'real'",
              shiny::downloadButton("dl_pt_items", "Pretest items (CSV)"),

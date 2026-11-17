@@ -892,6 +892,31 @@ sc_app_server <- function(real = NULL, synthetic = NULL, hosted = FALSE) {
         shiny::validate(shiny::need(!is.null(d), "No synthetic data yet."))
         write_synthetic(d, file, format = input$exp_format)
       })
+    # the best blend of the models, matched on each item's answers, then drawn
+    blended <- function() {
+      s <- current_syn()
+      shiny::validate(shiny::need(!is.null(s) && "model" %in% names(s), "No synthetic data yet."))
+      shiny::validate(shiny::need(length(unique(s$model)) >= 2L,
+                                  "A blend needs synthetic data from two or more models."))
+      r <- tryCatch(as.data.frame(real_data()), error = function(e) NULL)
+      shiny::validate(shiny::need(!is.null(r), "A blend needs real data (Compare tab)."))
+      it <- intersect(bm_items()$item, intersect(names(r), names(s)))
+      shiny::validate(shiny::need(length(it) > 0L,
+                                  "No instrument item is a column of both the real and the synthetic data."))
+      res <- tryCatch(shiny::withProgress(message = "Finding the best blend", {
+        cov <- synthetic_coverage(as_synthetic_list(s, items = it), r[it], slices = "item",
+                                  cor = "pearson", step = 0.1)
+        blend_data(cov, synthetic = as_synthetic_list(s))
+      }), error = function(e) e)
+      if (inherits(res, "error")) {
+        shiny::showNotification(conditionMessage(res), type = "error", duration = NULL)
+        shiny::validate(shiny::need(FALSE, conditionMessage(res)))
+      }
+      res
+    }
+    output$dl_blend <- shiny::downloadHandler(
+      filename = function() paste0("synthetic-blend.", input$exp_format),
+      content = function(file) write_synthetic(blended(), file, format = input$exp_format))
     output$dl_benchmark <- shiny::downloadHandler(
       filename = function() "benchmark.csv",
       content = function(file) {

@@ -35,6 +35,12 @@ test_that("the app generates mock data, benchmarks it and returns it", {
     expect_s3_class(rv$benchmark, "sc_benchmark")
     expect_setequal(rv$benchmark$table$model, c("Mock A", "Mock B"))
     expect_match(output$exp_script, "authenticity_benchmark", fixed = TRUE)
+    # the blended data download, in the format of the synthetic data
+    session$setInputs(exp_format = "csv")
+    bl <- read_synthetic(output$dl_blend)
+    expect_true(all(bl$model %in% c("Mock A", "Mock B")))
+    expect_true(all(c("blend", "model", "attempt", "persona_id") %in% names(bl)))
+    expect_equal(nrow(bl), 2 * 2 * 30)
     res <- result()
     expect_equal(nrow(res$synthetic), 240)
   })

@@ -1,3 +1,15 @@
+# synthcheck (development version)
+
+* New `blend_data()` gives the respondents behind the best blend of models:
+  For each attempt, it draws each model's share from the `blend_llms()`
+  recipe and stacks them, with a `model` column for the source model.
+  `seed` makes the draw repeatable, and `write_synthetic()` saves it.
+
+* The app's Export tab has a **Blended data** download on the path with real
+  data, when the synthetic data come from two or more models. It finds the
+  blend that matches each item's real answers and saves it in the same
+  formats as the synthetic data.
+
 # synthcheck 0.3.0
 
 * New `persona_fidelity()` and `gg_persona_fidelity()`: A check of whether
