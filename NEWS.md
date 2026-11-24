@@ -1,5 +1,22 @@
 # synthcheck (development version)
 
+* New item-revision loop: `revision_loop()` runs the cycle *write, answer,
+  check, revise* until a stopping rule passes or a round cap is reached. In
+  each round, synthetic respondents answer the items, `loop_irt()` fits graded
+  response models with mirt (slopes, S-X2 item fit, Q3 local dependence,
+  information), `loop_checker()` runs the pretest item analysis and screens
+  the respondents, `loop_criterion()` decides whether the items are polished,
+  and a reviser proposes edits. `loop_writer_llm()` and `loop_reviser_llm()`
+  write and revise items with a language model; `loop_reviser_drop()` only
+  drops failing items, as a baseline. Every step is logged in seven tables
+  (`loop_log_schema()`) that link each edit to the checks it cites and to
+  whether they were resolved. `read_loop()` stacks the logs of many runs,
+  `loop_outcomes()` gives one row of outcomes per run, and `gg_loop()` draws
+  a run. The steps are plain functions, so you can swap in your own.
+  `loop_builtin_construct("financial_wellbeing")` is a ready target: Financial
+  well-being as defined by the Consumer Financial Protection Bureau (2015),
+  with control, cushion, goals and freedom as its four scales.
+
 * New `blend_data()` gives the respondents behind the best blend of models:
   For each attempt, it draws each model's share from the `blend_llms()`
   recipe and stacks them, with a `model` column for the source model.

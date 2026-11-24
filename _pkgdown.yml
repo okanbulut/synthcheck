@@ -38,6 +38,8 @@ navbar:
         href: articles/instruments.html
       - text: Cognitive interviews with language models
         href: articles/cognitive-interviews.html
+      - text: "Revising items in a loop: Write, answer, check, revise"
+        href: articles/revision-loop.html
     app:
       text: The app
       menu:
@@ -66,6 +68,7 @@ articles:
   - articles/generate
   - articles/instruments
   - articles/cognitive-interviews
+  - articles/revision-loop
 - title: The synthcheck app
   desc: The whole workflow on screen, from an instrument to a benchmark, and how to get an API key for real models.
   contents:
@@ -139,6 +142,22 @@ reference:
   - sc_interview_prompts
   - summarise_interviews
   - gg_interview
+- title: The item-revision loop
+  desc: Write items, answer them with synthetic respondents, check and revise them, and log every step.
+  contents:
+  - revision_loop
+  - loop_construct
+  - loop_builtin_construct
+  - loop_writer_llm
+  - loop_irt
+  - loop_checker
+  - loop_criterion
+  - loop_reviser_llm
+  - loop_reviser_drop
+  - loop_log_schema
+  - read_loop
+  - loop_outcomes
+  - gg_loop
 - title: Data
   contents:
   - hexaco_real
