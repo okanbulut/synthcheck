@@ -5,7 +5,7 @@
 \title{Choose a language model for synthetic respondents}
 \usage{
 sc_model(
-  provider = c("anthropic", "openai", "ollama", "mock"),
+  provider = c("anthropic", "openai", "google", "ollama", "mock"),
   model = NULL,
   temperature = 1,
   name = NULL,
@@ -13,13 +13,15 @@ sc_model(
 )
 }
 \arguments{
-\item{provider}{\code{"anthropic"}, \code{"openai"}, \code{"ollama"} or \code{"mock"}.}
+\item{provider}{\code{"anthropic"}, \code{"openai"}, \code{"google"} (Gemini),
+\code{"ollama"} or \code{"mock"}.}
 
 \item{model}{the model id, for example \code{"claude-haiku-5-5"}. \code{NULL} uses
 the provider's default (see \link{sc_default_models}).}
 
 \item{temperature}{sampling temperature, or \code{NULL} to send none (some
-models do not take one).}
+models do not take one). Gemini 4 models are thinking models that
+ignore the temperature, so none is sent to them.}
 
 \item{name}{the label of the model in the data and the benchmark.
 \code{NULL} uses the model id.}
@@ -32,19 +34,20 @@ An object of class \code{sc_model}.
 }
 \description{
 \code{sc_model()} names a model and its settings for
-\code{\link[=generate_synthetic]{generate_synthetic()}}. Anthropic, OpenAI and Ollama models are called
-through the ellmer package. \code{provider = "mock"} gives random answers
+\code{\link[=generate_synthetic]{generate_synthetic()}}. Anthropic, OpenAI, Google Gemini and Ollama models
+are called through the ellmer package. \code{provider = "mock"} gives random answers
 without calling any model, for trying the workflow and the app.
 }
 \details{
-API keys are read from the \code{ANTHROPIC_API_KEY} and \code{OPENAI_API_KEY}
-environment variables (set them in \code{.Renviron}, or with \code{\link[=Sys.setenv]{Sys.setenv()}}
+API keys are read from the \code{ANTHROPIC_API_KEY}, \code{OPENAI_API_KEY} and
+\code{GOOGLE_API_KEY} (or \code{GEMINI_API_KEY}) environment variables (set them in \code{.Renviron}, or with \code{\link[=Sys.setenv]{Sys.setenv()}}
 for one session). They are never stored in the model specification or in
 the saved data. To get a key, see the article
 \href{https://www.okanbulut.com/synthcheck/articles/api-keys.html}{Getting an API key}.
 }
 \examples{
 sc_model("anthropic", temperature = 1)
+sc_model("google", "gemini-4-hydrogen", name = "Gemini 4 Hydrogen")
 sc_model("ollama", "gemma3:27b", name = "Gemma 3 27B")
 sc_model("mock")
 }

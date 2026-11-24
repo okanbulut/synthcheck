@@ -14,8 +14,10 @@ sc_default_models
 The model each provider uses when \code{\link[=sc_model]{sc_model()}} gets no \code{model}: The
 cheapest current model that takes a temperature (\code{claude-haiku-5-5} and
 \code{gpt-4.1-nano}). OpenAI's \code{gpt-5-nano} costs less per input token but is
-a reasoning model that takes no temperature. Ollama has no default: Use a
-model installed on your machine (\verb{ollama list}).
+a reasoning model that takes no temperature. Google's default is
+\code{gemini-4-hydrogen}, a thinking model that takes no temperature and costs
+far more than the other two defaults (see \link{sc_prices}). Ollama has no
+default: Use a model installed on your machine (\verb{ollama list}).
 }
 \examples{
 sc_default_models

@@ -1,5 +1,11 @@
 # synthcheck (development version)
 
+* `sc_model()` can call Google Gemini models through ellmer
+  (`provider = "google"`, key in `GOOGLE_API_KEY` or `GEMINI_API_KEY`). The
+  default is `gemini-4-hydrogen`, and `sc_prices` has its price. Gemini 4
+  models are thinking models that ignore the temperature, so none is sent.
+  The app does not offer Gemini yet.
+
 * New item-revision loop: `revision_loop()` runs the cycle *write, answer,
   check, revise* until a stopping rule passes or a round cap is reached. In
   each round, synthetic respondents answer the items, `loop_irt()` fits the
