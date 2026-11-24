@@ -4,31 +4,52 @@
 \alias{loop_irt}
 \title{IRT checks for the item-revision loop}
 \usage{
-loop_irt(thresholds = list(), itemfit = TRUE, q3 = TRUE)
+loop_irt(
+  model = c("pcm", "gpcm", "graded"),
+  thresholds = list(),
+  itemfit = TRUE,
+  q3 = TRUE
+)
 }
 \arguments{
-\item{thresholds}{a named list that changes any of the defaults
-\code{list(slope = 0.65, steep = 4, misfit_p = 0.01, q3 = 0.2, info = NULL)}.}
+\item{model}{the IRT model: \code{"pcm"} (partial credit, the default),
+\code{"gpcm"} (generalized partial credit) or \code{"graded"} (graded response).}
 
-\item{itemfit, q3}{compute the S-X2 item fit and the Q3 residuals? They
-are the slowest parts.}
+\item{thresholds}{a named list that changes any of the defaults
+\code{list(msq = c(0.6, 1.4), misfit_p = 0.01, slope = 0.65, steep = 4, q3 = 0.2, info = NULL)}.}
+
+\item{itemfit, q3}{compute the item fit statistics and the Q3 residuals?
+They are the slowest parts.}
 }
 \value{
 A function for the \code{evaluator} argument of \code{\link[=revision_loop]{revision_loop()}}.
 }
 \description{
 \code{loop_irt()} makes the \code{evaluator} step of \code{\link[=revision_loop]{revision_loop()}}. For every
-scale, it fits a unidimensional graded response model with mirt to the
-keyed answers of the round and flags
+scale, it fits a unidimensional IRT model with mirt to the keyed answers
+of the round. By default this is the partial credit model (Masters, 1982),
+a Rasch model for ordered categories with every slope fixed at 1;
+\code{model = "gpcm"} (generalized partial credit) and \code{model = "graded"}
+(graded response) estimate a slope per item instead. It flags
 }
 \details{
 \itemize{
-\item \code{low_slope} (fail): A discrimination below \code{thresholds$slope}; a
-negative slope means the item runs against its scale.
-\item \code{steep_slope} (warn): A discrimination above \code{thresholds$steep}, which
-synthetic respondents that answer almost deterministically produce.
+\item \code{msq_misfit} (fail, partial credit model): Infit or outfit mean square
+outside \code{thresholds$msq} (0.6 to 1.4 by default, the range Wright and
+Linacre (1994) give for rating scales). Below the range, answers are
+more predictable than the model expects (often a sign of redundant
+items or tidy synthetic respondents); above it, they are noisy.
 \item \code{misfit} (fail): The S-X2 item fit test (Orlando & Thissen, 2000) has
 a p value below \code{thresholds$misfit_p}.
+\item \code{disordered} (warn): The item's thresholds (the points where one
+category becomes more likely than the one below) are not in increasing
+order, so some categories are never the most likely answer.
+\item \code{low_slope} (fail, \code{"gpcm"} and \code{"graded"} only): A discrimination
+below \code{thresholds$slope}; a negative slope means the item runs against
+its scale.
+\item \code{steep_slope} (warn, \code{"gpcm"} and \code{"graded"} only): A discrimination
+above \code{thresholds$steep}, which synthetic respondents that answer
+almost deterministically produce.
 \item \code{local_dependence} (warn): The item's largest Q3 residual correlation
 (Yen, 1984) exceeds the mean Q3 of its scale by more than
 \code{thresholds$q3}, a sign that two items share more than the trait.
@@ -39,9 +60,11 @@ information of the scale between theta -2 and 2 is below the target.
 \item \code{irt_failed} (fail): The model could not be fitted for the scale.
 }
 
-Stats: Per item \code{slope} and \code{sx2_p}, and per scale \code{info_mean} and
-\code{marginal_rxx} (marginal reliability), which \code{\link[=loop_criterion]{loop_criterion()}} can use as
-targets, for example \code{min = list(marginal_rxx = 0.8)}.
+Stats: Per item \code{location} (the mean of its thresholds), \code{infit} and
+\code{outfit} (partial credit model), \code{slope} (\code{"gpcm"} and \code{"graded"}) and
+\code{sx2_p}, and per scale \code{info_mean} and \code{marginal_rxx} (marginal
+reliability), which \code{\link[=loop_criterion]{loop_criterion()}} can use as targets, for example
+\code{min = list(marginal_rxx = 0.8)}.
 }
 \examples{
 \donttest{
@@ -53,9 +76,15 @@ out$flags
 }
 }
 \references{
-Orlando, M., & Thissen, D. (2000). Likelihood-based
-item-fit indices for dichotomous item response theory models. \emph{Applied
-Psychological Measurement, 24}(1), 50-64.
+Masters, G. N. (1982). A Rasch model for partial credit
+scoring. \emph{Psychometrika, 47}(2), 149-174.
+
+Orlando, M., & Thissen, D. (2000). Likelihood-based item-fit indices for
+dichotomous item response theory models. \emph{Applied Psychological
+Measurement, 24}(1), 50-64.
+
+Wright, B. D., & Linacre, J. M. (1994). Reasonable mean-square fit
+values. \emph{Rasch Measurement Transactions, 8}(3), 370.
 
 Yen, W. M. (1984). Effects of local item dependence on the fit and
 equating performance of the three-parameter logistic model. \emph{Applied

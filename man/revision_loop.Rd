@@ -15,7 +15,7 @@ revision_loop(
   evaluator = loop_irt(),
   checker = loop_checker(),
   reviser = loop_reviser_drop(),
-  criterion = loop_criterion(),
+  criterion = construct$criterion \%||\% loop_criterion(),
   max_rounds = 10,
   output = NULL,
   run_id = NULL,
@@ -51,7 +51,9 @@ them.}
 the default \code{\link[=loop_reviser_drop]{loop_reviser_drop()}}, which only drops failing items, calls
 no model and is a useful baseline.}
 
-\item{criterion}{the stopping rule, a \code{\link[=loop_criterion]{loop_criterion()}}.}
+\item{criterion}{the stopping rule, a \code{\link[=loop_criterion]{loop_criterion()}}. By default the
+construct's own rule, if it has one (see \code{\link[=loop_builtin_construct]{loop_builtin_construct()}}),
+or else the defaults of \code{\link[=loop_criterion]{loop_criterion()}}.}
 
 \item{max_rounds}{the largest number of rounds.}
 

@@ -14,7 +14,8 @@ loop_construct(
   scale = c(1, 5),
   labels = NULL,
   instructions = sc_default_instructions,
-  notes = NULL
+  notes = NULL,
+  criterion = NULL
 )
 }
 \arguments{
@@ -37,6 +38,9 @@ instructions, as in \code{\link[=sc_instrument]{sc_instrument()}}.}
 
 \item{notes}{optional further guidance for the item writer and reviser,
 such as a style guide or a reading level.}
+
+\item{criterion}{optional stopping rule, a \code{\link[=loop_criterion]{loop_criterion()}}, that
+\code{\link[=revision_loop]{revision_loop()}} uses for this construct unless it is given another.}
 }
 \value{
 An object of class \code{sc_construct_spec}.

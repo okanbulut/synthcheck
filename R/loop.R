@@ -23,6 +23,8 @@
 #'   instructions, as in [sc_instrument()].
 #' @param notes optional further guidance for the item writer and reviser,
 #'   such as a style guide or a reading level.
+#' @param criterion optional stopping rule, a [loop_criterion()], that
+#'   [revision_loop()] uses for this construct unless it is given another.
 #' @return An object of class `sc_construct_spec`.
 #' @seealso [revision_loop()], [loop_builtin_construct()]
 #' @examples
@@ -34,7 +36,8 @@
 #' @export
 loop_construct <- function(name, definition = NULL, scales = NULL, n_per_scale = 6,
                            reverse_share = 1 / 3, population = NULL, scale = c(1, 5),
-                           labels = NULL, instructions = sc_default_instructions, notes = NULL) {
+                           labels = NULL, instructions = sc_default_instructions, notes = NULL,
+                           criterion = NULL) {
   if (!is.character(name) || length(name) != 1L || !nzchar(name))
     stop("`name` must be one non-empty string.", call. = FALSE)
   if (is.null(scales)) scales <- stats::setNames(definition %||% name, lp_id(name))
@@ -42,13 +45,15 @@ loop_construct <- function(name, definition = NULL, scales = NULL, n_per_scale =
     stop("`scales` must be a named character vector (short names as names).", call. = FALSE)
   if (!is.numeric(n_per_scale) || n_per_scale < 1)
     stop("`n_per_scale` must be at least 1.", call. = FALSE)
+  if (!is.null(criterion) && !is.function(criterion))
+    stop("`criterion` must be made with loop_criterion().", call. = FALSE)
   if (!is.numeric(reverse_share) || reverse_share < 0 || reverse_share > 1)
     stop("`reverse_share` must be between 0 and 1.", call. = FALSE)
   ins <- sc_instrument("x", scale = scale, labels = labels, instructions = instructions)
   structure(list(name = name, definition = definition, scales = scales,
                  n_per_scale = as.integer(n_per_scale), reverse_share = reverse_share,
                  population = population, scale = c(ins$min, ins$max), labels = ins$labels,
-                 instructions = instructions, notes = notes),
+                 instructions = instructions, notes = notes, criterion = criterion),
             class = "sc_construct_spec")
 }
 
@@ -71,6 +76,10 @@ loop_construct <- function(name, definition = NULL, scales = NULL, n_per_scale =
 #' - `freedom`: Being able to make choices that allow one to enjoy life, such
 #'   as a vacation, a meal out, going back to school or working less to spend
 #'   time with family.
+#'
+#' Its stopping rule adds two parts to the defaults of [loop_criterion()]:
+#' A marginal reliability of at least 0.80 in every scale (from [loop_irt()])
+#' and parallel analysis finding four dimensions, one per scale.
 #'
 #' @param name the construct: `"financial_wellbeing"`.
 #' @param ... arguments of [loop_construct()] that replace the defaults, for
@@ -108,6 +117,8 @@ loop_builtin_construct <- function(name = "financial_wellbeing", ...) {
         "enjoying a meal out now and then, going back to school for an advanced degree, or",
         "working less to spend more time with family.")),
     n_per_scale = 6, reverse_share = 1 / 3, population = "adults", scale = c(1, 5),
+    criterion = loop_criterion(min = list(alpha = 0.8, own_scale = 0.9, marginal_rxx = 0.8),
+                               factors = TRUE),
     notes = paste(
       "Items should describe the respondent's own situation, feelings or behaviour,",
       "not knowledge about finance. Avoid amounts of money and products tied to one country.")))
@@ -198,7 +209,9 @@ print.sc_construct_spec <- function(x, ...) {
 #' @param reviser the reviser: [loop_reviser_llm()] for a language model, or
 #'   the default [loop_reviser_drop()], which only drops failing items, calls
 #'   no model and is a useful baseline.
-#' @param criterion the stopping rule, a [loop_criterion()].
+#' @param criterion the stopping rule, a [loop_criterion()]. By default the
+#'   construct's own rule, if it has one (see [loop_builtin_construct()]),
+#'   or else the defaults of [loop_criterion()].
 #' @param max_rounds the largest number of rounds.
 #' @param output optional folder: The log tables are written there after
 #'   every round, and the responses of each round to `responses/`.
@@ -243,7 +256,7 @@ print.sc_construct_spec <- function(x, ...) {
 revision_loop <- function(construct, items = NULL, models = sc_model("mock"), personas = NULL,
                           attempts = 1, respondents = 100, writer = NULL, evaluator = loop_irt(),
                           checker = loop_checker(), reviser = loop_reviser_drop(),
-                          criterion = loop_criterion(), max_rounds = 10, output = NULL,
+                          criterion = construct$criterion %||% loop_criterion(), max_rounds = 10, output = NULL,
                           run_id = NULL, seed = 1, cache = sc_cache(), progress = interactive(),
                           ...) {
   if (!inherits(construct, "sc_construct_spec"))

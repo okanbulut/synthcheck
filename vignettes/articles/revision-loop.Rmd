@@ -25,9 +25,11 @@ Each round has four steps:
 
 1. **Answer.** Synthetic respondents answer the current items
    (`generate_synthetic()`).
-2. **IRT checks.** `loop_irt()` fits a graded response model to each scale
-   with mirt and flags low or negative slopes, S-X2 misfit, local dependence
-   (Q3) and items nobody varies on.
+2. **IRT checks.** `loop_irt()` fits the partial credit model to each scale
+   with mirt and flags items with infit or outfit mean squares outside 0.6
+   to 1.4, S-X2 misfit, disordered thresholds, local dependence (Q3) and
+   items nobody varies on. `loop_irt("gpcm")` and `loop_irt("graded")` fit
+   models with a slope per item and flag low slopes instead.
 3. **Data quality.** `loop_checker()` runs the item analysis of
    `synthetic_pretest()` (weak items, keys that run against the scale, items
    closer to another scale, near-duplicates) and screens the respondents for
@@ -96,6 +98,9 @@ fwb <- loop_builtin_construct("financial_wellbeing", n_per_scale = 8,
 fwb
 ```
 
+It carries its own stopping rule: The defaults plus a marginal reliability
+of at least 0.80 in every scale and four dimensions in parallel analysis.
+
 In a real run, one model writes and revises the items and another answers
 them:
 
@@ -103,7 +108,7 @@ them:
 author <- sc_model("openai", "gpt-4.1-mini")
 run <- revision_loop(fwb, models = sc_model("anthropic"), respondents = 200,
                      writer = loop_writer_llm(author), reviser = loop_reviser_llm(author),
-                     criterion = crit, max_rounds = 10,
+                     max_rounds = 15, parallel = 10,
                      output = "loops/fwb/openai-writes_claude-answers/seed1", seed = 1)
 ```
 
@@ -164,7 +169,7 @@ for (i in seq_len(nrow(design))) {
   id <- sprintf("%s-writes_%s-answers_seed%d", d$author, d$respondent, d$seed)
   revision_loop(fwb, models = sc_model(d$respondent), respondents = 200,
                 writer = loop_writer_llm(author), reviser = loop_reviser_llm(author),
-                criterion = crit, output = file.path("loops", id), run_id = id, seed = d$seed)
+                max_rounds = 15, parallel = 10, output = file.path("loops", id), run_id = id, seed = d$seed)
 }
 runs <- read_loop("loops")
 ```

@@ -35,6 +35,10 @@ retirement, and being on track to meet them.
 as a vacation, a meal out, going back to school or working less to spend
 time with family.
 }
+
+Its stopping rule adds two parts to the defaults of \code{\link[=loop_criterion]{loop_criterion()}}:
+A marginal reliability of at least 0.80 in every scale (from \code{\link[=loop_irt]{loop_irt()}})
+and parallel analysis finding four dimensions, one per scale.
 }
 \examples{
 loop_builtin_construct("financial_wellbeing")

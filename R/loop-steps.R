@@ -135,15 +135,28 @@ loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add"
 #' IRT checks for the item-revision loop
 #'
 #' `loop_irt()` makes the `evaluator` step of [revision_loop()]. For every
-#' scale, it fits a unidimensional graded response model with mirt to the
-#' keyed answers of the round and flags
+#' scale, it fits a unidimensional IRT model with mirt to the keyed answers
+#' of the round. By default this is the partial credit model (Masters, 1982),
+#' a Rasch model for ordered categories with every slope fixed at 1;
+#' `model = "gpcm"` (generalized partial credit) and `model = "graded"`
+#' (graded response) estimate a slope per item instead. It flags
 #'
-#' - `low_slope` (fail): A discrimination below `thresholds$slope`; a
-#'   negative slope means the item runs against its scale.
-#' - `steep_slope` (warn): A discrimination above `thresholds$steep`, which
-#'   synthetic respondents that answer almost deterministically produce.
+#' - `msq_misfit` (fail, partial credit model): Infit or outfit mean square
+#'   outside `thresholds$msq` (0.6 to 1.4 by default, the range Wright and
+#'   Linacre (1994) give for rating scales). Below the range, answers are
+#'   more predictable than the model expects (often a sign of redundant
+#'   items or tidy synthetic respondents); above it, they are noisy.
 #' - `misfit` (fail): The S-X2 item fit test (Orlando & Thissen, 2000) has
 #'   a p value below `thresholds$misfit_p`.
+#' - `disordered` (warn): The item's thresholds (the points where one
+#'   category becomes more likely than the one below) are not in increasing
+#'   order, so some categories are never the most likely answer.
+#' - `low_slope` (fail, `"gpcm"` and `"graded"` only): A discrimination
+#'   below `thresholds$slope`; a negative slope means the item runs against
+#'   its scale.
+#' - `steep_slope` (warn, `"gpcm"` and `"graded"` only): A discrimination
+#'   above `thresholds$steep`, which synthetic respondents that answer
+#'   almost deterministically produce.
 #' - `local_dependence` (warn): The item's largest Q3 residual correlation
 #'   (Yen, 1984) exceeds the mean Q3 of its scale by more than
 #'   `thresholds$q3`, a sign that two items share more than the trait.
@@ -153,18 +166,29 @@ loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add"
 #'   information of the scale between theta -2 and 2 is below the target.
 #' - `irt_failed` (fail): The model could not be fitted for the scale.
 #'
-#' Stats: Per item `slope` and `sx2_p`, and per scale `info_mean` and
-#' `marginal_rxx` (marginal reliability), which [loop_criterion()] can use as
-#' targets, for example `min = list(marginal_rxx = 0.8)`.
+#' Stats: Per item `location` (the mean of its thresholds), `infit` and
+#' `outfit` (partial credit model), `slope` (`"gpcm"` and `"graded"`) and
+#' `sx2_p`, and per scale `info_mean` and `marginal_rxx` (marginal
+#' reliability), which [loop_criterion()] can use as targets, for example
+#' `min = list(marginal_rxx = 0.8)`.
 #'
+#' @param model the IRT model: `"pcm"` (partial credit, the default),
+#'   `"gpcm"` (generalized partial credit) or `"graded"` (graded response).
 #' @param thresholds a named list that changes any of the defaults
-#'   `list(slope = 0.65, steep = 4, misfit_p = 0.01, q3 = 0.2, info = NULL)`.
-#' @param itemfit,q3 compute the S-X2 item fit and the Q3 residuals? They
-#'   are the slowest parts.
+#'   `list(msq = c(0.6, 1.4), misfit_p = 0.01, slope = 0.65, steep = 4,
+#'   q3 = 0.2, info = NULL)`.
+#' @param itemfit,q3 compute the item fit statistics and the Q3 residuals?
+#'   They are the slowest parts.
 #' @return A function for the `evaluator` argument of [revision_loop()].
-#' @references Orlando, M., & Thissen, D. (2000). Likelihood-based
-#'   item-fit indices for dichotomous item response theory models. *Applied
-#'   Psychological Measurement, 24*(1), 50-64.
+#' @references Masters, G. N. (1982). A Rasch model for partial credit
+#'   scoring. *Psychometrika, 47*(2), 149-174.
+#'
+#'   Orlando, M., & Thissen, D. (2000). Likelihood-based item-fit indices for
+#'   dichotomous item response theory models. *Applied Psychological
+#'   Measurement, 24*(1), 50-64.
+#'
+#'   Wright, B. D., & Linacre, J. M. (1994). Reasonable mean-square fit
+#'   values. *Rasch Measurement Transactions, 8*(3), 370.
 #'
 #'   Yen, W. M. (1984). Effects of local item dependence on the fit and
 #'   equating performance of the three-parameter logistic model. *Applied
@@ -179,9 +203,14 @@ loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add"
 #' out$flags
 #' }
 #' @export
-loop_irt <- function(thresholds = list(), itemfit = TRUE, q3 = TRUE) {
-  thr <- utils::modifyList(list(slope = 0.65, steep = 4, misfit_p = 0.01, q3 = 0.2, info = NULL),
-                           thresholds)
+loop_irt <- function(model = c("pcm", "gpcm", "graded"), thresholds = list(), itemfit = TRUE,
+                     q3 = TRUE) {
+  model <- match.arg(model)
+  thr <- utils::modifyList(list(msq = c(0.6, 1.4), misfit_p = 0.01, slope = 0.65, steep = 4,
+                                q3 = 0.2, info = NULL), thresholds)
+  if (length(thr$msq) != 2L || thr$msq[1] >= thr$msq[2])
+    stop("`thresholds$msq` must be a lower and an upper limit.", call. = FALSE)
+  itemtype <- c(pcm = "Rasch", gpcm = "gpcm", graded = "graded")[[model]]
   force(itemfit); force(q3)
   f <- function(responses, items, context) {
     lo <- context$construct$scale[1]; hi <- context$construct$scale[2]
@@ -206,36 +235,69 @@ loop_irt <- function(thresholds = list(), itemfit = TRUE, q3 = TRUE) {
       use <- idx[nvar >= 2L]
       if (length(use) < 3L) {
         flag(NA_character_, s, "irt_failed", length(use), 3, "fail",
-             sprintf("Only %d items vary; a graded response model needs 3 or more.", length(use)))
+             sprintf("Only %d items vary; an IRT model needs 3 or more.", length(use)))
         next
       }
       fit <- tryCatch(suppressMessages(suppressWarnings(
-        mirt::mirt(as.data.frame(X[, use, drop = FALSE]), 1, "graded", verbose = FALSE,
+        mirt::mirt(as.data.frame(X[, use, drop = FALSE]), 1, itemtype, verbose = FALSE,
                    technical = list(NCYCLES = 1000)))), error = function(e) e)
       if (inherits(fit, "error")) {
         flag(NA_character_, s, "irt_failed", NA_real_, NA_real_, "fail",
-             paste("The graded response model failed:", conditionMessage(fit)))
+             sprintf("The %s model failed: %s", lp_irt_label[[model]], conditionMessage(fit)))
         next
       }
-      a <- mirt::coef(fit, IRTpars = TRUE, simplify = TRUE)$items[, "a"]
-      stat(use, s, "slope", a)
+      pars <- mirt::coef(fit, IRTpars = TRUE, simplify = TRUE)$items
+      b <- pars[, grepl("^b[0-9]*$", colnames(pars)), drop = FALSE]
+      stat(use, s, "location", rowMeans(b, na.rm = TRUE))
       for (j in seq_along(use)) {
-        if (a[j] < thr$slope)
-          flag(use[j], s, "low_slope", a[j], thr$slope, "fail", sprintf(
-            "Discrimination %.2f is below %.2f%s.", a[j], thr$slope,
-            if (a[j] < 0) "; the item runs against its scale" else ""))
-        else if (a[j] > thr$steep)
-          flag(use[j], s, "steep_slope", a[j], thr$steep, "warn", sprintf(
-            "Discrimination %.2f is above %.2f: Answers look almost deterministic.", a[j], thr$steep))
+        bj <- b[j, !is.na(b[j, ])]
+        if (length(bj) > 1L && is.unsorted(bj))
+          flag(use[j], s, "disordered", sum(diff(bj) < 0), 0, "warn", sprintf(
+            "Thresholds out of order (%s): Some categories are never the most likely answer.",
+            paste(sprintf("%.2f", bj), collapse = ", ")))
+      }
+      if (model != "pcm") {
+        a <- pars[, "a"]
+        stat(use, s, "slope", a)
+        for (j in seq_along(use)) {
+          if (a[j] < thr$slope)
+            flag(use[j], s, "low_slope", a[j], thr$slope, "fail", sprintf(
+              "Discrimination %.2f is below %.2f%s.", a[j], thr$slope,
+              if (a[j] < 0) "; the item runs against its scale" else ""))
+          else if (a[j] > thr$steep)
+            flag(use[j], s, "steep_slope", a[j], thr$steep, "warn", sprintf(
+              "Discrimination %.2f is above %.2f: Answers look almost deterministic.", a[j],
+              thr$steep))
+        }
       }
       if (itemfit) {
-        p <- tryCatch(suppressMessages(suppressWarnings(
-          mirt::itemfit(fit, fit_stats = "S_X2", na.rm = TRUE)$p.S_X2)), error = function(e) NULL)
-        if (length(p) == length(use)) {
-          stat(use, s, "sx2_p", p)
-          for (j in which(!is.na(p) & p < thr$misfit_p))
-            flag(use[j], s, "misfit", p[j], thr$misfit_p, "fail",
-                 sprintf("S-X2 item fit p = %.3g: The model does not describe the answers.", p[j]))
+        stats_fit <- c("S_X2", if (model == "pcm") "infit")
+        ifit <- tryCatch(suppressMessages(suppressWarnings(
+          mirt::itemfit(fit, fit_stats = stats_fit, na.rm = TRUE))), error = function(e) NULL)
+        if (!is.null(ifit) && nrow(ifit) == length(use)) {
+          p <- ifit$p.S_X2
+          if (!is.null(p)) {
+            stat(use, s, "sx2_p", p)
+            for (j in which(!is.na(p) & p < thr$misfit_p))
+              flag(use[j], s, "misfit", p[j], thr$misfit_p, "fail",
+                   sprintf("S-X2 item fit p = %.3g: The model does not describe the answers.", p[j]))
+          }
+          if (model == "pcm" && all(c("infit", "outfit") %in% names(ifit))) {
+            stat(use, s, "infit", ifit$infit)
+            stat(use, s, "outfit", ifit$outfit)
+            for (j in seq_along(use)) {
+              v <- c(infit = ifit$infit[j], outfit = ifit$outfit[j])
+              out <- !is.na(v) & (v < thr$msq[1] | v > thr$msq[2])
+              if (!any(out)) next
+              worst <- names(v)[out][which.max(abs(log(v[out])))]
+              flag(use[j], s, "msq_misfit", v[[worst]],
+                   if (v[[worst]] < thr$msq[1]) thr$msq[1] else thr$msq[2], "fail", sprintf(
+                     "%s mean square %.2f is outside %.1f to %.1f: Answers are %s.",
+                     if (worst == "infit") "Infit" else "Outfit", v[[worst]], thr$msq[1],
+                     thr$msq[2], if (v[[worst]] < thr$msq[1])
+                       "more predictable than the model expects" else "noisier than the model expects"))
+            }
+          }
         }
       }
       if (q3 && length(use) >= 4L) {
@@ -266,8 +328,13 @@ loop_irt <- function(thresholds = list(), itemfit = TRUE, q3 = TRUE) {
     list(flags = if (length(fl)) do.call(rbind, fl) else NULL,
          stats = if (length(st)) do.call(rbind, st) else NULL)
   }
-  structure(f, label = "mirt graded response model (slopes, S-X2, Q3, information)")
+  structure(f, label = sprintf("mirt %s model (%s, S-X2, Q3, information)", lp_irt_label[[model]],
+                               if (model == "pcm") "infit and outfit, threshold order" else
+                                 "slopes, threshold order"))
 }
+
+lp_irt_label <- c(pcm = "partial credit", gpcm = "generalized partial credit",
+                  graded = "graded response")
 
 # ---- internal -------------------------------------------------------------
 

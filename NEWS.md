@@ -2,9 +2,10 @@
 
 * New item-revision loop: `revision_loop()` runs the cycle *write, answer,
   check, revise* until a stopping rule passes or a round cap is reached. In
-  each round, synthetic respondents answer the items, `loop_irt()` fits graded
-  response models with mirt (slopes, S-X2 item fit, Q3 local dependence,
-  information), `loop_checker()` runs the pretest item analysis and screens
+  each round, synthetic respondents answer the items, `loop_irt()` fits the
+  partial credit model with mirt (infit and outfit, S-X2 item fit, threshold
+  order, Q3 local dependence, information; `"gpcm"` and `"graded"` add slope
+  checks), `loop_checker()` runs the pretest item analysis and screens
   the respondents, `loop_criterion()` decides whether the items are polished,
   and a reviser proposes edits. `loop_writer_llm()` and `loop_reviser_llm()`
   write and revise items with a language model; `loop_reviser_drop()` only

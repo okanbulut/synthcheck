@@ -144,7 +144,7 @@ test_that("read_loop() stacks runs with the schema's types", {
   expect_error(read_loop(withr::local_tempdir()), "No loop log")
 })
 
-test_that("loop_irt() flags weak and constant items", {
+test_that("loop_irt() flags misfitting, weak and constant items", {
   skip_on_cran()
   set.seed(3)
   a <- matrix(c(rep(1.6, 5), 0))
@@ -155,15 +155,26 @@ test_that("loop_irt() flags weak and constant items", {
   X$i7 <- 3
   items <- data.frame(item = paste0("i", 1:7), scale = "s", reverse = FALSE,
                       statement = "x", stringsAsFactors = FALSE)
-  out <- loop_irt()(X, items, list(construct = loop_construct("s", scale = c(1, 5))))
+  ctx <- list(construct = loop_construct("s", scale = c(1, 5)))
+  # the partial credit model (default): The noise item misfits
+  out <- loop_irt()(X, items, ctx)
+  fl <- out$flags
+  expect_true("i6" %in% fl$item[fl$check %in% c("msq_misfit", "misfit") & fl$severity == "fail"])
+  expect_true("i7" %in% fl$item[fl$check == "no_variance"])
+  expect_false("low_slope" %in% fl$check)
+  expect_true(all(c("infit", "outfit", "location", "sx2_p", "info_mean", "marginal_rxx") %in%
+                    out$stats$stat))
+  expect_false("slope" %in% out$stats$stat)
+  expect_match(attr(loop_irt(), "label"), "partial credit")
+  # the graded response model: The noise item has a low slope
+  out <- loop_irt("graded")(X, items, ctx)
   fl <- out$flags
   expect_true("i6" %in% fl$item[fl$check == "low_slope"])
-  expect_true("i7" %in% fl$item[fl$check == "no_variance"])
   expect_false(any(fl$item[fl$check == "low_slope"] %in% paste0("i", 1:5)))
-  expect_true(all(c("slope", "sx2_p", "info_mean", "marginal_rxx") %in% out$stats$stat))
+  expect_true("slope" %in% out$stats$stat)
+  expect_error(loop_irt(thresholds = list(msq = 1)), "lower and an upper")
   # too few items to fit
-  out <- loop_irt()(X[, c("i1", "i7")], items[c(1, 7), ],
-                    list(construct = loop_construct("s", scale = c(1, 5))))
+  out <- loop_irt()(X[, c("i1", "i7")], items[c(1, 7), ], ctx)
   expect_true("irt_failed" %in% out$flags$check)
 })
 
@@ -238,4 +249,16 @@ test_that("the financial well-being construct is ready to use", {
   w <- loop_writer_llm(sc_model("mock"))(fwb, list())
   expect_equal(nrow(w$items), 24L)
   expect_setequal(unique(w$items$scale), names(fwb$scales))
+})
+
+test_that("a construct can carry its own stopping rule", {
+  fwb <- loop_builtin_construct("financial_wellbeing")
+  expect_match(attr(fwb$criterion, "label"), "marginal_rxx >= 0.8")
+  expect_match(attr(fwb$criterion, "label"), "dimensions match scales")
+  run <- revision_loop(fwb, writer = loop_writer_llm(sc_model("mock")), respondents = 30,
+                       max_rounds = 1, evaluator = NULL, checker = loop_checker(n_pa = 3),
+                       cache = FALSE)
+  expect_match(run$runs$criterion, "marginal_rxx")
+  expect_true(all(c("min_marginal_rxx", "factors") %in% run$criteria$criterion))
+  expect_error(loop_construct("x", criterion = 1), "loop_criterion")
 })
