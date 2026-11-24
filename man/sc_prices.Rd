@@ -25,7 +25,10 @@ table gets no estimate.
 Anthropic's prices are from its price list of 2026-11-03 (Claude Haiku 5.5
 costs more for prompts over 100,000 tokens, which synthcheck prompts are
 not). OpenAI's are from a published comparison of its list prices of
-2026-02-18.
+2026-02-18. Google's prices for \code{gemini-4-hydrogen} and
+\code{gemini-3.5-flash-lite} are from its AI Studio model pages of 2026-11-24
+(paid tier, standard); their output prices include the thinking tokens,
+which the estimate leaves out.
 }
 \examples{
 sc_prices

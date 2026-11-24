@@ -216,3 +216,26 @@ test_that("the templates load as an instrument and personas", {
   expect_equal(nrow(per), 4)
   expect_true(all(c("age", "country") %in% names(per)))
 })
+
+test_that("Google Gemini models can be named and priced", {
+  expect_message(m <- sc_model("google", "gemini-4-hydrogen"), "ignore the temperature")
+  expect_null(m$temperature)
+  expect_equal(m$provider, "google")
+  expect_equal(suppressMessages(sc_model("google"))$model, "gemini-4-hydrogen")
+  expect_message(fl <- sc_model("google", "gemini-3.5-flash-lite"), "ignore the temperature")
+  expect_null(fl$temperature)
+  expect_equal(sc_price(fl, sc_prices)$output, 2.5)
+  expect_equal(sc_model("google", "gemini-2.5-flash", temperature = 0.7)$temperature, 0.7)
+  expect_equal(sc_price(m, sc_prices)$input, 1.5)
+  ins <- sc_instrument(c("I pay my bills on time.", "I have savings for emergencies."))
+  cost <- estimate_cost(ins, m, respondents = 10, cache = FALSE)
+  expect_equal(cost$calls, 10L)
+  expect_false(is.na(cost$cost))
+  skip_if_not_installed("ellmer")
+  called <- NULL
+  local_mocked_bindings(chat_google_gemini = function(...) { called <<- list(...); "chat" },
+                        .package = "ellmer")
+  expect_equal(sc_chat(m, "You are 30."), "chat")
+  expect_equal(called$model, "gemini-4-hydrogen")
+  expect_null(called$params)
+})

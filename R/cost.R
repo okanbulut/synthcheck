@@ -12,7 +12,10 @@
 #' Anthropic's prices are from its price list of 2026-11-03 (Claude Haiku 5.5
 #' costs more for prompts over 100,000 tokens, which synthcheck prompts are
 #' not). OpenAI's are from a published comparison of its list prices of
-#' 2026-02-18.
+#' 2026-02-18. Google's prices for `gemini-4-hydrogen` and
+#' `gemini-3.5-flash-lite` are from its AI Studio model pages of 2026-11-24
+#' (paid tier, standard); their output prices include the thinking tokens,
+#' which the estimate leaves out.
 #'
 #' @format A data frame with `provider`, `model` (the model id; dated
 #'   snapshots such as `gpt-4.1-nano-2025-04-14` match too), `input` and
@@ -26,17 +29,18 @@
 #'                                          input = 0.3, output = 2.4, checked = "2026-12-01"))
 #' @export
 sc_prices <- data.frame(
-  provider = c(rep("anthropic", 9), rep("openai", 12)),
+  provider = c(rep("anthropic", 9), rep("openai", 12), rep("google", 2)),
   model = c("claude-haiku-5-5", "claude-haiku-4-5", "claude-sonnet-5-5", "claude-sonnet-5",
             "claude-sonnet-4-6", "claude-opus-5-5", "claude-opus-5", "claude-opus-4-8",
             "claude-fable-5-2",
             "gpt-4.1-nano", "gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini", "gpt-4o", "gpt-5-nano",
-            "gpt-5-mini", "gpt-5", "gpt-5.1", "gpt-5.2", "o3", "o4-mini"),
+            "gpt-5-mini", "gpt-5", "gpt-5.1", "gpt-5.2", "o3", "o4-mini", "gemini-4-hydrogen",
+            "gemini-3.5-flash-lite"),
   input = c(0.10, 1.00, 2.00, 2.00, 3.00, 4.00, 5.00, 5.00, 8.00,
-            0.10, 0.40, 2.00, 0.15, 2.50, 0.05, 0.25, 1.25, 1.25, 1.75, 2.00, 1.10),
+            0.10, 0.40, 2.00, 0.15, 2.50, 0.05, 0.25, 1.25, 1.25, 1.75, 2.00, 1.10, 1.50, 0.30),
   output = c(0.50, 5.00, 10.00, 10.00, 15.00, 20.00, 25.00, 25.00, 40.00,
-             0.40, 1.60, 8.00, 0.60, 10.00, 0.40, 2.00, 10.00, 10.00, 14.00, 8.00, 4.40),
-  checked = c(rep("2026-11-03", 9), rep("2026-02-18", 12)),
+             0.40, 1.60, 8.00, 0.60, 10.00, 0.40, 2.00, 10.00, 10.00, 14.00, 8.00, 4.40, 7.50, 2.50),
+  checked = c(rep("2026-11-03", 9), rep("2026-02-18", 12), rep("2026-11-24", 2)),
   stringsAsFactors = FALSE)
 
 #' Estimate what a run will cost

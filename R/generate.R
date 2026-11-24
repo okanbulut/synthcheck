@@ -351,7 +351,7 @@ sc_result <- function(v, retries, errors, t0) {
 
 sc_chat <- function(m, system) {
   fun <- switch(m$provider, anthropic = ellmer::chat_anthropic, openai = ellmer::chat_openai,
-                ollama = ellmer::chat_ollama)
+                google = ellmer::chat_google_gemini, ollama = ellmer::chat_ollama)
   args <- list(system_prompt = system, model = m$model, echo = "none")
   if (!is.null(m$temperature)) args$params <- ellmer::params(temperature = m$temperature)
   if (!is.null(m$base_url)) args$base_url <- m$base_url

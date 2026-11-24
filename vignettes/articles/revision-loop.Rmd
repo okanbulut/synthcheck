@@ -1,0 +1,189 @@
+---
+title: "Revising items in a loop: Write, answer, check, revise"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 8, fig.height = 5,
+                      dpi = 96, out.width = "100%")
+```
+
+Can a language model write a scale, see how synthetic respondents answer it,
+and revise it until it looks polished? And if so, after how many rounds, and
+do its revisions follow the evidence? `revision_loop()` runs that experiment
+and logs every step, so the questions can be answered from data.
+
+Like the [pretest](pretest.html), this is **pilot screening, not
+validation**. Items that look polished to synthetic respondents still need a
+field test with people. If the same model family writes and answers the
+items, "polished" may only mean "easy for language models to agree with", so
+cross the writer and respondent models and check the final items in a small
+real sample.
+
+## The loop
+
+Each round has four steps:
+
+1. **Answer.** Synthetic respondents answer the current items
+   (`generate_synthetic()`).
+2. **IRT checks.** `loop_irt()` fits the partial credit model to each scale
+   with mirt and flags items with infit or outfit mean squares outside 0.6
+   to 1.4, S-X2 misfit, disordered thresholds, local dependence (Q3) and
+   items nobody varies on. `loop_irt("gpcm")` and `loop_irt("graded")` fit
+   models with a slope per item and flag low slopes instead.
+3. **Data quality.** `loop_checker()` runs the item analysis of
+   `synthetic_pretest()` (weak items, keys that run against the scale, items
+   closer to another scale, near-duplicates) and screens the respondents for
+   straight-lining, ignored keys and skipped items.
+4. **Stop or revise.** `loop_criterion()` decides whether the items are
+   polished. If they are not, a reviser proposes edits (reword, rekey, drop,
+   add or keep), and the next round starts with the edited items.
+
+The loop stops when the criterion passes, when `max_rounds` is reached, when
+the reviser proposes no change, or when a step fails. The first items come
+from you (`items`) or from a writer (`loop_writer_llm()`).
+
+## Decide what "polished" means first
+
+Set the stopping rule before the first run, so that the number of rounds
+means something. The default asks for no item with a failing flag, alpha of
+at least 0.80 in every scale, at least 90% of items closest to their own
+scale, at most 5% unusable respondents and at least three items per scale:
+
+```{r}
+library(synthcheck)
+loop_criterion()
+```
+
+Any stat a step reports can be a target, for example the marginal
+reliability from `loop_irt()`:
+
+```{r}
+crit <- loop_criterion(min = list(alpha = 0.8, own_scale = 0.9, marginal_rxx = 0.8),
+                       factors = TRUE)
+```
+
+## A first run
+
+The mock provider answers at random, so every item fails. That makes it a
+quick way to see the loop and its log without calling a model. Here the
+rules-based reviser `loop_reviser_drop()` drops failing items until each
+scale is down to three:
+
+```{r}
+h <- hexaco_items[hexaco_items$facet %in% c("HSinc", "HFair"), ]
+h$scale <- h$facet
+con <- loop_construct("Honesty-Humility", "Sincerity and fairness in dealing with others.",
+                      scales = c(HSinc = "Sincerity", HFair = "Fairness"), scale = c(1, 7))
+run <- revision_loop(con, h, sc_model("mock"), respondents = 60, max_rounds = 4,
+                     checker = loop_checker(n_pa = 5), cache = FALSE)
+run
+```
+
+```{r}
+gg_loop(run)
+```
+
+## A run with language models
+
+The target instrument is a new scale of **financial well-being**, built on
+the definition of the Consumer Financial Protection Bureau (2015). Its four
+elements are the scales: Control over day-to-day finances, a cushion
+against financial shocks, being on track to meet financial goals, and the
+freedom to make choices that let one enjoy life.
+`loop_builtin_construct()` has it ready:
+
+```{r}
+fwb <- loop_builtin_construct("financial_wellbeing", n_per_scale = 8,
+                              population = "adults in Canada")
+fwb
+```
+
+It carries its own stopping rule: The defaults plus a marginal reliability
+of at least 0.80 in every scale and four dimensions in parallel analysis.
+
+In a real run, one model writes and revises the items and another answers
+them:
+
+```{r, eval = FALSE}
+author <- sc_model("openai", "gpt-4.1-mini")
+run <- revision_loop(fwb, models = sc_model("anthropic"), respondents = 200,
+                     writer = loop_writer_llm(author), reviser = loop_reviser_llm(author),
+                     max_rounds = 15, parallel = 10,
+                     output = "loops/fwb/openai-writes_claude-answers/seed1", seed = 1)
+```
+
+See what a round of respondents costs first with `estimate_cost()`. The
+response cache (`sc_cache()`) makes a repeated run free.
+
+## What the log records
+
+Every run writes seven tables, which `loop_log_schema()` documents column by
+column:
+
+```{r}
+unique(loop_log_schema()$table)
+loop_log_schema("edits")[, c("column", "description")]
+```
+
+- `runs`: The settings, the step labels, the writer's note and the final
+  status.
+- `rounds`: Per round, the number of items, failing items and passed
+  criteria, the cost and tokens, and the reviser's note on the round.
+- `items`: Every item in every round, with its wording, version and flags.
+- `flags` and `stats`: Every flag and statistic, from each step.
+- `criteria`: Every part of the stopping rule in every round.
+- `edits`: Every edit, with its rationale, the checks it cites, whether those
+  checks were in fact flagged (`cites_flagged`), whether they were gone in the
+  next round (`resolved`) and how much of the wording changed
+  (`similarity`).
+
+The last table carries the reasoning questions. `cites_flagged` asks whether
+the stated rationale matches the evidence. `resolved` asks whether the fix
+worked. An edit that resolved its check, followed by the same check on the
+same item a few rounds later, is oscillation. A falling `similarity` across
+rounds is drift away from the starting wording, and a rising alpha together
+with near-duplicate flags is a sign of items converging on the same bland
+statement.
+
+## Running an experiment
+
+One run is an anecdote. A design crosses the factors that matter, with
+several replications (seeds) per cell:
+
+- the construct (a new one, such as financial well-being, against an
+  established one with known items, such as HEXACO facets),
+- the writer and reviser model,
+- the respondent model (the same family as the writer, or a different one),
+- the reviser (a language model against `loop_reviser_drop()`, which shows
+  how far deletion alone gets),
+- the persona mix.
+
+Give each run its own folder and `run_id`, then read them all back:
+
+```{r, eval = FALSE}
+design <- expand.grid(author = c("openai", "anthropic"), respondent = c("openai", "anthropic"),
+                      seed = 1:5, stringsAsFactors = FALSE)
+for (i in seq_len(nrow(design))) {
+  d <- design[i, ]
+  author <- sc_model(d$author)
+  id <- sprintf("%s-writes_%s-answers_seed%d", d$author, d$respondent, d$seed)
+  revision_loop(fwb, models = sc_model(d$respondent), respondents = 200,
+                writer = loop_writer_llm(author), reviser = loop_reviser_llm(author),
+                max_rounds = 15, parallel = 10, output = file.path("loops", id), run_id = id, seed = d$seed)
+}
+runs <- read_loop("loops")
+```
+
+`loop_outcomes()` gives one row per run: The round in which the items were
+polished, the edits by action, the share of edits that cited flagged checks
+and that resolved them, relapses, wording drift and cost. Join it with the
+design to compare cells:
+
+```{r}
+loop_outcomes(run)
+```
+
+Finally, give the final items of a few runs to a small sample of people and
+compare them with `authenticity_benchmark()` and `synthetic_pretest()` on the
+real answers. That is the only way to tell whether synthetic polish carries
+over to people.

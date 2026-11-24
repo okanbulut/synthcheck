@@ -158,21 +158,23 @@ sc_persona_grid <- function(..., template) {
 #' Choose a language model for synthetic respondents
 #'
 #' `sc_model()` names a model and its settings for
-#' [generate_synthetic()]. Anthropic, OpenAI and Ollama models are called
-#' through the ellmer package. `provider = "mock"` gives random answers
+#' [generate_synthetic()]. Anthropic, OpenAI, Google Gemini and Ollama models
+#' are called through the ellmer package. `provider = "mock"` gives random answers
 #' without calling any model, for trying the workflow and the app.
 #'
-#' API keys are read from the `ANTHROPIC_API_KEY` and `OPENAI_API_KEY`
-#' environment variables (set them in `.Renviron`, or with [Sys.setenv()]
+#' API keys are read from the `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` and
+#' `GOOGLE_API_KEY` (or `GEMINI_API_KEY`) environment variables (set them in `.Renviron`, or with [Sys.setenv()]
 #' for one session). They are never stored in the model specification or in
 #' the saved data. To get a key, see the article
 #' [Getting an API key](https://www.okanbulut.com/synthcheck/articles/api-keys.html).
 #'
-#' @param provider `"anthropic"`, `"openai"`, `"ollama"` or `"mock"`.
+#' @param provider `"anthropic"`, `"openai"`, `"google"` (Gemini),
+#'   `"ollama"` or `"mock"`.
 #' @param model the model id, for example `"claude-haiku-5-5"`. `NULL` uses
 #'   the provider's default (see [sc_default_models]).
 #' @param temperature sampling temperature, or `NULL` to send none (some
-#'   models do not take one).
+#'   models do not take one). Gemini 3 and later models ignore the
+#'   temperature, so none is sent to them.
 #' @param name the label of the model in the data and the benchmark.
 #'   `NULL` uses the model id.
 #' @param base_url optional address of the API, for example an Ollama server
@@ -181,18 +183,23 @@ sc_persona_grid <- function(..., template) {
 #' @seealso [generate_synthetic()]
 #' @examples
 #' sc_model("anthropic", temperature = 1)
+#' sc_model("google", "gemini-4-hydrogen", name = "Gemini 4 Hydrogen")
 #' sc_model("ollama", "gemma3:27b", name = "Gemma 3 27B")
 #' sc_model("mock")
 #' @export
-sc_model <- function(provider = c("anthropic", "openai", "ollama", "mock"), model = NULL,
+sc_model <- function(provider = c("anthropic", "openai", "google", "ollama", "mock"), model = NULL,
                      temperature = 1, name = NULL, base_url = NULL) {
   provider <- match.arg(provider)
   if (is.null(model) || !nzchar(model)) model <- sc_default_models[[provider]]
   if (is.null(model) || !nzchar(model))
-    stop("Give the model id for ", provider, ", for example one listed by `ollama list`.",
-         call. = FALSE)
+    stop("Give the model id for ", provider, if (provider == "ollama")
+      ", for example one listed by `ollama list`." else ".", call. = FALSE)
   if (!is.null(temperature) && (!is.numeric(temperature) || temperature < 0 || temperature > 2))
     stop("`temperature` must be between 0 and 2, or NULL.", call. = FALSE)
+  if (provider == "google" && !is.null(temperature) && grepl("^gemini-([3-9]|[1-9][0-9])", model)) {
+    message("Gemini 3 and later models ignore the temperature, so none is sent to ", model, ".")
+    temperature <- NULL
+  }
   if (is.null(name) || !nzchar(name)) name <- model
   structure(list(provider = provider, model = model, temperature = temperature, name = name,
                  base_url = base_url), class = "sc_model")
@@ -210,15 +217,17 @@ print.sc_model <- function(x, ...) {
 #' The model each provider uses when [sc_model()] gets no `model`: The
 #' cheapest current model that takes a temperature (`claude-haiku-5-5` and
 #' `gpt-4.1-nano`). OpenAI's `gpt-5-nano` costs less per input token but is
-#' a reasoning model that takes no temperature. Ollama has no default: Use a
-#' model installed on your machine (`ollama list`).
+#' a reasoning model that takes no temperature. Google's default is
+#' `gemini-4-hydrogen`, a thinking model that takes no temperature and costs
+#' far more than the other two defaults (see [sc_prices]). Ollama has no
+#' default: Use a model installed on your machine (`ollama list`).
 #'
 #' @format A named list.
 #' @examples
 #' sc_default_models
 #' @export
 sc_default_models <- list(anthropic = "claude-haiku-5-5", openai = "gpt-4.1-nano",
-                          ollama = NULL, mock = "mock")
+                          google = "gemini-4-hydrogen", ollama = NULL, mock = "mock")
 
 #' Build the prompts for one synthetic respondent
 #'
