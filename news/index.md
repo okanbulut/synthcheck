@@ -2,6 +2,47 @@
 
 ## synthcheck (development version)
 
+- [`sc_model()`](https://www.okanbulut.com/synthcheck/reference/sc_model.md)
+  can call Google Gemini models through ellmer (`provider = "google"`,
+  key in `GOOGLE_API_KEY` or `GEMINI_API_KEY`). The default is
+  `gemini-4-hydrogen`, and `sc_prices` has its price and that of
+  `gemini-3.5-flash-lite`. Gemini 3 and later models ignore the
+  temperature, so none is sent. The app does not offer Gemini yet.
+
+- New item-revision loop:
+  [`revision_loop()`](https://www.okanbulut.com/synthcheck/reference/revision_loop.md)
+  runs the cycle *write, answer, check, revise* until a stopping rule
+  passes or a round cap is reached. In each round, synthetic respondents
+  answer the items,
+  [`loop_irt()`](https://www.okanbulut.com/synthcheck/reference/loop_irt.md)
+  fits the partial credit model with mirt (infit and outfit, S-X2 item
+  fit, threshold order, Q3 local dependence, information; `"gpcm"` and
+  `"graded"` add slope checks),
+  [`loop_checker()`](https://www.okanbulut.com/synthcheck/reference/loop_checker.md)
+  runs the pretest item analysis and screens the respondents,
+  [`loop_criterion()`](https://www.okanbulut.com/synthcheck/reference/loop_criterion.md)
+  decides whether the items are polished, and a reviser proposes edits.
+  [`loop_writer_llm()`](https://www.okanbulut.com/synthcheck/reference/loop_writer_llm.md)
+  and
+  [`loop_reviser_llm()`](https://www.okanbulut.com/synthcheck/reference/loop_reviser_llm.md)
+  write and revise items with a language model;
+  [`loop_reviser_drop()`](https://www.okanbulut.com/synthcheck/reference/loop_reviser_drop.md)
+  only drops failing items, as a baseline. Every step is logged in seven
+  tables
+  ([`loop_log_schema()`](https://www.okanbulut.com/synthcheck/reference/loop_log_schema.md))
+  that link each edit to the checks it cites and to whether they were
+  resolved.
+  [`read_loop()`](https://www.okanbulut.com/synthcheck/reference/read_loop.md)
+  stacks the logs of many runs,
+  [`loop_outcomes()`](https://www.okanbulut.com/synthcheck/reference/loop_outcomes.md)
+  gives one row of outcomes per run, and
+  [`gg_loop()`](https://www.okanbulut.com/synthcheck/reference/gg_loop.md)
+  draws a run. The steps are plain functions, so you can swap in your
+  own. `loop_builtin_construct("financial_wellbeing")` is a ready
+  target: Financial well-being as defined by the Consumer Financial
+  Protection Bureau (2015), with control, cushion, goals and freedom as
+  its four scales.
+
 - New
   [`blend_data()`](https://www.okanbulut.com/synthcheck/reference/blend_data.md)
   gives the respondents behind the best blend of models: For each

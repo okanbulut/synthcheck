@@ -127,6 +127,38 @@ are no real respondents yet.
 - [`gg_interview()`](https://www.okanbulut.com/synthcheck/reference/gg_interview.md)
   : Plot cognitive interview problems per item
 
+## The item-revision loop
+
+Write items, answer them with synthetic respondents, check and revise
+them, and log every step.
+
+- [`revision_loop()`](https://www.okanbulut.com/synthcheck/reference/revision_loop.md)
+  : Run an item-revision loop with synthetic respondents
+- [`loop_construct()`](https://www.okanbulut.com/synthcheck/reference/loop_construct.md)
+  : Describe the construct for an item-revision loop
+- [`loop_builtin_construct()`](https://www.okanbulut.com/synthcheck/reference/loop_builtin_construct.md)
+  : Ready-made constructs for the item-revision loop
+- [`loop_writer_llm()`](https://www.okanbulut.com/synthcheck/reference/loop_writer_llm.md)
+  : A language-model item writer for the item-revision loop
+- [`loop_irt()`](https://www.okanbulut.com/synthcheck/reference/loop_irt.md)
+  : IRT checks for the item-revision loop
+- [`loop_checker()`](https://www.okanbulut.com/synthcheck/reference/loop_checker.md)
+  : Data quality checks for the item-revision loop
+- [`loop_criterion()`](https://www.okanbulut.com/synthcheck/reference/loop_criterion.md)
+  : The stopping rule of the item-revision loop
+- [`loop_reviser_llm()`](https://www.okanbulut.com/synthcheck/reference/loop_reviser_llm.md)
+  : A language-model reviser for the item-revision loop
+- [`loop_reviser_drop()`](https://www.okanbulut.com/synthcheck/reference/loop_reviser_drop.md)
+  : A rules-based reviser: Drop failing items
+- [`loop_log_schema()`](https://www.okanbulut.com/synthcheck/reference/loop_log_schema.md)
+  : The log of the item-revision loop
+- [`read_loop()`](https://www.okanbulut.com/synthcheck/reference/read_loop.md)
+  : Read the log of item-revision loops
+- [`loop_outcomes()`](https://www.okanbulut.com/synthcheck/reference/loop_outcomes.md)
+  : Outcomes of item-revision loops
+- [`gg_loop()`](https://www.okanbulut.com/synthcheck/reference/gg_loop.md)
+  : Draw an item-revision loop
+
 ## Data
 
 - [`hexaco_real`](https://www.okanbulut.com/synthcheck/reference/hexaco_real.md)

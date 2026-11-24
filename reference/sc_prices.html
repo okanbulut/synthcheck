@@ -36,6 +36,7 @@ table gets no estimate."><meta property="og:image" content="https://www.okanbulu
     <li><a class="dropdown-item" href="../articles/generate.html">Generating synthetic respondents in R</a></li>
     <li><a class="dropdown-item" href="../articles/instruments.html">Short instruments with known item problems</a></li>
     <li><a class="dropdown-item" href="../articles/cognitive-interviews.html">Cognitive interviews with language models</a></li>
+    <li><a class="dropdown-item" href="../articles/revision-loop.html">Revising items in a loop: Write, answer, check, revise</a></li>
   </ul></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-the-app" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">The app</button>
@@ -87,7 +88,10 @@ prices).</p>
     <p>Anthropic's prices are from its price list of 2026-11-03 (Claude Haiku 5.5
 costs more for prompts over 100,000 tokens, which synthcheck prompts are
 not). OpenAI's are from a published comparison of its list prices of
-2026-02-18.</p>
+2026-02-18. Google's prices for <code>gemini-4-hydrogen</code> and
+<code>gemini-3.5-flash-lite</code> are from its AI Studio model pages of 2026-11-24
+(paid tier, standard); their output prices include the thinking tokens,
+which the estimate leaves out.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -97,28 +101,30 @@ not). OpenAI's are from a published comparison of its list prices of
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">sc_prices</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     provider             model input output    checked</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  anthropic  claude-haiku-5-5  0.10    0.5 2026-11-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2  anthropic  claude-haiku-4-5  1.00    5.0 2026-11-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  anthropic claude-sonnet-5-5  2.00   10.0 2026-11-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  anthropic   claude-sonnet-5  2.00   10.0 2026-11-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  anthropic claude-sonnet-4-6  3.00   15.0 2026-11-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6  anthropic   claude-opus-5-5  4.00   20.0 2026-11-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7  anthropic     claude-opus-5  5.00   25.0 2026-11-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8  anthropic   claude-opus-4-8  5.00   25.0 2026-11-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9  anthropic  claude-fable-5-2  8.00   40.0 2026-11-03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10    openai      gpt-4.1-nano  0.10    0.4 2026-02-18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11    openai      gpt-4.1-mini  0.40    1.6 2026-02-18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12    openai           gpt-4.1  2.00    8.0 2026-02-18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13    openai       gpt-4o-mini  0.15    0.6 2026-02-18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14    openai            gpt-4o  2.50   10.0 2026-02-18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15    openai        gpt-5-nano  0.05    0.4 2026-02-18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16    openai        gpt-5-mini  0.25    2.0 2026-02-18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17    openai             gpt-5  1.25   10.0 2026-02-18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18    openai           gpt-5.1  1.25   10.0 2026-02-18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19    openai           gpt-5.2  1.75   14.0 2026-02-18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20    openai                o3  2.00    8.0 2026-02-18</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21    openai           o4-mini  1.10    4.4 2026-02-18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     provider                 model input output    checked</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  anthropic      claude-haiku-5-5  0.10    0.5 2026-11-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  anthropic      claude-haiku-4-5  1.00    5.0 2026-11-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  anthropic     claude-sonnet-5-5  2.00   10.0 2026-11-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  anthropic       claude-sonnet-5  2.00   10.0 2026-11-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  anthropic     claude-sonnet-4-6  3.00   15.0 2026-11-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  anthropic       claude-opus-5-5  4.00   20.0 2026-11-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7  anthropic         claude-opus-5  5.00   25.0 2026-11-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8  anthropic       claude-opus-4-8  5.00   25.0 2026-11-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9  anthropic      claude-fable-5-2  8.00   40.0 2026-11-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10    openai          gpt-4.1-nano  0.10    0.4 2026-02-18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11    openai          gpt-4.1-mini  0.40    1.6 2026-02-18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12    openai               gpt-4.1  2.00    8.0 2026-02-18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13    openai           gpt-4o-mini  0.15    0.6 2026-02-18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14    openai                gpt-4o  2.50   10.0 2026-02-18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15    openai            gpt-5-nano  0.05    0.4 2026-02-18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16    openai            gpt-5-mini  0.25    2.0 2026-02-18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17    openai                 gpt-5  1.25   10.0 2026-02-18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18    openai               gpt-5.1  1.25   10.0 2026-02-18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19    openai               gpt-5.2  1.75   14.0 2026-02-18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20    openai                    o3  2.00    8.0 2026-02-18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21    openai               o4-mini  1.10    4.4 2026-02-18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22    google     gemini-4-hydrogen  1.50    7.5 2026-11-24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23    google gemini-3.5-flash-lite  0.30    2.5 2026-11-24</span>
 <span class="r-in"><span><span class="co"># a price of your own</span></span></span>
 <span class="r-in"><span><span class="va">my_prices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">sc_prices</span>, <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>provider <span class="op">=</span> <span class="st">"openai"</span>, model <span class="op">=</span> <span class="st">"gpt-5.2-mini"</span>,</span></span>
 <span class="r-in"><span>                                         input <span class="op">=</span> <span class="fl">0.3</span>, output <span class="op">=</span> <span class="fl">2.4</span>, checked <span class="op">=</span> <span class="st">"2026-12-01"</span><span class="op">)</span><span class="op">)</span></span></span>

@@ -25,6 +25,8 @@ One step of the workflow at a time, with the functions behind it.
   problems](https://www.okanbulut.com/synthcheck/articles/instruments.md):
 - [Cognitive interviews with language
   models](https://www.okanbulut.com/synthcheck/articles/cognitive-interviews.md):
+- [Revising items in a loop: Write, answer, check,
+  revise](https://www.okanbulut.com/synthcheck/articles/revision-loop.md):
 
 ### The synthcheck app
 

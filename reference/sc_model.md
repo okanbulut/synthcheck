@@ -2,15 +2,15 @@
 
 `sc_model()` names a model and its settings for
 [`generate_synthetic()`](https://www.okanbulut.com/synthcheck/reference/generate_synthetic.md).
-Anthropic, OpenAI and Ollama models are called through the ellmer
-package. `provider = "mock"` gives random answers without calling any
-model, for trying the workflow and the app.
+Anthropic, OpenAI, Google Gemini and Ollama models are called through
+the ellmer package. `provider = "mock"` gives random answers without
+calling any model, for trying the workflow and the app.
 
 ## Usage
 
 ``` r
 sc_model(
-  provider = c("anthropic", "openai", "ollama", "mock"),
+  provider = c("anthropic", "openai", "google", "ollama", "mock"),
   model = NULL,
   temperature = 1,
   name = NULL,
@@ -22,7 +22,8 @@ sc_model(
 
 - provider:
 
-  `"anthropic"`, `"openai"`, `"ollama"` or `"mock"`.
+  `"anthropic"`, `"openai"`, `"google"` (Gemini), `"ollama"` or
+  `"mock"`.
 
 - model:
 
@@ -33,7 +34,8 @@ sc_model(
 - temperature:
 
   sampling temperature, or `NULL` to send none (some models do not take
-  one).
+  one). Gemini 3 and later models ignore the temperature, so none is
+  sent to them.
 
 - name:
 
@@ -51,8 +53,9 @@ An object of class `sc_model`.
 
 ## Details
 
-API keys are read from the `ANTHROPIC_API_KEY` and `OPENAI_API_KEY`
-environment variables (set them in `.Renviron`, or with
+API keys are read from the `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` and
+`GOOGLE_API_KEY` (or `GEMINI_API_KEY`) environment variables (set them
+in `.Renviron`, or with
 [`Sys.setenv()`](https://rdrr.io/r/base/Sys.setenv.html) for one
 session). They are never stored in the model specification or in the
 saved data. To get a key, see the article [Getting an API
@@ -67,6 +70,9 @@ key](https://www.okanbulut.com/synthcheck/articles/api-keys.html).
 ``` r
 sc_model("anthropic", temperature = 1)
 #> claude-haiku-5-5 (anthropic, model "claude-haiku-5-5", temperature 1)
+sc_model("google", "gemini-4-hydrogen", name = "Gemini 4 Hydrogen")
+#> Gemini 3 and later models ignore the temperature, so none is sent to gemini-4-hydrogen.
+#> Gemini 4 Hydrogen (google, model "gemini-4-hydrogen", temperature not sent)
 sc_model("ollama", "gemma3:27b", name = "Gemma 3 27B")
 #> Gemma 3 27B (ollama, model "gemma3:27b", temperature 1)
 sc_model("mock")

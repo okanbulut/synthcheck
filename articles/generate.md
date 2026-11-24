@@ -147,6 +147,9 @@ sc_default_models
 #> $openai
 #> [1] "gpt-4.1-nano"
 #> 
+#> $google
+#> [1] "gemini-4-hydrogen"
+#> 
 #> $ollama
 #> NULL
 #> 
