@@ -173,8 +173,8 @@ sc_persona_grid <- function(..., template) {
 #' @param model the model id, for example `"claude-haiku-5-5"`. `NULL` uses
 #'   the provider's default (see [sc_default_models]).
 #' @param temperature sampling temperature, or `NULL` to send none (some
-#'   models do not take one). Gemini 4 models are thinking models that
-#'   ignore the temperature, so none is sent to them.
+#'   models do not take one). Gemini 3 and later models ignore the
+#'   temperature, so none is sent to them.
 #' @param name the label of the model in the data and the benchmark.
 #'   `NULL` uses the model id.
 #' @param base_url optional address of the API, for example an Ollama server
@@ -196,8 +196,8 @@ sc_model <- function(provider = c("anthropic", "openai", "google", "ollama", "mo
       ", for example one listed by `ollama list`." else ".", call. = FALSE)
   if (!is.null(temperature) && (!is.numeric(temperature) || temperature < 0 || temperature > 2))
     stop("`temperature` must be between 0 and 2, or NULL.", call. = FALSE)
-  if (provider == "google" && !is.null(temperature) && grepl("^gemini-([4-9]|[1-9][0-9])", model)) {
-    message("Gemini 4 models ignore the temperature, so none is sent to ", model, ".")
+  if (provider == "google" && !is.null(temperature) && grepl("^gemini-([3-9]|[1-9][0-9])", model)) {
+    message("Gemini 3 and later models ignore the temperature, so none is sent to ", model, ".")
     temperature <- NULL
   }
   if (is.null(name) || !nzchar(name)) name <- model

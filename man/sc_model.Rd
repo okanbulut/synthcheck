@@ -20,8 +20,8 @@ sc_model(
 the provider's default (see \link{sc_default_models}).}
 
 \item{temperature}{sampling temperature, or \code{NULL} to send none (some
-models do not take one). Gemini 4 models are thinking models that
-ignore the temperature, so none is sent to them.}
+models do not take one). Gemini 3 and later models ignore the
+temperature, so none is sent to them.}
 
 \item{name}{the label of the model in the data and the benchmark.
 \code{NULL} uses the model id.}
