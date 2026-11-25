@@ -66,7 +66,7 @@ loop_writer_llm <- function(model, guidelines = lp_guidelines) {
 #' each round, one call shows a language model the construct, every item
 #' with its flags and main statistics, the parts of the stopping rule that
 #' fail, and the earlier edits with whether they worked. It asks for edits
-#' (reword, rekey, drop, add or keep), each with a rationale and the names
+#' (reword, rekey, drop, add, replace or keep), each with a rationale and the names
 #' of the checks it responds to, and one note on the round. These are logged
 #' in the `edits` and `rounds` tables, so you can see whether the revisions
 #' follow the evidence.
@@ -89,7 +89,7 @@ loop_writer_llm <- function(model, guidelines = lp_guidelines) {
 #' @examples
 #' # see revision_loop()
 #' @export
-loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add", "keep"),
+loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add", "replace", "keep"),
                              min_items = 3, max_edits = Inf, guidelines = lp_guidelines,
                              min_total = NULL) {
   if (!inherits(model, "sc_model")) stop("`model` must be an sc_model().", call. = FALSE)
@@ -119,7 +119,7 @@ loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add"
         item = ellmer::type_string("Name of the item; for an added item, an empty string."),
         action = ellmer::type_enum(actions, "What to do with the item."),
         statement = ellmer::type_string(
-          "The new wording for reword, rekey or add; an empty string otherwise."),
+          "The new wording for reword, rekey, add or replace; an empty string otherwise."),
         reverse = ellmer::type_boolean("The item's key after the edit: TRUE for reverse-keyed."),
         scale = ellmer::type_string("The item's scale."),
         rationale = ellmer::type_string("Why: The evidence and how the edit should fix it."),
@@ -132,6 +132,33 @@ loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add"
       ed$item[!nzchar(ed$item)] <- NA_character_
       if (is.finite(max_edits)) ed <- utils::head(ed, max_edits)
       ed <- lp_guard_drops(items, ed, min_items, min_total)
+      refused <- attr(ed, "refused_items")
+      if (length(refused) && "replace" %in% actions) {
+        # a drop the minimum refuses becomes a replacement: Ask for the new items
+        rp <- tryCatch(chat$chat_structured(lp_replace_prompt(items, refused), type = ellmer::type_object(
+          items = ellmer::type_array(ellmer::type_object(
+            item = ellmer::type_string("Name of the item being replaced, exactly as shown."),
+            statement = ellmer::type_string("The new item for the same scale."),
+            reverse = ellmer::type_boolean("TRUE for reverse-keyed."),
+            rationale = ellmer::type_string("How the new item avoids the old item's problems.")))))
+          , error = function(e) NULL)
+        rp <- lp_llm_rows(rp$items)
+        if (nrow(rp)) {
+          rp <- rp[rp$item %in% refused & !duplicated(rp$item), , drop = FALSE]
+          old <- attr(ed, "refused_edits")
+          rp$cites <- old$cites[match(rp$item, old$item)]
+          rp$scale <- items$scale[match(rp$item, items$item)]
+          rp$action <- "replace"
+          keep_attr <- attributes(ed)[c("refused", "refused_items")]
+          ed <- lp_bind_rows(ed, rp)
+          attr(ed, "refused") <- sprintf(
+            "Replaced instead of dropped, to keep the minimum number of items: %s.",
+            paste(rp$item, collapse = ", "))
+          left <- setdiff(refused, rp$item)
+          if (length(left)) attr(ed, "refused") <- paste(attr(ed, "refused"), sprintf(
+            "Not dropped: %s.", paste(left, collapse = ", ")))
+        }
+      }
     }
     reasoning <- lp_chr1(res$reasoning)
     if (!is.null(attr(ed, "refused")))
@@ -155,10 +182,12 @@ loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add"
 #'   Linacre (1994) give for rating scales). Below the range, answers are
 #'   more predictable than the model expects (often a sign of redundant
 #'   items or tidy synthetic respondents); above it, they are noisy. With
-#'   `overfit = "warn"`, an item that is only too predictable is a warning,
-#'   and only noisy items fail.
+#'   `overfit = "warn"`, an item that is only too predictable is a warning;
+#'   with `underfit = "warn"`, so is a noisy item. Both make infit and
+#'   outfit warnings only.
 #' - `misfit` (fail): The S-X2 item fit test (Orlando & Thissen, 2000) has
-#'   a p value below `thresholds$misfit_p`.
+#'   a p value below `thresholds$misfit_p`. `thresholds = list(misfit_p = 0)`
+#'   turns this flag off (`sx2_p` is still reported).
 #' - `disordered` (warn): The item's thresholds (the points where one
 #'   category becomes more likely than the one below) are not in increasing
 #'   order, so some categories are never the most likely answer.
@@ -199,6 +228,8 @@ loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add"
 #'   models often answer almost deterministically for a given persona,
 #'   which rewording cannot change, so `"warn"` lets the stopping rule rest
 #'   on the other checks.
+#' @param underfit severity of a mean square above the range (answers
+#'   noisier than the model expects): `"fail"` or `"warn"`.
 #' @return A function for the `evaluator` argument of [revision_loop()].
 #' @references Masters, G. N. (1982). A Rasch model for partial credit
 #'   scoring. *Psychometrika, 47*(2), 149-174.
@@ -224,9 +255,10 @@ loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add"
 #' }
 #' @export
 loop_irt <- function(model = c("pcm", "gpcm", "graded"), thresholds = list(), itemfit = TRUE,
-                     q3 = TRUE, overfit = c("fail", "warn")) {
+                     q3 = TRUE, overfit = c("fail", "warn"), underfit = c("fail", "warn")) {
   model <- match.arg(model)
   overfit <- match.arg(overfit)
+  underfit <- match.arg(underfit)
   thr <- utils::modifyList(list(msq = c(0.6, 1.4), misfit_p = 0.01, slope = 0.65, steep = 4,
                                 q3 = 0.2, info = NULL), thresholds)
   if (length(thr$msq) != 2L || thr$msq[1] >= thr$msq[2])
@@ -310,13 +342,13 @@ loop_irt <- function(model = c("pcm", "gpcm", "graded"), thresholds = list(), it
               v <- c(infit = ifit$infit[j], outfit = ifit$outfit[j])
               out <- !is.na(v) & (v < thr$msq[1] | v > thr$msq[2])
               if (!any(out)) next
-              # noisy answers (above the range) count first, as they always fail
+              # noisy answers (above the range) count first
               hi_out <- out & v > thr$msq[2]
               pick <- if (any(hi_out)) hi_out else out
               worst <- names(v)[pick][which.max(abs(log(v[pick])))]
               flag(use[j], s, "msq_misfit", v[[worst]],
                    if (v[[worst]] < thr$msq[1]) thr$msq[1] else thr$msq[2],
-                   if (v[[worst]] < thr$msq[1]) overfit else "fail", sprintf(
+                   if (v[[worst]] < thr$msq[1]) overfit else underfit, sprintf(
                      "%s mean square %.2f is outside %.1f to %.1f: Answers are %s.",
                      if (worst == "infit") "Infit" else "Outfit", v[[worst]], thr$msq[1],
                      thr$msq[2], if (v[[worst]] < thr$msq[1])
@@ -358,7 +390,10 @@ loop_irt <- function(model = c("pcm", "gpcm", "graded"), thresholds = list(), it
   }
   structure(f, label = sprintf("mirt %s model (%s, S-X2, Q3, information)", lp_irt_label[[model]],
                                if (model == "pcm") paste0(
-                                 "infit and outfit", if (overfit == "warn") " (overfit warns)",
+                                 "infit and outfit",
+                                 if (overfit == "warn" && underfit == "warn") " (warn only)" else
+                                   if (overfit == "warn") " (overfit warns)" else
+                                     if (underfit == "warn") " (underfit warns)",
                                  ", threshold order") else "slopes, threshold order"))
 }
 
@@ -431,10 +466,34 @@ lp_guard_drops <- function(items, ed, min_items, min_total) {
     n_total <- n_total - 1L
   }
   out <- ed[keep, , drop = FALSE]
-  if (any(!keep))
+  if (any(!keep)) {
     attr(out, "refused") <- sprintf(
       "Not dropped, to keep the minimum number of items: %s.", paste(ed$item[!keep], collapse = ", "))
+    attr(out, "refused_items") <- ed$item[!keep]
+    attr(out, "refused_edits") <- ed[!keep, , drop = FALSE]
+  }
   out
+}
+
+# stack edit tables whose columns differ
+lp_bind_rows <- function(a, b) {
+  cols <- union(names(a), names(b))
+  for (cc in setdiff(cols, names(a))) a[[cc]] <- rep(NA, nrow(a))
+  for (cc in setdiff(cols, names(b))) b[[cc]] <- rep(NA, nrow(b))
+  out <- rbind(as.data.frame(a)[cols], as.data.frame(b)[cols])
+  rownames(out) <- NULL
+  out
+}
+
+lp_replace_prompt <- function(items, ids) {
+  it <- items[match(ids, items$item), , drop = FALSE]
+  paste0(
+    "These drops were not applied, because the scale is at its minimum number of items. ",
+    "Replace each of these items instead: Write a new item for the same scale that keeps the ",
+    "content the scale needs but avoids the problems that made you drop it. Do not repeat or ",
+    "lightly reword the old item or any other current item.\n\n",
+    paste(sprintf("- %s (%s%s): %s", it$item, it$scale, ifelse(it$reverse, ", reverse-keyed", ""),
+                  it$statement), collapse = "\n"))
 }
 
 lp_reviser_system <- function(actions, min_items, max_edits, min_total = NULL,
@@ -443,7 +502,8 @@ lp_reviser_system <- function(actions, min_items, max_edits, min_total = NULL,
   "Each round, synthetic respondents answer the items, and checks flag problems.",
   "Propose edits that respond to the evidence: Reword an item whose wording is the likely cause,",
   "rekey an item whose key is wrong, drop an item that cannot be saved, add an item to a scale",
-  "that is short or narrow, or keep an item on purpose.",
+  "that is short or narrow, replace an item that cannot be saved with a new item for the same",
+  "scale (use this instead of drop when the scale is at its minimum), or keep an item on purpose.",
   sprintf("Allowed actions: %s.", paste(actions, collapse = ", ")),
   if (single_scale) paste(
     "The scales are content domains of one scale: The checks treat all items as one scale,",

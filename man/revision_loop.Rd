@@ -117,8 +117,9 @@ every round, so a stopped run keeps the rounds it finished, and
 \code{scale}, \code{stat} and \code{value}; \code{item} is \code{NA} for scale-level values, and
 both are \code{NA} for values over all items).
 \item \code{reviser(items, flags, context)} returns a list with \code{edits} (a data
-frame with \code{item}, \code{action} (\code{"reword"}, \code{"rekey"}, \code{"drop"}, \code{"add"}
-or \code{"keep"}), \code{statement}, \code{reverse}, \code{scale}, \code{rationale} and \code{cites},
+frame with \code{item}, \code{action} (\code{"reword"}, \code{"rekey"}, \code{"drop"}, \code{"add"},
+\code{"replace"} or \code{"keep"}), \code{statement}, \code{reverse}, \code{scale}, \code{rationale}
+and \code{cites},
 the checks the edit responds to, separated by commas) and optionally
 \code{reasoning} (one note for the whole round). The loop applies the edits,
 so the log always matches the items.

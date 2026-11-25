@@ -46,6 +46,17 @@
   which language models produce for a given persona) is a warning instead of
   a failure. Noisy items still fail.
 
+* The item-revision loop can replace items: The new `"replace"` action of
+  `loop_reviser_llm()` drops an item and adds a new one for the same scale in
+  one step (the edit's `note` names the new item). When the minimum number of
+  items refuses a drop, the reviser is asked for a replacement instead, so a
+  run at its minimum keeps working instead of stalling. `loop_outcomes()`
+  counts `replaced` edits.
+
+* `loop_irt()` gains `underfit`: With `overfit = "warn"` and
+  `underfit = "warn"`, infit and outfit only warn. `thresholds = list(misfit_p = 0)`
+  turns the S-X2 flag off.
+
 * New `blend_data()` gives the respondents behind the best blend of models:
   For each attempt, it draws each model's share from the `blend_llms()`
   recipe and stacks them, with a `model` column for the source model.

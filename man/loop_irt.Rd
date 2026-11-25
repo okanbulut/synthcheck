@@ -9,7 +9,8 @@ loop_irt(
   thresholds = list(),
   itemfit = TRUE,
   q3 = TRUE,
-  overfit = c("fail", "warn")
+  overfit = c("fail", "warn"),
+  underfit = c("fail", "warn")
 )
 }
 \arguments{
@@ -27,6 +28,9 @@ predictable than the model expects): \code{"fail"} or \code{"warn"}. Language
 models often answer almost deterministically for a given persona,
 which rewording cannot change, so \code{"warn"} lets the stopping rule rest
 on the other checks.}
+
+\item{underfit}{severity of a mean square above the range (answers
+noisier than the model expects): \code{"fail"} or \code{"warn"}.}
 }
 \value{
 A function for the \code{evaluator} argument of \code{\link[=revision_loop]{revision_loop()}}.
@@ -46,10 +50,12 @@ outside \code{thresholds$msq} (0.6 to 1.4 by default, the range Wright and
 Linacre (1994) give for rating scales). Below the range, answers are
 more predictable than the model expects (often a sign of redundant
 items or tidy synthetic respondents); above it, they are noisy. With
-\code{overfit = "warn"}, an item that is only too predictable is a warning,
-and only noisy items fail.
+\code{overfit = "warn"}, an item that is only too predictable is a warning;
+with \code{underfit = "warn"}, so is a noisy item. Both make infit and
+outfit warnings only.
 \item \code{misfit} (fail): The S-X2 item fit test (Orlando & Thissen, 2000) has
-a p value below \code{thresholds$misfit_p}.
+a p value below \code{thresholds$misfit_p}. \code{thresholds = list(misfit_p = 0)}
+turns this flag off (\code{sx2_p} is still reported).
 \item \code{disordered} (warn): The item's thresholds (the points where one
 category becomes more likely than the one below) are not in increasing
 order, so some categories are never the most likely answer.

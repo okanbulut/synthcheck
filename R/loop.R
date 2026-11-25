@@ -195,8 +195,9 @@ print.sc_construct_spec <- function(x, ...) {
 #'   `scale`, `stat` and `value`; `item` is `NA` for scale-level values, and
 #'   both are `NA` for values over all items).
 #' - `reviser(items, flags, context)` returns a list with `edits` (a data
-#'   frame with `item`, `action` (`"reword"`, `"rekey"`, `"drop"`, `"add"`
-#'   or `"keep"`), `statement`, `reverse`, `scale`, `rationale` and `cites`,
+#'   frame with `item`, `action` (`"reword"`, `"rekey"`, `"drop"`, `"add"`,
+#'   `"replace"` or `"keep"`), `statement`, `reverse`, `scale`, `rationale`
+#'   and `cites`,
 #'   the checks the edit responds to, separated by commas) and optionally
 #'   `reasoning` (one note for the whole round). The loop applies the edits,
 #'   so the log always matches the items.
@@ -872,7 +873,7 @@ loop_outcomes <- function(x) {
                failing_start = if (nrow(rd)) rd$n_failing[1] else NA_integer_,
                failing_end = if (nrow(rd)) rd$n_failing[nrow(rd)] else NA_integer_,
                edits = nrow(ed), reworded = n("reword"), rekeyed = n("rekey"),
-               dropped = n("drop"), added = n("add"),
+               dropped = n("drop"), added = n("add"), replaced = n("replace"),
                cites_flagged = share(ed$cites_flagged), resolved = share(ed$resolved),
                relapsed = if (nrow(res)) mean(relapse) else NA_real_,
                similarity = if (length(sim)) mean(sim) else NA_real_,
@@ -1014,7 +1015,9 @@ lp_schema <- local({
       run_id = c("character", "Name of the run."),
       round = c("integer", "Round whose checks prompted the edit; it takes effect in the next round."),
       item = c("character", "Item edited (the new name for an added item)."),
-      action = c("character", "reword, rekey, drop, add or keep."),
+      action = c("character", paste(
+        "reword, rekey, drop, add, replace (the item leaves and a new one takes its place;",
+        "`note` names it) or keep.")),
       old_statement = c("character", "Wording before the edit."),
       new_statement = c("character", "Wording after the edit."),
       old_reverse = c("logical", "Key before the edit."),
@@ -1147,7 +1150,7 @@ lp_apply_edits <- function(items, e, round, flags) {
   k <- 0L
   for (i in seq_len(nrow(e))) {
     a <- e$action[i]; id <- e$item[i]
-    if (!a %in% c("reword", "rekey", "drop", "add", "keep")) {
+    if (!a %in% c("reword", "rekey", "drop", "add", "keep", "replace")) {
       e$note[i] <- sprintf("Unknown action \"%s\".", a); next
     }
     if (a == "add") {
@@ -1182,6 +1185,25 @@ lp_apply_edits <- function(items, e, round, flags) {
     if (a == "drop") {
       items <- items[-j, , drop = FALSE]
       e$new_statement[i] <- NA; e$new_reverse[i] <- NA
+    } else if (a == "replace") {
+      # the item leaves and a new item takes its place in the same scale
+      st <- e$new_statement[i]
+      if (is.na(st) || !nzchar(trimws(st))) {
+        e$note[i] <- "A replacement needs a new statement."; next
+      }
+      repeat {
+        k <- k + 1L
+        nid <- sprintf("%s.r%d.%d", lp_id(items$scale[j]), round, k)
+        if (!nid %in% items$item) break
+      }
+      rv <- e$new_reverse[i]
+      rv <- !is.na(rv) && rv
+      items <- rbind(items[-j, , drop = FALSE],
+                     data.frame(item = nid, scale = items$scale[j], reverse = rv,
+                                statement = trimws(st), version = 1L, stringsAsFactors = FALSE))
+      e$new_statement[i] <- trimws(st); e$new_reverse[i] <- rv
+      e$note[i] <- sprintf("Replaced by %s.", nid)
+      done <- c(done, nid)
     } else if (a == "keep") {
       e$new_statement[i] <- items$statement[j]; e$new_reverse[i] <- items$reverse[j]
     } else {
@@ -1202,7 +1224,7 @@ lp_apply_edits <- function(items, e, round, flags) {
   }
   e$similarity <- vapply(seq_len(nrow(e)), function(i)
     lp_jaccard(e$old_statement[i], e$new_statement[i]), numeric(1))
-  e$similarity[e$action %in% c("drop", "add")] <- NA_real_
+  e$similarity[e$action %in% c("drop", "add", "replace")] <- NA_real_
   fl <- flags[!is.na(flags$item), , drop = FALSE]
   e$cites_flagged <- vapply(seq_len(nrow(e)), function(i) {
     ci <- lp_split(e$cites[i])
