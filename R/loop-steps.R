@@ -504,6 +504,8 @@ lp_reviser_system <- function(actions, min_items, max_edits, min_total = NULL,
   "rekey an item whose key is wrong, drop an item that cannot be saved, add an item to a scale",
   "that is short or narrow, replace an item that cannot be saved with a new item for the same",
   "scale (use this instead of drop when the scale is at its minimum), or keep an item on purpose.",
+  "For redundancy or local dependence (two items that say nearly the same thing), replace one",
+  "item of the pair with a new item for the same scale that covers a different aspect of it.",
   sprintf("Allowed actions: %s.", paste(actions, collapse = ", ")),
   if (single_scale) paste(
     "The scales are content domains of one scale: The checks treat all items as one scale,",

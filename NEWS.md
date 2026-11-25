@@ -50,7 +50,9 @@
   `loop_reviser_llm()` drops an item and adds a new one for the same scale in
   one step (the edit's `note` names the new item). When the minimum number of
   items refuses a drop, the reviser is asked for a replacement instead, so a
-  run at its minimum keeps working instead of stalling. `loop_outcomes()`
+  run at its minimum keeps working instead of stalling. For redundant or
+  locally dependent items, the reviser is told to replace one item of the
+  pair with a new item that covers a different aspect of its scale. `loop_outcomes()`
   counts `replaced` edits.
 
 * `loop_irt()` gains `underfit`: With `overfit = "warn"` and
