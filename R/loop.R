@@ -468,6 +468,9 @@ revision_loop <- function(construct, items = NULL, models = sc_model("mock"), pe
 #' @param n_pa number of random data sets for parallel analysis.
 #' @param straightline_sd,inconsistency,max_careless the respondent
 #'   screening rules (see above).
+#' @param severity a named list that changes the severity of checks, for
+#'   example `list(redundant = "fail")` so that near-duplicate items block
+#'   the stopping rule.
 #' @return A function for the `checker` argument of [revision_loop()].
 #' @seealso [revision_loop()], [synthetic_pretest()]
 #' @examples
@@ -478,8 +481,9 @@ revision_loop <- function(construct, items = NULL, models = sc_model("mock"), pe
 #' head(out$flags)
 #' @export
 loop_checker <- function(thresholds = list(), irt = FALSE, n_pa = 20, straightline_sd = 0.5,
-                         inconsistency = 0.5, max_careless = 0.05) {
+                         inconsistency = 0.5, max_careless = 0.05, severity = list()) {
   force(thresholds); force(irt); force(n_pa)
+  lp_check_severity(severity)
   f <- function(responses, items, context) {
     lo <- context$construct$scale[1]; hi <- context$construct$scale[2]
     d <- as.data.frame(responses)
@@ -555,9 +559,10 @@ loop_checker <- function(thresholds = list(), irt = FALSE, n_pa = 20, straightli
                  stat = c("own_scale", "reverse_ok", "n_factors_all", "scales", "careless_share"),
                  value = c(su$own_scale, su$reverse_ok, su$n_factors, su$scales, share),
                  stringsAsFactors = FALSE))
-    list(flags = if (length(fl)) do.call(rbind, fl) else NULL, stats = stats)
+    list(flags = lp_resev(if (length(fl)) do.call(rbind, fl) else NULL, severity), stats = stats)
   }
-  structure(f, label = "synthcheck data quality (pretest and respondent screening)")
+  structure(f, label = paste0("synthcheck data quality (pretest and respondent screening",
+                              lp_sev_label(severity), ")"))
 }
 
 #' The stopping rule of the item-revision loop
@@ -1305,3 +1310,20 @@ lp_id <- function(x) {
 lp_sentence <- function(x) if (grepl("[.!?]$", x)) x else paste0(x, ".")
 
 lp_now <- function() format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
+
+# change the severity of named checks
+lp_check_severity <- function(severity) {
+  if (!is.list(severity) || (length(severity) && is.null(names(severity))) ||
+      !all(unlist(severity) %in% c("fail", "warn")))
+    stop("`severity` must be a named list of \"fail\" or \"warn\".", call. = FALSE)
+  invisible(severity)
+}
+lp_resev <- function(fl, severity) {
+  if (is.null(fl) || !nrow(fl) || !length(severity)) return(fl)
+  hit <- fl$check %in% names(severity)
+  fl$severity[hit] <- unlist(severity)[fl$check[hit]]
+  fl
+}
+lp_sev_label <- function(severity) if (!length(severity)) "" else
+  paste0("; ", paste(sprintf("%s %s", names(severity), ifelse(unlist(severity) == "fail", "fails",
+                                                               "warns")), collapse = ", "))

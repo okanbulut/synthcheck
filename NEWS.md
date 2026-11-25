@@ -59,6 +59,10 @@
   `underfit = "warn"`, infit and outfit only warn. `thresholds = list(misfit_p = 0)`
   turns the S-X2 flag off.
 
+* `loop_checker()` and `loop_irt()` gain `severity`, a named list that
+  changes the severity of any check, for example
+  `loop_checker(severity = list(redundant = "fail"))`.
+
 * New `blend_data()` gives the respondents behind the best blend of models:
   For each attempt, it draws each model's share from the `blend_llms()`
   recipe and stacks them, with a `model` column for the source model.

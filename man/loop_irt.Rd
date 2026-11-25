@@ -10,7 +10,8 @@ loop_irt(
   itemfit = TRUE,
   q3 = TRUE,
   overfit = c("fail", "warn"),
-  underfit = c("fail", "warn")
+  underfit = c("fail", "warn"),
+  severity = list()
 )
 }
 \arguments{
@@ -31,6 +32,9 @@ on the other checks.}
 
 \item{underfit}{severity of a mean square above the range (answers
 noisier than the model expects): \code{"fail"} or \code{"warn"}.}
+
+\item{severity}{a named list that changes the severity of checks, for
+example \code{list(local_dependence = "fail")}.}
 }
 \value{
 A function for the \code{evaluator} argument of \code{\link[=revision_loop]{revision_loop()}}.

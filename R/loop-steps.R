@@ -230,6 +230,8 @@ loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add"
 #'   on the other checks.
 #' @param underfit severity of a mean square above the range (answers
 #'   noisier than the model expects): `"fail"` or `"warn"`.
+#' @param severity a named list that changes the severity of checks, for
+#'   example `list(local_dependence = "fail")`.
 #' @return A function for the `evaluator` argument of [revision_loop()].
 #' @references Masters, G. N. (1982). A Rasch model for partial credit
 #'   scoring. *Psychometrika, 47*(2), 149-174.
@@ -255,8 +257,10 @@ loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add"
 #' }
 #' @export
 loop_irt <- function(model = c("pcm", "gpcm", "graded"), thresholds = list(), itemfit = TRUE,
-                     q3 = TRUE, overfit = c("fail", "warn"), underfit = c("fail", "warn")) {
+                     q3 = TRUE, overfit = c("fail", "warn"), underfit = c("fail", "warn"),
+                     severity = list()) {
   model <- match.arg(model)
+  lp_check_severity(severity)
   overfit <- match.arg(overfit)
   underfit <- match.arg(underfit)
   thr <- utils::modifyList(list(msq = c(0.6, 1.4), misfit_p = 0.01, slope = 0.65, steep = 4,
@@ -385,16 +389,17 @@ loop_irt <- function(model = c("pcm", "gpcm", "graded"), thresholds = list(), it
         flag(NA_character_, s, "low_info", info, thr$info, "fail", sprintf(
           "Mean test information %.2f between theta -2 and 2 is below %.2f.", info, thr$info))
     }
-    list(flags = if (length(fl)) do.call(rbind, fl) else NULL,
+    list(flags = lp_resev(if (length(fl)) do.call(rbind, fl) else NULL, severity),
          stats = if (length(st)) do.call(rbind, st) else NULL)
   }
-  structure(f, label = sprintf("mirt %s model (%s, S-X2, Q3, information)", lp_irt_label[[model]],
+  structure(f, label = sprintf("mirt %s model (%s, S-X2, Q3, information%s)", lp_irt_label[[model]],
                                if (model == "pcm") paste0(
                                  "infit and outfit",
                                  if (overfit == "warn" && underfit == "warn") " (warn only)" else
                                    if (overfit == "warn") " (overfit warns)" else
                                      if (underfit == "warn") " (underfit warns)",
-                                 ", threshold order") else "slopes, threshold order"))
+                                 ", threshold order") else "slopes, threshold order",
+                               lp_sev_label(severity)))
 }
 
 lp_irt_label <- c(pcm = "partial credit", gpcm = "generalized partial credit",

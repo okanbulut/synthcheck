@@ -388,3 +388,14 @@ test_that("infit and outfit can be warnings only", {
   f2 <- loop_irt(q3 = FALSE, itemfit = TRUE)(X, items, ctx)$flags
   expect_true(any(f2$severity[f2$check == "msq_misfit" & f2$item == "i6"] == "fail"))
 })
+
+test_that("the severity of any check can be changed", {
+  fl <- data.frame(item = c("a", "b"), check = c("redundant", "weak"), severity = c("warn", "fail"),
+                   stringsAsFactors = FALSE)
+  out <- synthcheck:::lp_resev(fl, list(redundant = "fail", weak = "warn"))
+  expect_equal(out$severity, c("fail", "warn"))
+  expect_error(loop_checker(severity = list(redundant = "block")), "named list")
+  expect_match(attr(loop_checker(severity = list(redundant = "fail")), "label"), "redundant fails")
+  expect_match(attr(loop_irt(severity = list(local_dependence = "fail")), "label"),
+               "local_dependence fails")
+})
