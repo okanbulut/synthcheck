@@ -18,7 +18,8 @@ loop_reviser_llm(
   actions = c("reword", "rekey", "drop", "add", "keep"),
   min_items = 3,
   max_edits = Inf,
-  guidelines = lp_guidelines
+  guidelines = lp_guidelines,
+  min_total = NULL
 )
 ```
 
@@ -36,7 +37,9 @@ loop_reviser_llm(
 
 - min_items:
 
-  smallest number of items a scale should keep (told to the model).
+  smallest number of items a scale should keep. The model is told, and a
+  drop that would leave a scale with fewer is not applied (the round's
+  `reasoning` says so).
 
 - max_edits:
 
@@ -45,6 +48,10 @@ loop_reviser_llm(
 - guidelines:
 
   item-writing guidelines added to the system prompt.
+
+- min_total:
+
+  smallest number of items in all, or `NULL`, enforced in the same way.
 
 ## Value
 

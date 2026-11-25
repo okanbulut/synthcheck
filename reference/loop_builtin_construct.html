@@ -74,7 +74,7 @@ use as the target of <code><a href="revision_loop.html">revision_loop()</a></cod
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>arguments of <code><a href="loop_construct.html">loop_construct()</a></code> that replace the defaults, for
-example <code>n_per_scale</code>, <code>population</code> or <code>scale</code>.</p></dd>
+example <code>n_per_scale</code>, <code>population</code>, <code>scale</code> or <code>single_scale</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -98,6 +98,10 @@ time with family.</p></li>
 </ul><p>Its stopping rule adds two parts to the defaults of <code><a href="loop_criterion.html">loop_criterion()</a></code>:
 A marginal reliability of at least 0.80 in every scale (from <code><a href="loop_irt.html">loop_irt()</a></code>)
 and parallel analysis finding four dimensions, one per scale.</p>
+<p>With <code>single_scale = TRUE</code>, the four parts are content domains of one
+financial well-being scale. The stopping rule is then: No failing items,
+alpha and marginal reliability of at least .80, one dimension, at most 5%
+careless respondents, at least 10 items, and every domain kept.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -121,6 +125,15 @@ well-being: The goal of financial education</em>. Washington, DC: CFPB.</p>
 <span class="r-in"><span><span class="fu">loop_builtin_construct</span><span class="op">(</span><span class="st">"financial_wellbeing"</span>, n_per_scale <span class="op">=</span> <span class="fl">8</span>, population <span class="op">=</span> <span class="st">"adults in Canada"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Construct "Financial well-being": 4 scales, 8 items each, answers 1 to 5.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> A state in which a person can fully meet current and ongoing financial obligations, can feel secure in their financial future, and is able to make choices that allow them to enjoy life. </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   control: Having control over one's finances: Being able to pay bills on time, not having unmanageable debt, and being able to make ends meet.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   cushion: Having a financial cushion against unexpected expenses and emergencies: Savings, health insurance and good credit, and being able to rely on friends and family for financial help, which increase the capacity to absorb a financial shock.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   goals: Having financial goals, such as paying off student loans within a certain number of years or saving a particular amount toward retirement, and being on track to meet them.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   freedom: Being able to make choices that allow one to enjoy life, such as taking a vacation, enjoying a meal out now and then, going back to school for an advanced degree, or working less to spend more time with family.</span>
+<span class="r-in"><span><span class="co"># one scale that covers the four domains</span></span></span>
+<span class="r-in"><span><span class="fu">loop_builtin_construct</span><span class="op">(</span><span class="st">"financial_wellbeing"</span>, single_scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Construct "Financial well-being": 4 scales, 6 items each, answers 1 to 5.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> A state in which a person can fully meet current and ongoing financial obligations, can feel secure in their financial future, and is able to make choices that allow them to enjoy life. </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> One scale; the parts below are its content domains.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   control: Having control over one's finances: Being able to pay bills on time, not having unmanageable debt, and being able to make ends meet.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   cushion: Having a financial cushion against unexpected expenses and emergencies: Savings, health insurance and good credit, and being able to rely on friends and family for financial help, which increase the capacity to absorb a financial shock.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   goals: Having financial goals, such as paying off student loans within a certain number of years or saving a particular amount toward retirement, and being on track to meet them.</span>

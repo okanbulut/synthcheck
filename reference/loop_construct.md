@@ -23,7 +23,8 @@ loop_construct(
   labels = NULL,
   instructions = sc_default_instructions,
   notes = NULL,
-  criterion = NULL
+  criterion = NULL,
+  single_scale = FALSE
 )
 ```
 
@@ -72,6 +73,18 @@ loop_construct(
   that
   [`revision_loop()`](https://www.okanbulut.com/synthcheck/reference/revision_loop.md)
   uses for this construct unless it is given another.
+
+- single_scale:
+
+  are the `scales` content domains of one scale? With `TRUE`, the items
+  are written and revised domain by domain (and each item keeps its
+  domain in `scale`), but the checks of
+  [`revision_loop()`](https://www.okanbulut.com/synthcheck/reference/revision_loop.md)
+  treat all items as one scale: One IRT model, one alpha and one
+  dimension. Use
+  [`loop_criterion()`](https://www.okanbulut.com/synthcheck/reference/loop_criterion.md)
+  with `min_items` and `min_total` to require that every domain stays in
+  the scale.
 
 ## Value
 

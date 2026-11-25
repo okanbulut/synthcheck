@@ -72,7 +72,8 @@ the number of rounds means something. Every part gives one row in the
 <span>  min <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.8</span>, own_scale <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span>,</span>
 <span>  max <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>careless_share <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span>,</span>
 <span>  min_items <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  factors <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  factors <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  min_total <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -96,6 +97,10 @@ the number of rounds means something. Every part gives one row in the
 <dd><p>require the number of dimensions to match the number of
 scales?</p></dd>
 
+
+<dt id="arg-min-total">min_total<a class="anchor" aria-label="anchor" href="#arg-min-total"></a></dt>
+<dd><p>smallest number of items in all, or <code>NULL</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -111,9 +116,13 @@ must be at least the target. The default asks for alpha of at least
 0.80 in every scale and at least 90% of items closest to their own scale.</p></li>
 <li><p><code>max</code>: For each named stat, its highest value must be at most the
 target. The default allows at most 5% unusable respondents.</p></li>
-<li><p><code>min_items</code>: Every scale keeps at least this many items.</p></li>
+<li><p><code>min_items</code>: Every scale keeps at least this many items. A scale of
+the construct that lost all its items counts as 0, so <code>min_items = 1</code>
+requires that every scale (or content domain) is still there.</p></li>
+<li><p><code>min_total</code>: The items number at least this many in all.</p></li>
 <li><p><code>factors</code>: Parallel analysis over all items finds as many dimensions as
-there are scales.</p></li>
+there are scales, or one dimension for a construct made with
+<code>single_scale = TRUE</code>.</p></li>
 </ul><p>Stats from any step can be named, for example the test information of
 <code><a href="loop_irt.html">loop_irt()</a></code> (<code>min = list(marginal_rxx = 0.8)</code>). A stat that no
 step reports fails, so that a missing check never passes quietly.</p>
@@ -153,21 +162,28 @@ step reports fails, so that a missing check never passes quietly.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         add(paste0("max_", s), v, max[[s]], !is.na(v) &amp;&amp; v &lt;= </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             max[[s]])</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     con &lt;- context$construct</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (!is.null(min_items)) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         n &lt;- min(table(items$scale))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         sc &lt;- unique(c(names(con$scales), items$scale))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         n &lt;- min(table(factor(items$scale, levels = sc)))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         add("min_items", n, min_items, n &gt;= min_items)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (!is.null(min_total)) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         add("min_total", nrow(items), min_total, nrow(items) &gt;= </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             min_total)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (factors) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         v &lt;- stats$value[stats$stat == "n_factors_all"][1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         k &lt;- length(unique(items$scale))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         k &lt;- if (isTRUE(con$single_scale)) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             1L</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         else length(unique(items$scale))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         add("factors", v, k, !is.na(v) &amp;&amp; v == k)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (!length(rows)) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         return(NULL)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     do.call(rbind, rows)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x5b3807313c60&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x5b380f480760&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x64eeefb623f0&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x64eee388af48&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"label")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "no failing items; alpha &gt;= 0.8; own_scale &gt;= 0.9; careless_share &lt;= 0.05; at least 3 items per scale"</span>
 <span class="r-in"><span><span class="fu">loop_criterion</span><span class="op">(</span>min <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span>, factors <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
@@ -198,23 +214,83 @@ step reports fails, so that a missing check never passes quietly.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         add(paste0("max_", s), v, max[[s]], !is.na(v) &amp;&amp; v &lt;= </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             max[[s]])</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     con &lt;- context$construct</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (!is.null(min_items)) {</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         n &lt;- min(table(items$scale))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         sc &lt;- unique(c(names(con$scales), items$scale))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         n &lt;- min(table(factor(items$scale, levels = sc)))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         add("min_items", n, min_items, n &gt;= min_items)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (!is.null(min_total)) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         add("min_total", nrow(items), min_total, nrow(items) &gt;= </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             min_total)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (factors) {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         v &lt;- stats$value[stats$stat == "n_factors_all"][1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         k &lt;- length(unique(items$scale))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         k &lt;- if (isTRUE(con$single_scale)) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             1L</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         else length(unique(items$scale))</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         add("factors", v, k, !is.na(v) &amp;&amp; v == k)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     if (!length(rows)) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         return(NULL)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     do.call(rbind, rows)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x5b3807313c60&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x5b380c912ca0&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x64eeefb623f0&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x64eee3822aa0&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"label")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "no failing items; alpha &gt;= 0.7; careless_share &lt;= 0.05; at least 3 items per scale; dimensions match scales"</span>
+<span class="r-in"><span><span class="co"># one scale: Every domain kept, at least 10 items, one dimension</span></span></span>
+<span class="r-in"><span><span class="fu">loop_criterion</span><span class="op">(</span>min_items <span class="op">=</span> <span class="fl">1</span>, min_total <span class="op">=</span> <span class="fl">10</span>, factors <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> function (flags, stats, items, context) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     rows &lt;- list()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     add &lt;- function(name, value, target, pass) rows[[length(rows) + </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         1L]] &lt;&lt;- data.frame(criterion = name, value = value, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         target = target, pass = pass, stringsAsFactors = FALSE)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (no_failing_items) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         n &lt;- length(unique(flags$item[flags$severity == "fail" &amp; </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             !is.na(flags$item)]))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         add("no_failing_items", n, 0, n == 0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     for (s in names(min)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         v &lt;- stats$value[stats$stat == s]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         v &lt;- if (length(v) &amp;&amp; any(!is.na(v))) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             min(v, na.rm = TRUE)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         else NA_real_</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         add(paste0("min_", s), v, min[[s]], !is.na(v) &amp;&amp; v &gt;= </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             min[[s]])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     for (s in names(max)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         v &lt;- stats$value[stats$stat == s]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         v &lt;- if (length(v) &amp;&amp; any(!is.na(v))) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             max(v, na.rm = TRUE)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         else NA_real_</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         add(paste0("max_", s), v, max[[s]], !is.na(v) &amp;&amp; v &lt;= </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             max[[s]])</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     con &lt;- context$construct</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (!is.null(min_items)) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         sc &lt;- unique(c(names(con$scales), items$scale))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         n &lt;- min(table(factor(items$scale, levels = sc)))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         add("min_items", n, min_items, n &gt;= min_items)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (!is.null(min_total)) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         add("min_total", nrow(items), min_total, nrow(items) &gt;= </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             min_total)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (factors) {</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         v &lt;- stats$value[stats$stat == "n_factors_all"][1]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         k &lt;- if (isTRUE(con$single_scale)) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             1L</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         else length(unique(items$scale))</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         add("factors", v, k, !is.na(v) &amp;&amp; v == k)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     if (!length(rows)) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         return(NULL)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     do.call(rbind, rows)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x64eeefb623f0&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x64eee37e1da8&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"label")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "no failing items; alpha &gt;= 0.8; own_scale &gt;= 0.9; careless_share &lt;= 0.05; at least 1 items per scale; at least 10 items in all; dimensions match scales"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

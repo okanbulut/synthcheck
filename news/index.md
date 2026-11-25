@@ -43,6 +43,33 @@
   Protection Bureau (2015), with control, cushion, goals and freedom as
   its four scales.
 
+- `loop_construct(single_scale = TRUE)` treats the scales as content
+  domains of one scale: Items are still written and revised domain by
+  domain, but the checks pool all items (one IRT model, one alpha, one
+  dimension).
+  `loop_builtin_construct("financial_wellbeing", single_scale = TRUE)`
+  uses a stopping rule with one dimension, at least 10 items and every
+  domain kept.
+  [`loop_criterion()`](https://www.okanbulut.com/synthcheck/reference/loop_criterion.md)
+  gains `min_total`, and its `min_items` counts a domain that lost all
+  its items as 0.
+  [`loop_reviser_llm()`](https://www.okanbulut.com/synthcheck/reference/loop_reviser_llm.md)
+  gains `min_total`, and no longer applies drops that would go below
+  `min_items` or `min_total`.
+
+- [`loop_irt()`](https://www.okanbulut.com/synthcheck/reference/loop_irt.md)
+  now takes `marginal_rxx` and `info_mean` over the estimated latent
+  distribution. Before, they assumed a latent variance of 1, so with the
+  partial credit model (which estimates the variance) the marginal
+  reliability was far too low: .17 instead of about .95 for
+  near-deterministic synthetic answers.
+
+- [`loop_irt()`](https://www.okanbulut.com/synthcheck/reference/loop_irt.md)
+  gains `overfit`: With `"warn"`, an item whose infit or outfit is only
+  below the range (answers more predictable than the model expects,
+  which language models produce for a given persona) is a warning
+  instead of a failure. Noisy items still fail.
+
 - New
   [`blend_data()`](https://www.okanbulut.com/synthcheck/reference/blend_data.md)
   gives the respondents behind the best blend of models: For each

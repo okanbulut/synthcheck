@@ -16,7 +16,8 @@ loop_irt(
   model = c("pcm", "gpcm", "graded"),
   thresholds = list(),
   itemfit = TRUE,
-  q3 = TRUE
+  q3 = TRUE,
+  overfit = c("fail", "warn")
 )
 ```
 
@@ -37,6 +38,14 @@ loop_irt(
   compute the item fit statistics and the Q3 residuals? They are the
   slowest parts.
 
+- overfit:
+
+  severity of a mean square below the range (answers more predictable
+  than the model expects): `"fail"` or `"warn"`. Language models often
+  answer almost deterministically for a given persona, which rewording
+  cannot change, so `"warn"` lets the stopping rule rest on the other
+  checks.
+
 ## Value
 
 A function for the `evaluator` argument of
@@ -48,7 +57,9 @@ A function for the `evaluator` argument of
   outside `thresholds$msq` (0.6 to 1.4 by default, the range Wright and
   Linacre (1994) give for rating scales). Below the range, answers are
   more predictable than the model expects (often a sign of redundant
-  items or tidy synthetic respondents); above it, they are noisy.
+  items or tidy synthetic respondents); above it, they are noisy. With
+  `overfit = "warn"`, an item that is only too predictable is a warning,
+  and only noisy items fail.
 
 - `misfit` (fail): The S-X2 item fit test (Orlando & Thissen, 2000) has
   a p value below `thresholds$misfit_p`.
@@ -82,7 +93,12 @@ Stats: Per item `location` (the mean of its thresholds), `infit` and
 `sx2_p`, and per scale `info_mean` and `marginal_rxx` (marginal
 reliability), which
 [`loop_criterion()`](https://www.okanbulut.com/synthcheck/reference/loop_criterion.md)
-can use as targets, for example `min = list(marginal_rxx = 0.8)`.
+can use as targets, for example `min = list(marginal_rxx = 0.8)`. Both
+are taken over the estimated latent distribution, with the trait
+standardized: `info_mean` is the mean information between 2 SD below and
+2 SD above the latent mean, and `marginal_rxx` is the mean of \\\sigma^2
+I / (\sigma^2 I + 1)\\. With a latent variance of 1 these equal the
+usual values.
 
 ## References
 

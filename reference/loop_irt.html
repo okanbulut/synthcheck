@@ -77,7 +77,8 @@ a Rasch model for ordered categories with every slope fixed at 1;
 <span>  model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pcm"</span>, <span class="st">"gpcm"</span>, <span class="st">"graded"</span><span class="op">)</span>,</span>
 <span>  thresholds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  itemfit <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  q3 <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  q3 <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  overfit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fail"</span>, <span class="st">"warn"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -99,6 +100,14 @@ a Rasch model for ordered categories with every slope fixed at 1;
 <dd><p>compute the item fit statistics and the Q3 residuals?
 They are the slowest parts.</p></dd>
 
+
+<dt id="arg-overfit">overfit<a class="anchor" aria-label="anchor" href="#arg-overfit"></a></dt>
+<dd><p>severity of a mean square below the range (answers more
+predictable than the model expects): <code>"fail"</code> or <code>"warn"</code>. Language
+models often answer almost deterministically for a given persona,
+which rewording cannot change, so <code>"warn"</code> lets the stopping rule rest
+on the other checks.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -111,7 +120,9 @@ They are the slowest parts.</p></dd>
 outside <code>thresholds$msq</code> (0.6 to 1.4 by default, the range Wright and
 Linacre (1994) give for rating scales). Below the range, answers are
 more predictable than the model expects (often a sign of redundant
-items or tidy synthetic respondents); above it, they are noisy.</p></li>
+items or tidy synthetic respondents); above it, they are noisy. With
+<code>overfit = "warn"</code>, an item that is only too predictable is a warning,
+and only noisy items fail.</p></li>
 <li><p><code>misfit</code> (fail): The S-X2 item fit test (Orlando &amp; Thissen, 2000) has
 a p value below <code>thresholds$misfit_p</code>.</p></li>
 <li><p><code>disordered</code> (warn): The item's thresholds (the points where one
@@ -135,7 +146,11 @@ information of the scale between theta -2 and 2 is below the target.</p></li>
 <code>outfit</code> (partial credit model), <code>slope</code> (<code>"gpcm"</code> and <code>"graded"</code>) and
 <code>sx2_p</code>, and per scale <code>info_mean</code> and <code>marginal_rxx</code> (marginal
 reliability), which <code><a href="loop_criterion.html">loop_criterion()</a></code> can use as targets, for example
-<code>min = list(marginal_rxx = 0.8)</code>.</p>
+<code>min = list(marginal_rxx = 0.8)</code>. Both are taken over the estimated
+latent distribution, with the trait standardized: <code>info_mean</code> is the mean
+information between 2 SD below and 2 SD above the latent mean, and
+<code>marginal_rxx</code> is the mean of \(\sigma^2 I / (\sigma^2 I + 1)\). With
+a latent variance of 1 these equal the usual values.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

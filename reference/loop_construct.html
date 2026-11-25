@@ -81,7 +81,8 @@ the reviser, and uses <code>scale</code>, <code>labels</code> and <code>instruct
 <span>  labels <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  instructions <span class="op">=</span> <span class="va">sc_default_instructions</span>,</span>
 <span>  notes <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  criterion <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  criterion <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  single_scale <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -128,6 +129,15 @@ such as a style guide or a reading level.</p></dd>
 <dt id="arg-criterion">criterion<a class="anchor" aria-label="anchor" href="#arg-criterion"></a></dt>
 <dd><p>optional stopping rule, a <code><a href="loop_criterion.html">loop_criterion()</a></code>, that
 <code><a href="revision_loop.html">revision_loop()</a></code> uses for this construct unless it is given another.</p></dd>
+
+
+<dt id="arg-single-scale">single_scale<a class="anchor" aria-label="anchor" href="#arg-single-scale"></a></dt>
+<dd><p>are the <code>scales</code> content domains of one scale? With
+<code>TRUE</code>, the items are written and revised domain by domain (and each
+item keeps its domain in <code>scale</code>), but the checks of <code><a href="revision_loop.html">revision_loop()</a></code>
+treat all items as one scale: One IRT model, one alpha and one
+dimension. Use <code><a href="loop_criterion.html">loop_criterion()</a></code> with <code>min_items</code> and <code>min_total</code> to
+require that every domain stays in the scale.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -21,8 +21,8 @@ loop_builtin_construct(name = "financial_wellbeing", ...)
 
   arguments of
   [`loop_construct()`](https://www.okanbulut.com/synthcheck/reference/loop_construct.md)
-  that replace the defaults, for example `n_per_scale`, `population` or
-  `scale`.
+  that replace the defaults, for example `n_per_scale`, `population`,
+  `scale` or `single_scale`.
 
 ## Value
 
@@ -54,6 +54,11 @@ A marginal reliability of at least 0.80 in every scale (from
 [`loop_irt()`](https://www.okanbulut.com/synthcheck/reference/loop_irt.md))
 and parallel analysis finding four dimensions, one per scale.
 
+With `single_scale = TRUE`, the four parts are content domains of one
+financial well-being scale. The stopping rule is then: No failing items,
+alpha and marginal reliability of at least .80, one dimension, at most
+5% careless respondents, at least 10 items, and every domain kept.
+
 ## References
 
 Consumer Financial Protection Bureau. (2015). *Financial well-being: The
@@ -77,6 +82,15 @@ loop_builtin_construct("financial_wellbeing")
 loop_builtin_construct("financial_wellbeing", n_per_scale = 8, population = "adults in Canada")
 #> Construct "Financial well-being": 4 scales, 8 items each, answers 1 to 5.
 #> A state in which a person can fully meet current and ongoing financial obligations, can feel secure in their financial future, and is able to make choices that allow them to enjoy life. 
+#>   control: Having control over one's finances: Being able to pay bills on time, not having unmanageable debt, and being able to make ends meet.
+#>   cushion: Having a financial cushion against unexpected expenses and emergencies: Savings, health insurance and good credit, and being able to rely on friends and family for financial help, which increase the capacity to absorb a financial shock.
+#>   goals: Having financial goals, such as paying off student loans within a certain number of years or saving a particular amount toward retirement, and being on track to meet them.
+#>   freedom: Being able to make choices that allow one to enjoy life, such as taking a vacation, enjoying a meal out now and then, going back to school for an advanced degree, or working less to spend more time with family.
+# one scale that covers the four domains
+loop_builtin_construct("financial_wellbeing", single_scale = TRUE)
+#> Construct "Financial well-being": 4 scales, 6 items each, answers 1 to 5.
+#> A state in which a person can fully meet current and ongoing financial obligations, can feel secure in their financial future, and is able to make choices that allow them to enjoy life. 
+#> One scale; the parts below are its content domains.
 #>   control: Having control over one's finances: Being able to pay bills on time, not having unmanageable debt, and being able to make ends meet.
 #>   cushion: Having a financial cushion against unexpected expenses and emergencies: Savings, health insurance and good credit, and being able to rely on friends and family for financial help, which increase the capacity to absorb a financial shock.
 #>   goals: Having financial goals, such as paying off student loans within a certain number of years or saving a particular amount toward retirement, and being on track to meet them.

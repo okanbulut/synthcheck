@@ -85,21 +85,28 @@ loop_criterion()
 #>         add(paste0("max_", s), v, max[[s]], !is.na(v) && v <= 
 #>             max[[s]])
 #>     }
+#>     con <- context$construct
 #>     if (!is.null(min_items)) {
-#>         n <- min(table(items$scale))
+#>         sc <- unique(c(names(con$scales), items$scale))
+#>         n <- min(table(factor(items$scale, levels = sc)))
 #>         add("min_items", n, min_items, n >= min_items)
 #>     }
+#>     if (!is.null(min_total)) 
+#>         add("min_total", nrow(items), min_total, nrow(items) >= 
+#>             min_total)
 #>     if (factors) {
 #>         v <- stats$value[stats$stat == "n_factors_all"][1]
-#>         k <- length(unique(items$scale))
+#>         k <- if (isTRUE(con$single_scale)) 
+#>             1L
+#>         else length(unique(items$scale))
 #>         add("factors", v, k, !is.na(v) && v == k)
 #>     }
 #>     if (!length(rows)) 
 #>         return(NULL)
 #>     do.call(rbind, rows)
 #> }
-#> <bytecode: 0x649132d97b28>
-#> <environment: 0x649132d90998>
+#> <bytecode: 0x61ffacaa9428>
+#> <environment: 0x61ffaca9f6c8>
 #> attr(,"label")
 #> [1] "no failing items; alpha >= 0.8; own_scale >= 0.9; careless_share <= 0.05; at least 3 items per scale"
 ```
@@ -181,6 +188,23 @@ fwb
 It carries its own stopping rule: The defaults plus a marginal
 reliability of at least 0.80 in every scale and four dimensions in
 parallel analysis.
+
+The four elements can also be content domains of one financial
+well-being score. With `single_scale = TRUE`, items are still written
+and revised domain by domain, but the checks treat all items as one
+scale. The stopping rule then asks for one dimension, at least 10 items
+in all, and at least one item left in every domain, which is evidence of
+content coverage:
+
+``` r
+
+fwb1 <- loop_builtin_construct("financial_wellbeing", single_scale = TRUE)
+attr(fwb1$criterion, "label")
+#> [1] "no failing items; alpha >= 0.8; marginal_rxx >= 0.8; careless_share <= 0.05; at least 1 items per scale; at least 10 items in all; dimensions match scales"
+```
+
+Give the reviser the same limits, so that it cannot drop the last item
+of a domain: `loop_reviser_llm(author, min_items = 1, min_total = 10)`.
 
 In a real run, one model writes and revises the items and another
 answers them:

@@ -163,21 +163,28 @@ three items per scale:</p>
 <span><span class="co">#&gt;         add(paste0("max_", s), v, max[[s]], !is.na(v) &amp;&amp; v &lt;= </span></span>
 <span><span class="co">#&gt;             max[[s]])</span></span>
 <span><span class="co">#&gt;     }</span></span>
+<span><span class="co">#&gt;     con &lt;- context$construct</span></span>
 <span><span class="co">#&gt;     if (!is.null(min_items)) {</span></span>
-<span><span class="co">#&gt;         n &lt;- min(table(items$scale))</span></span>
+<span><span class="co">#&gt;         sc &lt;- unique(c(names(con$scales), items$scale))</span></span>
+<span><span class="co">#&gt;         n &lt;- min(table(factor(items$scale, levels = sc)))</span></span>
 <span><span class="co">#&gt;         add("min_items", n, min_items, n &gt;= min_items)</span></span>
 <span><span class="co">#&gt;     }</span></span>
+<span><span class="co">#&gt;     if (!is.null(min_total)) </span></span>
+<span><span class="co">#&gt;         add("min_total", nrow(items), min_total, nrow(items) &gt;= </span></span>
+<span><span class="co">#&gt;             min_total)</span></span>
 <span><span class="co">#&gt;     if (factors) {</span></span>
 <span><span class="co">#&gt;         v &lt;- stats$value[stats$stat == "n_factors_all"][1]</span></span>
-<span><span class="co">#&gt;         k &lt;- length(unique(items$scale))</span></span>
+<span><span class="co">#&gt;         k &lt;- if (isTRUE(con$single_scale)) </span></span>
+<span><span class="co">#&gt;             1L</span></span>
+<span><span class="co">#&gt;         else length(unique(items$scale))</span></span>
 <span><span class="co">#&gt;         add("factors", v, k, !is.na(v) &amp;&amp; v == k)</span></span>
 <span><span class="co">#&gt;     }</span></span>
 <span><span class="co">#&gt;     if (!length(rows)) </span></span>
 <span><span class="co">#&gt;         return(NULL)</span></span>
 <span><span class="co">#&gt;     do.call(rbind, rows)</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x649132d97b28&gt;</span></span>
-<span><span class="co">#&gt; &lt;environment: 0x649132d90998&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x61ffacaa9428&gt;</span></span>
+<span><span class="co">#&gt; &lt;environment: 0x61ffaca9f6c8&gt;</span></span>
 <span><span class="co">#&gt; attr(,"label")</span></span>
 <span><span class="co">#&gt; [1] "no failing items; alpha &gt;= 0.8; own_scale &gt;= 0.9; careless_share &lt;= 0.05; at least 3 items per scale"</span></span></code></pre></div>
 <p>Any stat a step reports can be a target, for example the marginal
@@ -242,9 +249,22 @@ enjoy life. <code><a href="../reference/loop_builtin_construct.html">loop_builti
 <p>It carries its own stopping rule: The defaults plus a marginal
 reliability of at least 0.80 in every scale and four dimensions in
 parallel analysis.</p>
+<p>The four elements can also be content domains of one financial
+well-being score. With <code>single_scale = TRUE</code>, items are still
+written and revised domain by domain, but the checks treat all items as
+one scale. The stopping rule then asks for one dimension, at least 10
+items in all, and at least one item left in every domain, which is
+evidence of content coverage:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fwb1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/loop_builtin_construct.html">loop_builtin_construct</a></span><span class="op">(</span><span class="st">"financial_wellbeing"</span>, single_scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">fwb1</span><span class="op">$</span><span class="va">criterion</span>, <span class="st">"label"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "no failing items; alpha &gt;= 0.8; marginal_rxx &gt;= 0.8; careless_share &lt;= 0.05; at least 1 items per scale; at least 10 items in all; dimensions match scales"</span></span></code></pre></div>
+<p>Give the reviser the same limits, so that it cannot drop the last
+item of a domain:
+<code>loop_reviser_llm(author, min_items = 1, min_total = 10)</code>.</p>
 <p>In a real run, one model writes and revises the items and another
 answers them:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">author</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sc_model.html">sc_model</a></span><span class="op">(</span><span class="st">"openai"</span>, <span class="st">"gpt-4.1-mini"</span><span class="op">)</span></span>
 <span><span class="va">run</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/revision_loop.html">revision_loop</a></span><span class="op">(</span><span class="va">fwb</span>, models <span class="op">=</span> <span class="fu"><a href="../reference/sc_model.html">sc_model</a></span><span class="op">(</span><span class="st">"anthropic"</span><span class="op">)</span>, respondents <span class="op">=</span> <span class="fl">200</span>,</span>
 <span>                     writer <span class="op">=</span> <span class="fu"><a href="../reference/loop_writer_llm.html">loop_writer_llm</a></span><span class="op">(</span><span class="va">author</span><span class="op">)</span>, reviser <span class="op">=</span> <span class="fu"><a href="../reference/loop_reviser_llm.html">loop_reviser_llm</a></span><span class="op">(</span><span class="va">author</span><span class="op">)</span>,</span>
@@ -259,7 +279,7 @@ answers them:</p>
 </h2>
 <p>Every run writes seven tables, which <code><a href="../reference/loop_log_schema.html">loop_log_schema()</a></code>
 documents column by column:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="../reference/loop_log_schema.html">loop_log_schema</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">table</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "runs"     "rounds"   "items"    "flags"    "stats"    "criteria" "edits"</span></span>
 <span><span class="fu"><a href="../reference/loop_log_schema.html">loop_log_schema</a></span><span class="op">(</span><span class="st">"edits"</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"column"</span>, <span class="st">"description"</span><span class="op">)</span><span class="op">]</span></span>
@@ -333,7 +353,7 @@ gets),</li>
 </ul>
 <p>Give each run its own folder and <code>run_id</code>, then read them
 all back:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>author <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"openai"</span>, <span class="st">"anthropic"</span><span class="op">)</span>, respondent <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"openai"</span>, <span class="st">"anthropic"</span><span class="op">)</span>,</span>
 <span>                      seed <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">design</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -349,7 +369,7 @@ all back:</p>
 which the items were polished, the edits by action, the share of edits
 that cited flagged checks and that resolved them, relapses, wording
 drift and cost. Join it with the design to compare cells:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/loop_outcomes.html">loop_outcomes</a></span><span class="op">(</span><span class="va">run</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 18</span></span></span>
 <span><span class="co">#&gt;   run_id      status rounds rounds_to_polish items_start items_end failing_start</span></span>

@@ -84,7 +84,8 @@ follow the evidence.</p>
 <span>  actions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"reword"</span>, <span class="st">"rekey"</span>, <span class="st">"drop"</span>, <span class="st">"add"</span>, <span class="st">"keep"</span><span class="op">)</span>,</span>
 <span>  min_items <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  max_edits <span class="op">=</span> <span class="cn">Inf</span>,</span>
-<span>  guidelines <span class="op">=</span> <span class="va">lp_guidelines</span></span>
+<span>  guidelines <span class="op">=</span> <span class="va">lp_guidelines</span>,</span>
+<span>  min_total <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -101,8 +102,9 @@ follow the evidence.</p>
 
 
 <dt id="arg-min-items">min_items<a class="anchor" aria-label="anchor" href="#arg-min-items"></a></dt>
-<dd><p>smallest number of items a scale should keep (told to the
-model).</p></dd>
+<dd><p>smallest number of items a scale should keep. The model
+is told, and a drop that would leave a scale with fewer is not applied
+(the round's <code>reasoning</code> says so).</p></dd>
 
 
 <dt id="arg-max-edits">max_edits<a class="anchor" aria-label="anchor" href="#arg-max-edits"></a></dt>
@@ -111,6 +113,11 @@ model).</p></dd>
 
 <dt id="arg-guidelines">guidelines<a class="anchor" aria-label="anchor" href="#arg-guidelines"></a></dt>
 <dd><p>item-writing guidelines added to the system prompt.</p></dd>
+
+
+<dt id="arg-min-total">min_total<a class="anchor" aria-label="anchor" href="#arg-min-total"></a></dt>
+<dd><p>smallest number of items in all, or <code>NULL</code>, enforced in
+the same way.</p></dd>
 
 </dl></div>
     <div class="section level2">
