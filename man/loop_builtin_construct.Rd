@@ -10,7 +10,7 @@ loop_builtin_construct(name = "financial_wellbeing", ...)
 \item{name}{the construct: \code{"financial_wellbeing"}.}
 
 \item{...}{arguments of \code{\link[=loop_construct]{loop_construct()}} that replace the defaults, for
-example \code{n_per_scale}, \code{population} or \code{scale}.}
+example \code{n_per_scale}, \code{population}, \code{scale} or \code{single_scale}.}
 }
 \value{
 An object of class \code{sc_construct_spec}.
@@ -39,10 +39,17 @@ time with family.
 Its stopping rule adds two parts to the defaults of \code{\link[=loop_criterion]{loop_criterion()}}:
 A marginal reliability of at least 0.80 in every scale (from \code{\link[=loop_irt]{loop_irt()}})
 and parallel analysis finding four dimensions, one per scale.
+
+With \code{single_scale = TRUE}, the four parts are content domains of one
+financial well-being scale. The stopping rule is then: No failing items,
+alpha and marginal reliability of at least .80, one dimension, at most 5\%
+careless respondents, at least 10 items, and every domain kept.
 }
 \examples{
 loop_builtin_construct("financial_wellbeing")
 loop_builtin_construct("financial_wellbeing", n_per_scale = 8, population = "adults in Canada")
+# one scale that covers the four domains
+loop_builtin_construct("financial_wellbeing", single_scale = TRUE)
 }
 \references{
 Consumer Financial Protection Bureau. (2015). \emph{Financial

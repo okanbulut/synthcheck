@@ -9,7 +9,8 @@ loop_reviser_llm(
   actions = c("reword", "rekey", "drop", "add", "keep"),
   min_items = 3,
   max_edits = Inf,
-  guidelines = lp_guidelines
+  guidelines = lp_guidelines,
+  min_total = NULL
 )
 }
 \arguments{
@@ -17,12 +18,16 @@ loop_reviser_llm(
 
 \item{actions}{the actions the reviser may take.}
 
-\item{min_items}{smallest number of items a scale should keep (told to the
-model).}
+\item{min_items}{smallest number of items a scale should keep. The model
+is told, and a drop that would leave a scale with fewer is not applied
+(the round's \code{reasoning} says so).}
 
 \item{max_edits}{most edits per round, or \code{Inf}.}
 
 \item{guidelines}{item-writing guidelines added to the system prompt.}
+
+\item{min_total}{smallest number of items in all, or \code{NULL}, enforced in
+the same way.}
 }
 \value{
 A function for the \code{reviser} argument of \code{\link[=revision_loop]{revision_loop()}}.
