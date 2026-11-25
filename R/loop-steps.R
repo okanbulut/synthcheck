@@ -77,20 +77,24 @@ loop_writer_llm <- function(model, guidelines = lp_guidelines) {
 #'
 #' @param model an [sc_model()] for the reviser.
 #' @param actions the actions the reviser may take.
-#' @param min_items smallest number of items a scale should keep (told to the
-#'   model).
+#' @param min_items smallest number of items a scale should keep. The model
+#'   is told, and a drop that would leave a scale with fewer is not applied
+#'   (the round's `reasoning` says so).
 #' @param max_edits most edits per round, or `Inf`.
 #' @param guidelines item-writing guidelines added to the system prompt.
+#' @param min_total smallest number of items in all, or `NULL`, enforced in
+#'   the same way.
 #' @return A function for the `reviser` argument of [revision_loop()].
 #' @seealso [revision_loop()], [loop_writer_llm()], [loop_reviser_drop()]
 #' @examples
 #' # see revision_loop()
 #' @export
 loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add", "keep"),
-                             min_items = 3, max_edits = Inf, guidelines = lp_guidelines) {
+                             min_items = 3, max_edits = Inf, guidelines = lp_guidelines,
+                             min_total = NULL) {
   if (!inherits(model, "sc_model")) stop("`model` must be an sc_model().", call. = FALSE)
   actions <- match.arg(actions, several.ok = TRUE)
-  force(min_items); force(max_edits); force(guidelines)
+  force(min_items); force(max_edits); force(guidelines); force(min_total)
   f <- function(items, flags, context) {
     fail <- flags[flags$severity == "fail" & !is.na(flags$item), , drop = FALSE]
     if (model$provider == "mock") {
@@ -107,8 +111,9 @@ loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add"
         usage = lp_usage(NULL)))
     }
     sc_need("ellmer", "to call language models")
-    chat <- sc_chat(model, paste(lp_reviser_system(actions, min_items, max_edits), guidelines,
-                                 sep = "\n\n"))
+    chat <- sc_chat(model, paste(lp_reviser_system(actions, min_items, max_edits, min_total,
+                                                   isTRUE(context$construct$single_scale)),
+                                 guidelines, sep = "\n\n"))
     ty <- ellmer::type_object(
       edits = ellmer::type_array(ellmer::type_object(
         item = ellmer::type_string("Name of the item; for an added item, an empty string."),
@@ -126,8 +131,12 @@ loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add"
     if (nrow(ed)) {
       ed$item[!nzchar(ed$item)] <- NA_character_
       if (is.finite(max_edits)) ed <- utils::head(ed, max_edits)
+      ed <- lp_guard_drops(items, ed, min_items, min_total)
     }
-    list(edits = ed, reasoning = lp_chr1(res$reasoning), usage = lp_chat_usage(chat, model))
+    reasoning <- lp_chr1(res$reasoning)
+    if (!is.null(attr(ed, "refused")))
+      reasoning <- paste(c(stats::na.omit(reasoning), attr(ed, "refused")), collapse = " ")
+    list(edits = ed, reasoning = reasoning, usage = lp_chat_usage(chat, model))
   }
   structure(f, label = sprintf("%s (language model reviser)", model$name))
 }
@@ -145,7 +154,9 @@ loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add"
 #'   outside `thresholds$msq` (0.6 to 1.4 by default, the range Wright and
 #'   Linacre (1994) give for rating scales). Below the range, answers are
 #'   more predictable than the model expects (often a sign of redundant
-#'   items or tidy synthetic respondents); above it, they are noisy.
+#'   items or tidy synthetic respondents); above it, they are noisy. With
+#'   `overfit = "warn"`, an item that is only too predictable is a warning,
+#'   and only noisy items fail.
 #' - `misfit` (fail): The S-X2 item fit test (Orlando & Thissen, 2000) has
 #'   a p value below `thresholds$misfit_p`.
 #' - `disordered` (warn): The item's thresholds (the points where one
@@ -170,7 +181,11 @@ loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add"
 #' `outfit` (partial credit model), `slope` (`"gpcm"` and `"graded"`) and
 #' `sx2_p`, and per scale `info_mean` and `marginal_rxx` (marginal
 #' reliability), which [loop_criterion()] can use as targets, for example
-#' `min = list(marginal_rxx = 0.8)`.
+#' `min = list(marginal_rxx = 0.8)`. Both are taken over the estimated
+#' latent distribution, with the trait standardized: `info_mean` is the mean
+#' information between 2 SD below and 2 SD above the latent mean, and
+#' `marginal_rxx` is the mean of \eqn{\sigma^2 I / (\sigma^2 I + 1)}. With
+#' a latent variance of 1 these equal the usual values.
 #'
 #' @param model the IRT model: `"pcm"` (partial credit, the default),
 #'   `"gpcm"` (generalized partial credit) or `"graded"` (graded response).
@@ -179,6 +194,11 @@ loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add"
 #'   q3 = 0.2, info = NULL)`.
 #' @param itemfit,q3 compute the item fit statistics and the Q3 residuals?
 #'   They are the slowest parts.
+#' @param overfit severity of a mean square below the range (answers more
+#'   predictable than the model expects): `"fail"` or `"warn"`. Language
+#'   models often answer almost deterministically for a given persona,
+#'   which rewording cannot change, so `"warn"` lets the stopping rule rest
+#'   on the other checks.
 #' @return A function for the `evaluator` argument of [revision_loop()].
 #' @references Masters, G. N. (1982). A Rasch model for partial credit
 #'   scoring. *Psychometrika, 47*(2), 149-174.
@@ -204,8 +224,9 @@ loop_reviser_llm <- function(model, actions = c("reword", "rekey", "drop", "add"
 #' }
 #' @export
 loop_irt <- function(model = c("pcm", "gpcm", "graded"), thresholds = list(), itemfit = TRUE,
-                     q3 = TRUE) {
+                     q3 = TRUE, overfit = c("fail", "warn")) {
   model <- match.arg(model)
+  overfit <- match.arg(overfit)
   thr <- utils::modifyList(list(msq = c(0.6, 1.4), misfit_p = 0.01, slope = 0.65, steep = 4,
                                 q3 = 0.2, info = NULL), thresholds)
   if (length(thr$msq) != 2L || thr$msq[1] >= thr$msq[2])
@@ -289,9 +310,13 @@ loop_irt <- function(model = c("pcm", "gpcm", "graded"), thresholds = list(), it
               v <- c(infit = ifit$infit[j], outfit = ifit$outfit[j])
               out <- !is.na(v) & (v < thr$msq[1] | v > thr$msq[2])
               if (!any(out)) next
-              worst <- names(v)[out][which.max(abs(log(v[out])))]
+              # noisy answers (above the range) count first, as they always fail
+              hi_out <- out & v > thr$msq[2]
+              pick <- if (any(hi_out)) hi_out else out
+              worst <- names(v)[pick][which.max(abs(log(v[pick])))]
               flag(use[j], s, "msq_misfit", v[[worst]],
-                   if (v[[worst]] < thr$msq[1]) thr$msq[1] else thr$msq[2], "fail", sprintf(
+                   if (v[[worst]] < thr$msq[1]) thr$msq[1] else thr$msq[2],
+                   if (v[[worst]] < thr$msq[1]) overfit else "fail", sprintf(
                      "%s mean square %.2f is outside %.1f to %.1f: Answers are %s.",
                      if (worst == "infit") "Infit" else "Outfit", v[[worst]], thr$msq[1],
                      thr$msq[2], if (v[[worst]] < thr$msq[1])
@@ -316,9 +341,12 @@ loop_irt <- function(model = c("pcm", "gpcm", "graded"), thresholds = list(), it
           }
         }
       }
-      th <- matrix(seq(-2, 2, length.out = 41))
-      info <- tryCatch(mean(mirt::testinfo(fit, th)), error = function(e) NA_real_)
-      rxx <- tryCatch(mirt::marginal_rxx(fit), error = function(e) NA_real_)
+      # the partial credit model estimates the latent mean and variance, so
+      # take the information and reliability over that distribution
+      g <- lp_latent(fit)
+      th <- matrix(g[1] + g[2] * seq(-2, 2, length.out = 41))
+      info <- tryCatch(mean(mirt::testinfo(fit, th)) * g[2]^2, error = function(e) NA_real_)
+      rxx <- tryCatch(lp_marginal_rxx(fit, g), error = function(e) NA_real_)
       stat(NA_character_, s, "info_mean", info)
       stat(NA_character_, s, "marginal_rxx", rxx)
       if (!is.null(thr$info) && !is.na(info) && info < thr$info)
@@ -329,8 +357,9 @@ loop_irt <- function(model = c("pcm", "gpcm", "graded"), thresholds = list(), it
          stats = if (length(st)) do.call(rbind, st) else NULL)
   }
   structure(f, label = sprintf("mirt %s model (%s, S-X2, Q3, information)", lp_irt_label[[model]],
-                               if (model == "pcm") "infit and outfit, threshold order" else
-                                 "slopes, threshold order"))
+                               if (model == "pcm") paste0(
+                                 "infit and outfit", if (overfit == "warn") " (overfit warns)",
+                                 ", threshold order") else "slopes, threshold order"))
 }
 
 lp_irt_label <- c(pcm = "partial credit", gpcm = "generalized partial credit",
@@ -363,14 +392,65 @@ lp_writer_prompt <- function(con) {
     collapse = "\n")
 }
 
-lp_reviser_system <- function(actions, min_items, max_edits) paste(
+# Keep the drops that leave every scale at least `min_items` items and the
+# whole set at least `min_total`, counting the items the same edits add.
+# Latent mean and SD of a unidimensional mirt fit.
+lp_latent <- function(fit) {
+  cf <- mirt::coef(fit, simplify = TRUE)
+  m <- as.numeric(cf$means)[1]; v <- as.numeric(cf$cov)[1]
+  c(if (is.finite(m)) m else 0, if (is.finite(v) && v > 0) sqrt(v) else 1)
+}
+
+# Marginal reliability over the estimated latent distribution:
+# The mean of var * I / (var * I + 1), which is I / (I + 1) when var = 1.
+# (mirt::marginal_rxx() integrates over N(0, 1) and divides by var + I, so it
+# is too low when a Rasch-type model estimates a latent variance above 1.)
+lp_marginal_rxx <- function(fit, g = lp_latent(fit)) {
+  f <- function(theta) {
+    I <- mirt::testinfo(fit, matrix(theta))
+    g[2]^2 * I / (g[2]^2 * I + 1) * stats::dnorm(theta, g[1], g[2])
+  }
+  stats::integrate(f, g[1] - 6 * g[2], g[1] + 6 * g[2])$value
+}
+
+lp_guard_drops <- function(items, ed, min_items, min_total) {
+  if (!nrow(ed) || !"action" %in% names(ed)) return(ed)
+  is_add <- ed$action == "add"
+  n_scale <- table(factor(c(items$scale, ed$scale[is_add]),
+                          levels = unique(c(items$scale, ed$scale[is_add]))))
+  n_total <- nrow(items) + sum(is_add)
+  keep <- rep(TRUE, nrow(ed))
+  for (i in which(ed$action == "drop" & ed$item %in% items$item)) {
+    s <- items$scale[match(ed$item[i], items$item)]
+    if ((!is.null(min_items) && n_scale[[s]] <= min_items) ||
+        (!is.null(min_total) && n_total <= min_total)) {
+      keep[i] <- FALSE
+      next
+    }
+    n_scale[[s]] <- n_scale[[s]] - 1L
+    n_total <- n_total - 1L
+  }
+  out <- ed[keep, , drop = FALSE]
+  if (any(!keep))
+    attr(out, "refused") <- sprintf(
+      "Not dropped, to keep the minimum number of items: %s.", paste(ed$item[!keep], collapse = ", "))
+  out
+}
+
+lp_reviser_system <- function(actions, min_items, max_edits, min_total = NULL,
+                              single_scale = FALSE) paste(
   "You are an experienced psychometrician revising Likert-type items after a pilot.",
   "Each round, synthetic respondents answer the items, and checks flag problems.",
   "Propose edits that respond to the evidence: Reword an item whose wording is the likely cause,",
   "rekey an item whose key is wrong, drop an item that cannot be saved, add an item to a scale",
   "that is short or narrow, or keep an item on purpose.",
   sprintf("Allowed actions: %s.", paste(actions, collapse = ", ")),
-  sprintf("Keep at least %d items in every scale.", min_items),
+  if (single_scale) paste(
+    "The scales are content domains of one scale: The checks treat all items as one scale,",
+    "so a good item measures the one construct well while it covers its domain."),
+  sprintf("Keep at least %d item%s in every %s.", min_items, if (min_items == 1) "" else "s",
+          if (single_scale) "domain" else "scale"),
+  if (!is.null(min_total)) sprintf("Keep at least %d items in all.", min_total),
   if (is.finite(max_edits)) sprintf("Make at most %d edits.", max_edits),
   "For each edit, name the checks it responds to exactly as they are shown, and explain the fix.",
   "Look at the earlier edits: Do not undo an edit that resolved its flags, and try something",

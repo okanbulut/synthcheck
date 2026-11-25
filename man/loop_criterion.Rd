@@ -9,7 +9,8 @@ loop_criterion(
   min = list(alpha = 0.8, own_scale = 0.9),
   max = list(careless_share = 0.05),
   min_items = 3,
-  factors = FALSE
+  factors = FALSE,
+  min_total = NULL
 )
 }
 \arguments{
@@ -21,6 +22,8 @@ loop_criterion(
 
 \item{factors}{require the number of dimensions to match the number of
 scales?}
+
+\item{min_total}{smallest number of items in all, or \code{NULL}.}
 }
 \value{
 A function for the \code{criterion} argument of \code{\link[=revision_loop]{revision_loop()}}.
@@ -40,9 +43,13 @@ must be at least the target. The default asks for alpha of at least
 0.80 in every scale and at least 90\% of items closest to their own scale.
 \item \code{max}: For each named stat, its highest value must be at most the
 target. The default allows at most 5\% unusable respondents.
-\item \code{min_items}: Every scale keeps at least this many items.
+\item \code{min_items}: Every scale keeps at least this many items. A scale of
+the construct that lost all its items counts as 0, so \code{min_items = 1}
+requires that every scale (or content domain) is still there.
+\item \code{min_total}: The items number at least this many in all.
 \item \code{factors}: Parallel analysis over all items finds as many dimensions as
-there are scales.
+there are scales, or one dimension for a construct made with
+\code{single_scale = TRUE}.
 }
 
 Stats from any step can be named, for example the test information of
@@ -52,6 +59,8 @@ step reports fails, so that a missing check never passes quietly.
 \examples{
 loop_criterion()
 loop_criterion(min = list(alpha = 0.7), factors = TRUE)
+# one scale: Every domain kept, at least 10 items, one dimension
+loop_criterion(min_items = 1, min_total = 10, factors = TRUE)
 }
 \seealso{
 \code{\link[=revision_loop]{revision_loop()}}

@@ -8,7 +8,8 @@ loop_irt(
   model = c("pcm", "gpcm", "graded"),
   thresholds = list(),
   itemfit = TRUE,
-  q3 = TRUE
+  q3 = TRUE,
+  overfit = c("fail", "warn")
 )
 }
 \arguments{
@@ -20,6 +21,12 @@ loop_irt(
 
 \item{itemfit, q3}{compute the item fit statistics and the Q3 residuals?
 They are the slowest parts.}
+
+\item{overfit}{severity of a mean square below the range (answers more
+predictable than the model expects): \code{"fail"} or \code{"warn"}. Language
+models often answer almost deterministically for a given persona,
+which rewording cannot change, so \code{"warn"} lets the stopping rule rest
+on the other checks.}
 }
 \value{
 A function for the \code{evaluator} argument of \code{\link[=revision_loop]{revision_loop()}}.
@@ -38,7 +45,9 @@ a Rasch model for ordered categories with every slope fixed at 1;
 outside \code{thresholds$msq} (0.6 to 1.4 by default, the range Wright and
 Linacre (1994) give for rating scales). Below the range, answers are
 more predictable than the model expects (often a sign of redundant
-items or tidy synthetic respondents); above it, they are noisy.
+items or tidy synthetic respondents); above it, they are noisy. With
+\code{overfit = "warn"}, an item that is only too predictable is a warning,
+and only noisy items fail.
 \item \code{misfit} (fail): The S-X2 item fit test (Orlando & Thissen, 2000) has
 a p value below \code{thresholds$misfit_p}.
 \item \code{disordered} (warn): The item's thresholds (the points where one
@@ -64,7 +73,11 @@ Stats: Per item \code{location} (the mean of its thresholds), \code{infit} and
 \code{outfit} (partial credit model), \code{slope} (\code{"gpcm"} and \code{"graded"}) and
 \code{sx2_p}, and per scale \code{info_mean} and \code{marginal_rxx} (marginal
 reliability), which \code{\link[=loop_criterion]{loop_criterion()}} can use as targets, for example
-\code{min = list(marginal_rxx = 0.8)}.
+\code{min = list(marginal_rxx = 0.8)}. Both are taken over the estimated
+latent distribution, with the trait standardized: \code{info_mean} is the mean
+information between 2 SD below and 2 SD above the latent mean, and
+\code{marginal_rxx} is the mean of \eqn{\sigma^2 I / (\sigma^2 I + 1)}. With
+a latent variance of 1 these equal the usual values.
 }
 \examples{
 \donttest{

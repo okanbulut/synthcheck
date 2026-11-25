@@ -25,6 +25,12 @@
 #'   such as a style guide or a reading level.
 #' @param criterion optional stopping rule, a [loop_criterion()], that
 #'   [revision_loop()] uses for this construct unless it is given another.
+#' @param single_scale are the `scales` content domains of one scale? With
+#'   `TRUE`, the items are written and revised domain by domain (and each
+#'   item keeps its domain in `scale`), but the checks of [revision_loop()]
+#'   treat all items as one scale: One IRT model, one alpha and one
+#'   dimension. Use [loop_criterion()] with `min_items` and `min_total` to
+#'   require that every domain stays in the scale.
 #' @return An object of class `sc_construct_spec`.
 #' @seealso [revision_loop()], [loop_builtin_construct()]
 #' @examples
@@ -37,7 +43,7 @@
 loop_construct <- function(name, definition = NULL, scales = NULL, n_per_scale = 6,
                            reverse_share = 1 / 3, population = NULL, scale = c(1, 5),
                            labels = NULL, instructions = sc_default_instructions, notes = NULL,
-                           criterion = NULL) {
+                           criterion = NULL, single_scale = FALSE) {
   if (!is.character(name) || length(name) != 1L || !nzchar(name))
     stop("`name` must be one non-empty string.", call. = FALSE)
   if (is.null(scales)) scales <- stats::setNames(definition %||% name, lp_id(name))
@@ -49,11 +55,14 @@ loop_construct <- function(name, definition = NULL, scales = NULL, n_per_scale =
     stop("`criterion` must be made with loop_criterion().", call. = FALSE)
   if (!is.numeric(reverse_share) || reverse_share < 0 || reverse_share > 1)
     stop("`reverse_share` must be between 0 and 1.", call. = FALSE)
+  if (!is.logical(single_scale) || length(single_scale) != 1L || is.na(single_scale))
+    stop("`single_scale` must be TRUE or FALSE.", call. = FALSE)
   ins <- sc_instrument("x", scale = scale, labels = labels, instructions = instructions)
   structure(list(name = name, definition = definition, scales = scales,
                  n_per_scale = as.integer(n_per_scale), reverse_share = reverse_share,
                  population = population, scale = c(ins$min, ins$max), labels = ins$labels,
-                 instructions = instructions, notes = notes, criterion = criterion),
+                 instructions = instructions, notes = notes, criterion = criterion,
+                 single_scale = single_scale),
             class = "sc_construct_spec")
 }
 
@@ -81,9 +90,14 @@ loop_construct <- function(name, definition = NULL, scales = NULL, n_per_scale =
 #' A marginal reliability of at least 0.80 in every scale (from [loop_irt()])
 #' and parallel analysis finding four dimensions, one per scale.
 #'
+#' With `single_scale = TRUE`, the four parts are content domains of one
+#' financial well-being scale. The stopping rule is then: No failing items,
+#' alpha and marginal reliability of at least .80, one dimension, at most 5%
+#' careless respondents, at least 10 items, and every domain kept.
+#'
 #' @param name the construct: `"financial_wellbeing"`.
 #' @param ... arguments of [loop_construct()] that replace the defaults, for
-#'   example `n_per_scale`, `population` or `scale`.
+#'   example `n_per_scale`, `population`, `scale` or `single_scale`.
 #' @return An object of class `sc_construct_spec`.
 #' @references Consumer Financial Protection Bureau. (2015). *Financial
 #'   well-being: The goal of financial education*. Washington, DC: CFPB.
@@ -91,6 +105,8 @@ loop_construct <- function(name, definition = NULL, scales = NULL, n_per_scale =
 #' @examples
 #' loop_builtin_construct("financial_wellbeing")
 #' loop_builtin_construct("financial_wellbeing", n_per_scale = 8, population = "adults in Canada")
+#' # one scale that covers the four domains
+#' loop_builtin_construct("financial_wellbeing", single_scale = TRUE)
 #' @export
 loop_builtin_construct <- function(name = "financial_wellbeing", ...) {
   name <- match.arg(name)
@@ -122,7 +138,11 @@ loop_builtin_construct <- function(name = "financial_wellbeing", ...) {
     notes = paste(
       "Items should describe the respondent's own situation, feelings or behaviour,",
       "not knowledge about finance. Avoid amounts of money and products tied to one country.")))
-  args <- utils::modifyList(args, list(...))
+  dots <- list(...)
+  if (isTRUE(dots$single_scale) && is.null(dots$criterion))
+    args$criterion <- loop_criterion(min = list(alpha = 0.8, marginal_rxx = 0.8), factors = TRUE,
+                                     min_items = 1, min_total = 10)
+  args <- utils::modifyList(args, dots)
   do.call(loop_construct, args)
 }
 
@@ -132,6 +152,7 @@ print.sc_construct_spec <- function(x, ...) {
               length(x$scales), if (length(x$scales) == 1L) "" else "s", x$n_per_scale,
               x$scale[1], x$scale[2]))
   if (!is.null(x$definition)) cat(x$definition, "\n")
+  if (isTRUE(x$single_scale)) cat("One scale; the parts below are its content domains.\n")
   for (s in names(x$scales)) cat(sprintf("  %s: %s\n", s, x$scales[[s]]))
   invisible(x)
 }
@@ -324,10 +345,13 @@ revision_loop <- function(construct, items = NULL, models = sc_model("mock"), pe
         ins, models, personas, attempts = attempts, respondents = respondents, seed = gseed,
         cache = cache, progress = FALSE, ...))
       out <- list()
+      # one scale with content domains: The checks see all items as one scale
+      check_items <- items
+      if (isTRUE(construct$single_scale)) check_items$scale <- lp_id(construct$name)
       if (!is.null(checker)) out$quality <- step("The checker", lp_step_out(
-        checker(responses, items, ctx), "quality"))
+        checker(responses, check_items, ctx), "quality"))
       if (!is.null(evaluator)) out$irt <- step("The evaluator", lp_step_out(
-        evaluator(responses, items, ctx), "irt"))
+        evaluator(responses, check_items, ctx), "irt"))
       flags <- lp_bind(lapply(out, `[[`, "flags"), "flags")
       stats <- lp_bind(lapply(out, `[[`, "stats"), "stats")
       crit <- if (is.null(criterion)) lp_table(data.frame(), "criteria") else
@@ -549,9 +573,13 @@ loop_checker <- function(thresholds = list(), irt = FALSE, n_pa = 20, straightli
 #'   0.80 in every scale and at least 90% of items closest to their own scale.
 #' - `max`: For each named stat, its highest value must be at most the
 #'   target. The default allows at most 5% unusable respondents.
-#' - `min_items`: Every scale keeps at least this many items.
+#' - `min_items`: Every scale keeps at least this many items. A scale of
+#'   the construct that lost all its items counts as 0, so `min_items = 1`
+#'   requires that every scale (or content domain) is still there.
+#' - `min_total`: The items number at least this many in all.
 #' - `factors`: Parallel analysis over all items finds as many dimensions as
-#'   there are scales.
+#'   there are scales, or one dimension for a construct made with
+#'   `single_scale = TRUE`.
 #'
 #' Stats from any step can be named, for example the test information of
 #' [loop_irt()] (`min = list(marginal_rxx = 0.8)`). A stat that no
@@ -562,14 +590,18 @@ loop_checker <- function(thresholds = list(), irt = FALSE, n_pa = 20, straightli
 #' @param min_items smallest number of items per scale.
 #' @param factors require the number of dimensions to match the number of
 #'   scales?
+#' @param min_total smallest number of items in all, or `NULL`.
 #' @return A function for the `criterion` argument of [revision_loop()].
 #' @seealso [revision_loop()]
 #' @examples
 #' loop_criterion()
 #' loop_criterion(min = list(alpha = 0.7), factors = TRUE)
+#' # one scale: Every domain kept, at least 10 items, one dimension
+#' loop_criterion(min_items = 1, min_total = 10, factors = TRUE)
 #' @export
 loop_criterion <- function(no_failing_items = TRUE, min = list(alpha = 0.8, own_scale = 0.9),
-                           max = list(careless_share = 0.05), min_items = 3, factors = FALSE) {
+                           max = list(careless_share = 0.05), min_items = 3, factors = FALSE,
+                           min_total = NULL) {
   force(min); force(max)
   f <- function(flags, stats, items, context) {
     rows <- list()
@@ -589,13 +621,17 @@ loop_criterion <- function(no_failing_items = TRUE, min = list(alpha = 0.8, own_
       v <- if (length(v) && any(!is.na(v))) max(v, na.rm = TRUE) else NA_real_
       add(paste0("max_", s), v, max[[s]], !is.na(v) && v <= max[[s]])
     }
+    con <- context$construct
     if (!is.null(min_items)) {
-      n <- min(table(items$scale))
+      # scales of the construct that lost every item count as 0
+      sc <- unique(c(names(con$scales), items$scale))
+      n <- min(table(factor(items$scale, levels = sc)))
       add("min_items", n, min_items, n >= min_items)
     }
+    if (!is.null(min_total)) add("min_total", nrow(items), min_total, nrow(items) >= min_total)
     if (factors) {
       v <- stats$value[stats$stat == "n_factors_all"][1]
-      k <- length(unique(items$scale))
+      k <- if (isTRUE(con$single_scale)) 1L else length(unique(items$scale))
       add("factors", v, k, !is.na(v) && v == k)
     }
     if (!length(rows)) return(NULL)
@@ -605,6 +641,7 @@ loop_criterion <- function(no_failing_items = TRUE, min = list(alpha = 0.8, own_
            if (length(min)) sprintf("%s >= %s", names(min), unlist(min)),
            if (length(max)) sprintf("%s <= %s", names(max), unlist(max)),
            if (!is.null(min_items)) sprintf("at least %s items per scale", min_items),
+           if (!is.null(min_total)) sprintf("at least %s items in all", min_total),
            if (factors) "dimensions match scales")
   structure(f, label = paste(lab, collapse = "; "))
 }

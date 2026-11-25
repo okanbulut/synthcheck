@@ -262,3 +262,86 @@ test_that("a construct can carry its own stopping rule", {
   expect_true(all(c("min_marginal_rxx", "factors") %in% run$criteria$criterion))
   expect_error(loop_construct("x", criterion = 1), "loop_criterion")
 })
+
+test_that("marginal reliability uses the estimated latent variance", {
+  skip_on_cran()
+  set.seed(3)
+  # a wide latent distribution: The partial credit model estimates a variance well above 1
+  th <- rnorm(400, 0, 3)
+  X <- sapply(1:6, function(j) pmin(5, pmax(1, round(3 + th + rnorm(400, 0, 0.8)))))
+  colnames(X) <- paste0("i", 1:6)
+  items <- data.frame(item = paste0("i", 1:6), scale = "s", reverse = FALSE,
+                      statement = "x", stringsAsFactors = FALSE)
+  out <- loop_irt(itemfit = FALSE, q3 = FALSE)(as.data.frame(X), items,
+                                               list(construct = loop_construct("s")))
+  rxx <- out$stats$value[out$stats$stat == "marginal_rxx"]
+  fit <- mirt::mirt(as.data.frame(X - 1), 1, "Rasch", verbose = FALSE)
+  emp <- mirt::empirical_rxx(mirt::fscores(fit, full.scores.SE = TRUE))
+  expect_gt(as.numeric(mirt::coef(fit, simplify = TRUE)$cov), 2)
+  # close to the empirical reliability, far above mirt::marginal_rxx() (about .33 here)
+  expect_gt(rxx, 0.8)
+  expect_lt(abs(rxx - emp), 0.1)
+  expect_gt(rxx - mirt::marginal_rxx(fit), 0.3)
+})
+
+test_that("a single scale with content domains is checked as one scale", {
+  fwb <- loop_builtin_construct("financial_wellbeing", single_scale = TRUE)
+  expect_true(fwb$single_scale)
+  expect_match(attr(fwb$criterion, "label"), "at least 10 items in all")
+  expect_match(attr(fwb$criterion, "label"), "at least 1 items per scale")
+  expect_false(loop_builtin_construct("financial_wellbeing")$single_scale)
+  expect_error(loop_construct("x", single_scale = NA), "TRUE or FALSE")
+  run <- revision_loop(fwb, writer = loop_writer_llm(sc_model("mock")), respondents = 30,
+                       max_rounds = 1, evaluator = NULL, checker = loop_checker(n_pa = 3),
+                       cache = FALSE)
+  # the checks pool the items; the item table keeps the domains
+  st <- run$stats[!is.na(run$stats$scale), ]
+  expect_equal(unique(st$scale), "Financial_well_being")
+  expect_setequal(unique(run$items$scale), names(fwb$scales))
+  cr <- run$criteria
+  expect_true(all(c("min_total", "min_items", "factors") %in% cr$criterion))
+  expect_equal(cr$target[cr$criterion == "factors"], 1)
+  expect_equal(cr$value[cr$criterion == "min_total"], 24)
+})
+
+test_that("the criterion counts a domain that lost every item as 0", {
+  con <- loop_construct("x", scales = c(a = "A", b = "B"))
+  items <- data.frame(item = c("a1", "a2"), scale = "a", reverse = FALSE, statement = "s",
+                      stringsAsFactors = FALSE)
+  cr <- loop_criterion(no_failing_items = FALSE, min = list(), max = list(), min_items = 1,
+                       min_total = 3)(NULL, data.frame(stat = character(0)), items,
+                                      list(construct = con))
+  expect_equal(cr$value[cr$criterion == "min_items"], 0)
+  expect_false(any(cr$pass))
+})
+
+test_that("the language-model reviser cannot drop below the minimum", {
+  items <- data.frame(item = c("a1", "a2", "b1", "b2"), scale = c("a", "a", "b", "b"),
+                      reverse = FALSE, statement = "s", stringsAsFactors = FALSE)
+  ed <- data.frame(item = c("a1", "a2", "b1", NA), action = c("drop", "drop", "drop", "add"),
+                   scale = c("a", "a", "b", "b"), stringsAsFactors = FALSE)
+  g <- synthcheck:::lp_guard_drops(items, ed, min_items = 1, min_total = NULL)
+  expect_equal(g$item[g$action == "drop"], c("a1", "b1"))
+  expect_match(attr(g, "refused"), "a2")
+  g <- synthcheck:::lp_guard_drops(items, ed, min_items = 1, min_total = 4)
+  expect_equal(g$item[g$action == "drop"], "a1")
+})
+
+test_that("overfit can be a warning", {
+  skip_on_cran()
+  set.seed(5)
+  th <- rnorm(300, 0, 3)
+  # near-deterministic answers: Outfit well below 0.6
+  X <- as.data.frame(sapply(1:5, function(j) pmin(5, pmax(1, round(3 + th + rnorm(300, 0, 0.3))))))
+  names(X) <- paste0("i", 1:5)
+  items <- data.frame(item = names(X), scale = "s", reverse = FALSE, statement = "x",
+                      stringsAsFactors = FALSE)
+  ctx <- list(construct = loop_construct("s"))
+  f1 <- loop_irt(q3 = FALSE)(X, items, ctx)$flags
+  f2 <- loop_irt(q3 = FALSE, overfit = "warn")(X, items, ctx)$flags
+  m1 <- f1[f1$check == "msq_misfit", ]; m2 <- f2[f2$check == "msq_misfit", ]
+  expect_gt(nrow(m1), 0)
+  expect_true(all(m1$severity == "fail"))
+  expect_true(all(m2$severity[m2$value < 0.6] == "warn"))
+  expect_match(attr(loop_irt(overfit = "warn"), "label"), "overfit warns")
+})

@@ -15,7 +15,8 @@ loop_construct(
   labels = NULL,
   instructions = sc_default_instructions,
   notes = NULL,
-  criterion = NULL
+  criterion = NULL,
+  single_scale = FALSE
 )
 }
 \arguments{
@@ -41,6 +42,13 @@ such as a style guide or a reading level.}
 
 \item{criterion}{optional stopping rule, a \code{\link[=loop_criterion]{loop_criterion()}}, that
 \code{\link[=revision_loop]{revision_loop()}} uses for this construct unless it is given another.}
+
+\item{single_scale}{are the \code{scales} content domains of one scale? With
+\code{TRUE}, the items are written and revised domain by domain (and each
+item keeps its domain in \code{scale}), but the checks of \code{\link[=revision_loop]{revision_loop()}}
+treat all items as one scale: One IRT model, one alpha and one
+dimension. Use \code{\link[=loop_criterion]{loop_criterion()}} with \code{min_items} and \code{min_total} to
+require that every domain stays in the scale.}
 }
 \value{
 An object of class \code{sc_construct_spec}.
