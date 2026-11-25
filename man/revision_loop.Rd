@@ -17,6 +17,7 @@ revision_loop(
   reviser = loop_reviser_drop(),
   criterion = construct$criterion \%||\% loop_criterion(),
   max_rounds = 10,
+  max_failed = 0.5,
   output = NULL,
   run_id = NULL,
   seed = 1,
@@ -56,6 +57,11 @@ construct's own rule, if it has one (see \code{\link[=loop_builtin_construct]{lo
 or else the defaults of \code{\link[=loop_criterion]{loop_criterion()}}.}
 
 \item{max_rounds}{the largest number of rounds.}
+
+\item{max_failed}{the largest share of respondent calls that may fail in a
+round. When more fail (for example because the provider's credits ran
+out), the loop stops with status \code{"error"} instead of revising items on
+empty answers.}
 
 \item{output}{optional folder: The log tables are written there after
 every round, and the responses of each round to \verb{responses/}.}

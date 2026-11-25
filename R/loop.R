@@ -235,6 +235,10 @@ print.sc_construct_spec <- function(x, ...) {
 #'   construct's own rule, if it has one (see [loop_builtin_construct()]),
 #'   or else the defaults of [loop_criterion()].
 #' @param max_rounds the largest number of rounds.
+#' @param max_failed the largest share of respondent calls that may fail in a
+#'   round. When more fail (for example because the provider's credits ran
+#'   out), the loop stops with status `"error"` instead of revising items on
+#'   empty answers.
 #' @param output optional folder: The log tables are written there after
 #'   every round, and the responses of each round to `responses/`.
 #' @param run_id a name for the run. `NULL` builds one from the construct and
@@ -278,7 +282,8 @@ print.sc_construct_spec <- function(x, ...) {
 revision_loop <- function(construct, items = NULL, models = sc_model("mock"), personas = NULL,
                           attempts = 1, respondents = 100, writer = NULL, evaluator = loop_irt(),
                           checker = loop_checker(), reviser = loop_reviser_drop(),
-                          criterion = construct$criterion %||% loop_criterion(), max_rounds = 10, output = NULL,
+                          criterion = construct$criterion %||% loop_criterion(), max_rounds = 10,
+                          max_failed = 0.5, output = NULL,
                           run_id = NULL, seed = 1, cache = sc_cache(), progress = interactive(),
                           ...) {
   if (!inherits(construct, "sc_construct_spec"))
@@ -345,6 +350,7 @@ revision_loop <- function(construct, items = NULL, models = sc_model("mock"), pe
       responses <- step("Generating responses", generate_synthetic(
         ins, models, personas, attempts = attempts, respondents = respondents, seed = gseed,
         cache = cache, progress = FALSE, ...))
+      lp_check_failed(responses, items$item, max_failed)
       out <- list()
       # one scale with content domains: The checks see all items as one scale
       check_items <- items
@@ -1327,3 +1333,18 @@ lp_resev <- function(fl, severity) {
 lp_sev_label <- function(severity) if (!length(severity)) "" else
   paste0("; ", paste(sprintf("%s %s", names(severity), ifelse(unlist(severity) == "fail", "fails",
                                                                "warns")), collapse = ", "))
+
+# stop when too many respondent calls failed, so the reviser never works on empty answers
+lp_check_failed <- function(responses, items, max_failed = 0.5) {
+  n <- nrow(responses)
+  cols <- intersect(items, names(responses))
+  empty <- if (n == 0L || !length(cols)) n else
+    sum(rowSums(!is.na(as.data.frame(responses)[, cols, drop = FALSE])) == 0L)
+  calls <- max(n, 1L)
+  if (n > 0L && empty / calls <= max_failed) return(invisible(TRUE))
+  lg <- attr(responses, "log")
+  why <- if (is.null(lg) || !nrow(lg)) "" else
+    sprintf(" The first error: %s", lp_sentence(lg$error[1]))
+  stop(sprintf("%d of %d respondents gave no answers, more than the max_failed share of %s.%s",
+               empty, n, format(max_failed), why), call. = FALSE)
+}

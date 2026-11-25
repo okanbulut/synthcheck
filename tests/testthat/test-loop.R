@@ -399,3 +399,13 @@ test_that("the severity of any check can be changed", {
   expect_match(attr(loop_irt(severity = list(local_dependence = "fail")), "label"),
                "local_dependence fails")
 })
+
+test_that("the loop stops when most respondent calls fail", {
+  ok <- data.frame(a = c(1, 2, NA), b = c(2, NA, NA))
+  expect_true(lp_check_failed(ok, c("a", "b")))
+  bad <- data.frame(a = c(NA, NA, 1), b = c(NA, NA, 2))
+  attr(bad, "log") <- data.frame(error = "Your prepayment credits are depleted")
+  expect_error(lp_check_failed(bad, c("a", "b")), "2 of 3 respondents gave no answers.*credits are depleted\\.")
+  expect_true(lp_check_failed(bad, c("a", "b"), max_failed = 1))
+  expect_error(lp_check_failed(bad[0, ], c("a", "b")), "0 of 0")
+})

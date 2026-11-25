@@ -25,6 +25,11 @@
   well-being as defined by the Consumer Financial Protection Bureau (2015),
   with control, cushion, goals and freedom as its four scales.
 
+* `revision_loop(max_failed = 0.5)` stops the run with status `"error"` when
+  more than half of the respondents in a round give no answers, for example
+  because the provider's credits ran out. Before, the loop kept revising items
+  on empty answers until the round cap.
+
 * `loop_construct(single_scale = TRUE)` treats the scales as content domains
   of one scale: Items are still written and revised domain by domain, but the
   checks pool all items (one IRT model, one alpha, one dimension).
