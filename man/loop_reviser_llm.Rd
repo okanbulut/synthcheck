@@ -6,7 +6,7 @@
 \usage{
 loop_reviser_llm(
   model,
-  actions = c("reword", "rekey", "drop", "add", "keep"),
+  actions = c("reword", "rekey", "drop", "add", "replace", "keep"),
   min_items = 3,
   max_edits = Inf,
   guidelines = lp_guidelines,
@@ -37,7 +37,7 @@ A function for the \code{reviser} argument of \code{\link[=revision_loop]{revisi
 each round, one call shows a language model the construct, every item
 with its flags and main statistics, the parts of the stopping rule that
 fail, and the earlier edits with whether they worked. It asks for edits
-(reword, rekey, drop, add or keep), each with a rationale and the names
+(reword, rekey, drop, add, replace or keep), each with a rationale and the names
 of the checks it responds to, and one note on the round. These are logged
 in the \code{edits} and \code{rounds} tables, so you can see whether the revisions
 follow the evidence.

@@ -195,8 +195,9 @@ print.sc_construct_spec <- function(x, ...) {
 #'   `scale`, `stat` and `value`; `item` is `NA` for scale-level values, and
 #'   both are `NA` for values over all items).
 #' - `reviser(items, flags, context)` returns a list with `edits` (a data
-#'   frame with `item`, `action` (`"reword"`, `"rekey"`, `"drop"`, `"add"`
-#'   or `"keep"`), `statement`, `reverse`, `scale`, `rationale` and `cites`,
+#'   frame with `item`, `action` (`"reword"`, `"rekey"`, `"drop"`, `"add"`,
+#'   `"replace"` or `"keep"`), `statement`, `reverse`, `scale`, `rationale`
+#'   and `cites`,
 #'   the checks the edit responds to, separated by commas) and optionally
 #'   `reasoning` (one note for the whole round). The loop applies the edits,
 #'   so the log always matches the items.
@@ -234,6 +235,10 @@ print.sc_construct_spec <- function(x, ...) {
 #'   construct's own rule, if it has one (see [loop_builtin_construct()]),
 #'   or else the defaults of [loop_criterion()].
 #' @param max_rounds the largest number of rounds.
+#' @param max_failed the largest share of respondent calls that may fail in a
+#'   round. When more fail (for example because the provider's credits ran
+#'   out), the loop stops with status `"error"` instead of revising items on
+#'   empty answers.
 #' @param output optional folder: The log tables are written there after
 #'   every round, and the responses of each round to `responses/`.
 #' @param run_id a name for the run. `NULL` builds one from the construct and
@@ -277,7 +282,8 @@ print.sc_construct_spec <- function(x, ...) {
 revision_loop <- function(construct, items = NULL, models = sc_model("mock"), personas = NULL,
                           attempts = 1, respondents = 100, writer = NULL, evaluator = loop_irt(),
                           checker = loop_checker(), reviser = loop_reviser_drop(),
-                          criterion = construct$criterion %||% loop_criterion(), max_rounds = 10, output = NULL,
+                          criterion = construct$criterion %||% loop_criterion(), max_rounds = 10,
+                          max_failed = 0.5, output = NULL,
                           run_id = NULL, seed = 1, cache = sc_cache(), progress = interactive(),
                           ...) {
   if (!inherits(construct, "sc_construct_spec"))
@@ -344,6 +350,7 @@ revision_loop <- function(construct, items = NULL, models = sc_model("mock"), pe
       responses <- step("Generating responses", generate_synthetic(
         ins, models, personas, attempts = attempts, respondents = respondents, seed = gseed,
         cache = cache, progress = FALSE, ...))
+      lp_check_failed(responses, items$item, max_failed)
       out <- list()
       # one scale with content domains: The checks see all items as one scale
       check_items <- items
@@ -467,6 +474,9 @@ revision_loop <- function(construct, items = NULL, models = sc_model("mock"), pe
 #' @param n_pa number of random data sets for parallel analysis.
 #' @param straightline_sd,inconsistency,max_careless the respondent
 #'   screening rules (see above).
+#' @param severity a named list that changes the severity of checks, for
+#'   example `list(redundant = "fail")` so that near-duplicate items block
+#'   the stopping rule.
 #' @return A function for the `checker` argument of [revision_loop()].
 #' @seealso [revision_loop()], [synthetic_pretest()]
 #' @examples
@@ -477,8 +487,9 @@ revision_loop <- function(construct, items = NULL, models = sc_model("mock"), pe
 #' head(out$flags)
 #' @export
 loop_checker <- function(thresholds = list(), irt = FALSE, n_pa = 20, straightline_sd = 0.5,
-                         inconsistency = 0.5, max_careless = 0.05) {
+                         inconsistency = 0.5, max_careless = 0.05, severity = list()) {
   force(thresholds); force(irt); force(n_pa)
+  lp_check_severity(severity)
   f <- function(responses, items, context) {
     lo <- context$construct$scale[1]; hi <- context$construct$scale[2]
     d <- as.data.frame(responses)
@@ -554,9 +565,10 @@ loop_checker <- function(thresholds = list(), irt = FALSE, n_pa = 20, straightli
                  stat = c("own_scale", "reverse_ok", "n_factors_all", "scales", "careless_share"),
                  value = c(su$own_scale, su$reverse_ok, su$n_factors, su$scales, share),
                  stringsAsFactors = FALSE))
-    list(flags = if (length(fl)) do.call(rbind, fl) else NULL, stats = stats)
+    list(flags = lp_resev(if (length(fl)) do.call(rbind, fl) else NULL, severity), stats = stats)
   }
-  structure(f, label = "synthcheck data quality (pretest and respondent screening)")
+  structure(f, label = paste0("synthcheck data quality (pretest and respondent screening",
+                              lp_sev_label(severity), ")"))
 }
 
 #' The stopping rule of the item-revision loop
@@ -872,7 +884,7 @@ loop_outcomes <- function(x) {
                failing_start = if (nrow(rd)) rd$n_failing[1] else NA_integer_,
                failing_end = if (nrow(rd)) rd$n_failing[nrow(rd)] else NA_integer_,
                edits = nrow(ed), reworded = n("reword"), rekeyed = n("rekey"),
-               dropped = n("drop"), added = n("add"),
+               dropped = n("drop"), added = n("add"), replaced = n("replace"),
                cites_flagged = share(ed$cites_flagged), resolved = share(ed$resolved),
                relapsed = if (nrow(res)) mean(relapse) else NA_real_,
                similarity = if (length(sim)) mean(sim) else NA_real_,
@@ -1014,7 +1026,9 @@ lp_schema <- local({
       run_id = c("character", "Name of the run."),
       round = c("integer", "Round whose checks prompted the edit; it takes effect in the next round."),
       item = c("character", "Item edited (the new name for an added item)."),
-      action = c("character", "reword, rekey, drop, add or keep."),
+      action = c("character", paste(
+        "reword, rekey, drop, add, replace (the item leaves and a new one takes its place;",
+        "`note` names it) or keep.")),
       old_statement = c("character", "Wording before the edit."),
       new_statement = c("character", "Wording after the edit."),
       old_reverse = c("logical", "Key before the edit."),
@@ -1147,7 +1161,7 @@ lp_apply_edits <- function(items, e, round, flags) {
   k <- 0L
   for (i in seq_len(nrow(e))) {
     a <- e$action[i]; id <- e$item[i]
-    if (!a %in% c("reword", "rekey", "drop", "add", "keep")) {
+    if (!a %in% c("reword", "rekey", "drop", "add", "keep", "replace")) {
       e$note[i] <- sprintf("Unknown action \"%s\".", a); next
     }
     if (a == "add") {
@@ -1182,6 +1196,25 @@ lp_apply_edits <- function(items, e, round, flags) {
     if (a == "drop") {
       items <- items[-j, , drop = FALSE]
       e$new_statement[i] <- NA; e$new_reverse[i] <- NA
+    } else if (a == "replace") {
+      # the item leaves and a new item takes its place in the same scale
+      st <- e$new_statement[i]
+      if (is.na(st) || !nzchar(trimws(st))) {
+        e$note[i] <- "A replacement needs a new statement."; next
+      }
+      repeat {
+        k <- k + 1L
+        nid <- sprintf("%s.r%d.%d", lp_id(items$scale[j]), round, k)
+        if (!nid %in% items$item) break
+      }
+      rv <- e$new_reverse[i]
+      rv <- !is.na(rv) && rv
+      items <- rbind(items[-j, , drop = FALSE],
+                     data.frame(item = nid, scale = items$scale[j], reverse = rv,
+                                statement = trimws(st), version = 1L, stringsAsFactors = FALSE))
+      e$new_statement[i] <- trimws(st); e$new_reverse[i] <- rv
+      e$note[i] <- sprintf("Replaced by %s.", nid)
+      done <- c(done, nid)
     } else if (a == "keep") {
       e$new_statement[i] <- items$statement[j]; e$new_reverse[i] <- items$reverse[j]
     } else {
@@ -1202,7 +1235,7 @@ lp_apply_edits <- function(items, e, round, flags) {
   }
   e$similarity <- vapply(seq_len(nrow(e)), function(i)
     lp_jaccard(e$old_statement[i], e$new_statement[i]), numeric(1))
-  e$similarity[e$action %in% c("drop", "add")] <- NA_real_
+  e$similarity[e$action %in% c("drop", "add", "replace")] <- NA_real_
   fl <- flags[!is.na(flags$item), , drop = FALSE]
   e$cites_flagged <- vapply(seq_len(nrow(e)), function(i) {
     ci <- lp_split(e$cites[i])
@@ -1283,3 +1316,35 @@ lp_id <- function(x) {
 lp_sentence <- function(x) if (grepl("[.!?]$", x)) x else paste0(x, ".")
 
 lp_now <- function() format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
+
+# change the severity of named checks
+lp_check_severity <- function(severity) {
+  if (!is.list(severity) || (length(severity) && is.null(names(severity))) ||
+      !all(unlist(severity) %in% c("fail", "warn")))
+    stop("`severity` must be a named list of \"fail\" or \"warn\".", call. = FALSE)
+  invisible(severity)
+}
+lp_resev <- function(fl, severity) {
+  if (is.null(fl) || !nrow(fl) || !length(severity)) return(fl)
+  hit <- fl$check %in% names(severity)
+  fl$severity[hit] <- unlist(severity)[fl$check[hit]]
+  fl
+}
+lp_sev_label <- function(severity) if (!length(severity)) "" else
+  paste0("; ", paste(sprintf("%s %s", names(severity), ifelse(unlist(severity) == "fail", "fails",
+                                                               "warns")), collapse = ", "))
+
+# stop when too many respondent calls failed, so the reviser never works on empty answers
+lp_check_failed <- function(responses, items, max_failed = 0.5) {
+  n <- nrow(responses)
+  cols <- intersect(items, names(responses))
+  empty <- if (n == 0L || !length(cols)) n else
+    sum(rowSums(!is.na(as.data.frame(responses)[, cols, drop = FALSE])) == 0L)
+  calls <- max(n, 1L)
+  if (n > 0L && empty / calls <= max_failed) return(invisible(TRUE))
+  lg <- attr(responses, "log")
+  why <- if (is.null(lg) || !nrow(lg)) "" else
+    sprintf(" The first error: %s", lp_sentence(lg$error[1]))
+  stop(sprintf("%d of %d respondents gave no answers, more than the max_failed share of %s.%s",
+               empty, n, format(max_failed), why), call. = FALSE)
+}

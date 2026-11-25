@@ -17,6 +17,7 @@ revision_loop(
   reviser = loop_reviser_drop(),
   criterion = construct$criterion \%||\% loop_criterion(),
   max_rounds = 10,
+  max_failed = 0.5,
   output = NULL,
   run_id = NULL,
   seed = 1,
@@ -56,6 +57,11 @@ construct's own rule, if it has one (see \code{\link[=loop_builtin_construct]{lo
 or else the defaults of \code{\link[=loop_criterion]{loop_criterion()}}.}
 
 \item{max_rounds}{the largest number of rounds.}
+
+\item{max_failed}{the largest share of respondent calls that may fail in a
+round. When more fail (for example because the provider's credits ran
+out), the loop stops with status \code{"error"} instead of revising items on
+empty answers.}
 
 \item{output}{optional folder: The log tables are written there after
 every round, and the responses of each round to \verb{responses/}.}
@@ -117,8 +123,9 @@ every round, so a stopped run keeps the rounds it finished, and
 \code{scale}, \code{stat} and \code{value}; \code{item} is \code{NA} for scale-level values, and
 both are \code{NA} for values over all items).
 \item \code{reviser(items, flags, context)} returns a list with \code{edits} (a data
-frame with \code{item}, \code{action} (\code{"reword"}, \code{"rekey"}, \code{"drop"}, \code{"add"}
-or \code{"keep"}), \code{statement}, \code{reverse}, \code{scale}, \code{rationale} and \code{cites},
+frame with \code{item}, \code{action} (\code{"reword"}, \code{"rekey"}, \code{"drop"}, \code{"add"},
+\code{"replace"} or \code{"keep"}), \code{statement}, \code{reverse}, \code{scale}, \code{rationale}
+and \code{cites},
 the checks the edit responds to, separated by commas) and optionally
 \code{reasoning} (one note for the whole round). The loop applies the edits,
 so the log always matches the items.

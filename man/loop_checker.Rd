@@ -10,7 +10,8 @@ loop_checker(
   n_pa = 20,
   straightline_sd = 0.5,
   inconsistency = 0.5,
-  max_careless = 0.05
+  max_careless = 0.05,
+  severity = list()
 )
 }
 \arguments{
@@ -25,6 +26,10 @@ evaluator.}
 
 \item{straightline_sd, inconsistency, max_careless}{the respondent
 screening rules (see above).}
+
+\item{severity}{a named list that changes the severity of checks, for
+example \code{list(redundant = "fail")} so that near-duplicate items block
+the stopping rule.}
 }
 \value{
 A function for the \code{checker} argument of \code{\link[=revision_loop]{revision_loop()}}.

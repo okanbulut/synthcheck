@@ -25,6 +25,11 @@
   well-being as defined by the Consumer Financial Protection Bureau (2015),
   with control, cushion, goals and freedom as its four scales.
 
+* `revision_loop(max_failed = 0.5)` stops the run with status `"error"` when
+  more than half of the respondents in a round give no answers, for example
+  because the provider's credits ran out. Before, the loop kept revising items
+  on empty answers until the round cap.
+
 * `loop_construct(single_scale = TRUE)` treats the scales as content domains
   of one scale: Items are still written and revised domain by domain, but the
   checks pool all items (one IRT model, one alpha, one dimension).
@@ -45,6 +50,23 @@
   is only below the range (answers more predictable than the model expects,
   which language models produce for a given persona) is a warning instead of
   a failure. Noisy items still fail.
+
+* The item-revision loop can replace items: The new `"replace"` action of
+  `loop_reviser_llm()` drops an item and adds a new one for the same scale in
+  one step (the edit's `note` names the new item). When the minimum number of
+  items refuses a drop, the reviser is asked for a replacement instead, so a
+  run at its minimum keeps working instead of stalling. For redundant or
+  locally dependent items, the reviser is told to replace one item of the
+  pair with a new item that covers a different aspect of its scale. `loop_outcomes()`
+  counts `replaced` edits.
+
+* `loop_irt()` gains `underfit`: With `overfit = "warn"` and
+  `underfit = "warn"`, infit and outfit only warn. `thresholds = list(misfit_p = 0)`
+  turns the S-X2 flag off.
+
+* `loop_checker()` and `loop_irt()` gain `severity`, a named list that
+  changes the severity of any check, for example
+  `loop_checker(severity = list(redundant = "fail"))`.
 
 * New `blend_data()` gives the respondents behind the best blend of models:
   For each attempt, it draws each model's share from the `blend_llms()`

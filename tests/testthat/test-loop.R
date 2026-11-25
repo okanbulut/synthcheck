@@ -345,3 +345,67 @@ test_that("overfit can be a warning", {
   expect_true(all(m2$severity[m2$value < 0.6] == "warn"))
   expect_match(attr(loop_irt(overfit = "warn"), "label"), "overfit warns")
 })
+
+test_that("a replacement swaps an item for a new one in the same scale", {
+  items <- data.frame(item = c("a1", "a2", "b1"), scale = c("a", "a", "b"), reverse = FALSE,
+                      statement = c("Old a1.", "Old a2.", "Old b1."), version = 1L,
+                      stringsAsFactors = FALSE)
+  e <- synthcheck:::lp_edits(data.frame(item = c("a1", "b1"), action = c("replace", "replace"),
+                                        statement = c("New a.", ""), reverse = c(TRUE, NA),
+                                        cites = "misfit", stringsAsFactors = FALSE))
+  ap <- synthcheck:::lp_apply_edits(items, e, 3L, data.frame(item = "a1", check = "misfit"))
+  expect_equal(nrow(ap$items), 3L)
+  expect_false("a1" %in% ap$items$item)
+  new <- ap$items[ap$items$statement == "New a.", ]
+  expect_equal(new$scale, "a")
+  expect_true(new$reverse)
+  expect_match(new$item, "^a[.]r3[.]")
+  expect_match(ap$edits$note[1], new$item)
+  expect_equal(ap$edits$old_statement[1], "Old a1.")
+  expect_false(ap$edits$applied[2])
+  expect_match(ap$edits$note[2], "needs a new statement")
+  expect_true("replace" %in% eval(formals(loop_reviser_llm)$actions))
+})
+
+test_that("infit and outfit can be warnings only", {
+  skip_on_cran()
+  set.seed(7)
+  th <- rnorm(300)
+  X <- as.data.frame(sapply(1:5, function(j) pmin(5, pmax(1, round(3 + th + rnorm(300, 0, 0.5))))))
+  X$V6 <- sample(1:5, 300, replace = TRUE)
+  names(X) <- paste0("i", 1:6)
+  items <- data.frame(item = names(X), scale = "s", reverse = FALSE, statement = "x",
+                      stringsAsFactors = FALSE)
+  ctx <- list(construct = loop_construct("s"))
+  f <- loop_irt(q3 = FALSE, overfit = "warn", underfit = "warn",
+                thresholds = list(misfit_p = 0))(X, items, ctx)
+  m <- f$flags[f$flags$check == "msq_misfit", ]
+  expect_true("i6" %in% m$item)
+  expect_true(all(m$severity == "warn"))
+  expect_false("misfit" %in% f$flags$check)
+  expect_true("sx2_p" %in% f$stats$stat)
+  expect_match(attr(loop_irt(overfit = "warn", underfit = "warn"), "label"), "warn only")
+  f2 <- loop_irt(q3 = FALSE, itemfit = TRUE)(X, items, ctx)$flags
+  expect_true(any(f2$severity[f2$check == "msq_misfit" & f2$item == "i6"] == "fail"))
+})
+
+test_that("the severity of any check can be changed", {
+  fl <- data.frame(item = c("a", "b"), check = c("redundant", "weak"), severity = c("warn", "fail"),
+                   stringsAsFactors = FALSE)
+  out <- synthcheck:::lp_resev(fl, list(redundant = "fail", weak = "warn"))
+  expect_equal(out$severity, c("fail", "warn"))
+  expect_error(loop_checker(severity = list(redundant = "block")), "named list")
+  expect_match(attr(loop_checker(severity = list(redundant = "fail")), "label"), "redundant fails")
+  expect_match(attr(loop_irt(severity = list(local_dependence = "fail")), "label"),
+               "local_dependence fails")
+})
+
+test_that("the loop stops when most respondent calls fail", {
+  ok <- data.frame(a = c(1, 2, NA), b = c(2, NA, NA))
+  expect_true(lp_check_failed(ok, c("a", "b")))
+  bad <- data.frame(a = c(NA, NA, 1), b = c(NA, NA, 2))
+  attr(bad, "log") <- data.frame(error = "Your prepayment credits are depleted")
+  expect_error(lp_check_failed(bad, c("a", "b")), "2 of 3 respondents gave no answers.*credits are depleted\\.")
+  expect_true(lp_check_failed(bad, c("a", "b"), max_failed = 1))
+  expect_error(lp_check_failed(bad[0, ], c("a", "b")), "0 of 0")
+})
